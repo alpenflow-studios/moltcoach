@@ -15,22 +15,6 @@
 
 ### Not Started
 
-#### TASK-005: ProtocolFeeCollector Contract
-- **Priority**: P0
-- **Scope**: `contracts/src/fees/ProtocolFeeCollector.sol`, `contracts/test/ProtocolFeeCollector.t.sol`
-- **Acceptance Criteria**:
-  - [ ] `forge build` passes with zero warnings
-  - [ ] `forge test` passes all tests
-  - [ ] Fee collection works for $FIT and USDC
-  - [ ] `distribute()` splits to 4 treasury wallets at correct ratios (40/30/20/10)
-  - [ ] Allocation update enforces sum = 10000 bps
-  - [ ] Transaction fee capped at 5% max
-  - [ ] Only owner can update fees and allocations
-  - [ ] All state changes emit events
-  - [ ] `forge coverage` shows >90% line coverage
-- **Dependencies**: TASK-004 ($FIT Token)
-- **Notes**: See `docs/revenue_integration.md` for full contract spec. Deploy BEFORE registry/validator/staking contracts so they can reference it.
-
 #### TASK-006: FIT Staking Contract
 - **Priority**: P1
 - **Scope**: `contracts/src/FitStaking.sol`, `contracts/test/FitStaking.t.sol`
@@ -54,6 +38,21 @@
 ---
 
 ### Done
+
+#### TASK-005: ProtocolFeeCollector Contract
+- **Priority**: P0
+- **Scope**: `contracts/src/fees/ProtocolFeeCollector.sol`, `contracts/test/ProtocolFeeCollector.t.sol`
+- **Completed**: Session 4 (Feb 8, 2026)
+- **Acceptance Criteria**:
+  - [x] `forge build` passes with zero warnings
+  - [x] `forge test` passes all 61 tests (including 5 fuzz tests)
+  - [x] Fee collection works for $FIT and USDC
+  - [x] `distribute()` splits to 4 treasury wallets at correct ratios (40/30/20/10)
+  - [x] Allocation update enforces sum = 10000 bps
+  - [x] Transaction fee capped at 5% max
+  - [x] Only owner can update fees and allocations
+  - [x] All state changes emit events
+  - [x] `forge coverage` shows 100% line coverage on contract
 
 #### TASK-004: $FIT Token Contract
 - **Priority**: P0

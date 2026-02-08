@@ -25,10 +25,20 @@
      - `dailyEmissionCap`: 100K/day (adjustable by owner, range 10K-500K)
      - UTC day tracking with automatic rollover
      - Owner-only `mint()` enforcing both max supply and daily cap
-     - `remainingDailyMint()` and `remainingSupply()` view functions
      - Custom errors (gas-optimized)
-   - 50 tests passing (45 unit + 5 fuzz), **100% line/statement/branch/function coverage**
-   - Test categories: deployment, minting, daily cap rollover, burning, EIP-2612 permit, cap updates, view functions, standard ERC-20, fuzz
+   - 50 tests, **100% coverage**
+
+2. **TASK-005: ProtocolFeeCollector Contract** — COMPLETE
+   - `fees/ProtocolFeeCollector.sol` — central fee router:
+     - Ownable + ReentrancyGuard, SafeERC20 for all transfers
+     - Collects $FIT and USDC fees (`collectFitFee`, `collectUsdcFee`)
+     - `distribute()` splits to 4 treasury wallets (40/30/20/10 default)
+     - Allocation update enforces sum = 10000 bps
+     - Transaction fee capped at 5% max (`MAX_TRANSACTION_FEE_BPS = 500`)
+     - 8 configurable fee rates (spawn, validation, evolution, mode switch, reset)
+     - Treasury wallet addresses updatable (zero-address guarded)
+     - All state changes emit events
+   - 61 tests (56 unit + 5 fuzz), **100% coverage**
 
 ### Session 3 (Previous)
 
@@ -54,18 +64,16 @@ Nothing — clean handoff.
 
 ## What's Next
 
-1. **TASK-005**: ProtocolFeeCollector (P0)
-   - Spec: `docs/revenue_integration.md` (Patch 1)
-   - Central fee router: $FIT + USDC collection
-   - Treasury distribution: 40% dev / 30% buyback / 20% community / 10% insurance
-   - Configurable fee rates, capped at 5% max
-   - Depends on TASK-004 ($FIT address) — DONE
-2. **TASK-006**: FIT Staking (P1)
-   - Stake/unstake with tiers (Free/Basic/Pro/Elite)
-   - Early unstake penalty (5%) routed to FeeCollector
-   - Depends on TASK-004 + TASK-005
-3. Supabase project setup
-4. Coinbase Wallet project ID
+1. **TASK-006**: FIT Staking (P1) — **ready to start** (all dependencies met)
+   - Spec: `docs/TOKENOMICS.md` (Section 5) + `docs/revenue_integration.md` (Patch 4)
+   - Stake/unstake $FIT with ReentrancyGuard
+   - Tiers: Free(0), Basic(100 FIT), Pro(1K FIT), Elite(10K FIT)
+   - Early unstake (< 30 days) charges 5% penalty → ProtocolFeeCollector
+   - Normal unstake (≥ 30 days) has no penalty
+   - No staking rewards (utility-only — feature access, not yield)
+   - Depends on TASK-004 ($FIT) + TASK-005 (FeeCollector) — both DONE
+2. Supabase project setup
+3. Coinbase Wallet project ID
 
 ---
 
@@ -96,8 +104,8 @@ Nothing — clean handoff.
 
 ## State of Tests
 
-- `forge test` (contracts/): **93 tests pass** (50 FitToken + 43 MoltcoachIdentity)
-- `forge coverage`: **100% lines** on FitToken.sol, **98.67% lines** on MoltcoachIdentity.sol
+- `forge test` (contracts/): **154 tests pass** (61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
+- `forge coverage`: **100% lines** on ProtocolFeeCollector.sol, **100% lines** on FitToken.sol, **98.67% lines** on MoltcoachIdentity.sol
 - `pnpm typecheck`: PASSES
 - `pnpm lint`: PASSES
 - `pnpm build`: PASSES
@@ -108,6 +116,8 @@ Nothing — clean handoff.
 
 | File | Purpose |
 |------|---------|
+| `contracts/src/fees/ProtocolFeeCollector.sol` | Central fee router ($FIT + USDC, treasury distribution) |
+| `contracts/test/ProtocolFeeCollector.t.sol` | 61 tests: collection, distribution, allocation, fee updates, wallet updates, fuzz |
 | `contracts/src/FitToken.sol` | $FIT ERC-20 token (burn, permit, daily cap, max supply) |
 | `contracts/test/FitToken.t.sol` | 50 tests: deployment, minting, daily cap, burn, permit, fuzz |
 | `contracts/src/MoltcoachIdentity.sol` | ERC-8004 Identity Registry (ERC-721 + metadata + EIP-712 wallet) |

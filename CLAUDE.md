@@ -32,10 +32,22 @@
 |----------|---------|---------|
 | MoltcoachIdentity (ERC-8004) | TBD | Base Sepolia (84532) |
 | $FIT Token | TBD | Base Sepolia (84532) |
+| ProtocolFeeCollector | TBD | Base Sepolia (84532) |
 | FIT Staking | TBD | Base Sepolia (84532) |
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | Base Sepolia (84532) |
 
 **Admin Wallet**: TBD
+
+---
+
+## Contract Deployment Order
+
+```
+1. FitToken ($FIT)           ← TASK-004
+2. ProtocolFeeCollector      ← TASK-005 (needs FIT + USDC addresses)
+3. FitStaking                ← TASK-006 (needs FIT + FeeCollector)
+4. MoltcoachIdentity         ← Already built (TASK-003), deploy anytime
+```
 
 ---
 
@@ -152,6 +164,7 @@ Core tables (planned):
 |-----------|------------|
 | Feature work | `docs/PRD.md` |
 | Smart contracts | `docs/CONTRACTS.md` |
+| Revenue / fees | `docs/revenue_model.md`, `docs/revenue_integration.md` |
 | Database changes | Supabase dashboard |
 | System design | `docs/ARCHITECTURE.md` |
 | Web3 commands | `docs/WEB3_COMMANDS.md` |
@@ -166,6 +179,10 @@ Core tables (planned):
 | Product Requirements | `docs/PRD.md` |
 | Architecture | `docs/ARCHITECTURE.md` |
 | Smart Contracts | `docs/CONTRACTS.md` |
+| Tokenomics | `docs/TOKENOMICS.md` |
+| Revenue Model | `docs/revenue_model.md` |
+| Revenue Integration | `docs/revenue_integration.md` |
+| Coaching Skill | `docs/FITNESS_COACHING_SKILL.md` |
 | Web3 Commands | `docs/WEB3_COMMANDS.md` |
 | Maintenance | `docs/MAINTENANCE.md` |
 | Session Handoff | `SESSION_HANDOFF.md` |
@@ -174,4 +191,4 @@ Core tables (planned):
 
 ---
 
-*Last updated: Feb 7, 2026*
+*Last updated: Feb 8, 2026*

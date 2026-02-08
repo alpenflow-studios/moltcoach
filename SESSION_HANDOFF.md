@@ -6,8 +6,8 @@
 
 ## Last Session
 
-- **Date**: 2026-02-07
-- **Duration**: ~25 messages (TASK-001 + TASK-002 completed)
+- **Date**: 2026-02-08
+- **Duration**: Session 4
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,38 +15,34 @@
 
 ## What Was Done
 
-### Session 2 (This Session)
+### Session 4 (This Session)
 
-1. **Read entire codebase** — got up to speed on all docs, architecture, PRD, contracts spec
-2. **TASK-001: Scaffold Next.js App** — COMPLETE
-   - Next.js 16.1.6 (App Router, Turbopack), TypeScript strict mode
-   - Tailwind v4 + shadcn/ui (new-york style, zinc base)
-   - Custom dark theme with lime accent (`oklch(0.768 0.233 130.85)`) as primary
-   - Landing page: hero ("Your AI Coach. On-Chain."), 3 feature cards, CTA
-   - loading.tsx, error.tsx, not-found.tsx boundaries
-   - `.env.example` with all vars, `.gitignore`
-   - Commit: `97cbf6d`
-3. **TASK-002: Coinbase Smart Wallet Integration** — COMPLETE
-   - wagmi v3.4.2 + viem v2.45.1 + TanStack Query v5.90
-   - Coinbase Smart Wallet connector (`smartWalletOnly` preference)
-   - Base Sepolia (84532) chain config
-   - ConnectWallet component: 4 states (disconnected/connecting/wrong chain/connected)
-   - Truncated address display in header
-   - Disconnect clears state, wrong chain triggers switch prompt
-   - localStorage persistence for reconnect across refresh
-   - WalletProvider wrapping app in layout.tsx
-   - Commit: `46cdc47`
-4. **Merged remote docs** — pulled 8 "Add files via upload" commits from GitHub
-   - Discovered TOKENOMICS.md (detailed $FIT economics — 1B supply, 100K/day cap, tiers, staking)
-   - Discovered FITNESS_COACHING_SKILL.md (coaching modes, workout programming)
-   - Organized into docs/, removed root-level duplicates
-   - Commit: `85d65b0`
+1. **TASK-004: $FIT Token Contract** — COMPLETE
+   - `FitToken.sol` — ERC-20 move-to-earn token:
+     - ERC20 + ERC20Burnable + ERC20Permit + Ownable
+     - Name: "MoltCoach FIT", Symbol: "FIT", 18 decimals
+     - `MAX_SUPPLY`: 1B (immutable constant)
+     - `dailyEmissionCap`: 100K/day (adjustable by owner, range 10K-500K)
+     - UTC day tracking with automatic rollover
+     - Owner-only `mint()` enforcing both max supply and daily cap
+     - `remainingDailyMint()` and `remainingSupply()` view functions
+     - Custom errors (gas-optimized)
+   - 50 tests passing (45 unit + 5 fuzz), **100% line/statement/branch/function coverage**
+   - Test categories: deployment, minting, daily cap rollover, burning, EIP-2612 permit, cap updates, view functions, standard ERC-20, fuzz
+
+### Session 3 (Previous)
+
+- TASK-003 (ERC-8004 Identity) completed
+- Revenue model docs integrated (TASK-005, TASK-006 added)
+- See session 3 handoff for details
+
+### Session 2 (Previous)
+
+- TASK-001 (scaffold) + TASK-002 (wallet) completed
 
 ### Session 1 (Previous)
 
-- Full dev environment setup (Node, pnpm, Foundry, Vercel CLI, GitHub CLI)
-- All project documentation created (PRD, ARCHITECTURE, CONTRACTS, etc.)
-- See git log for full history
+- Dev environment setup, all project docs created
 
 ---
 
@@ -58,27 +54,32 @@ Nothing — clean handoff.
 
 ## What's Next
 
-1. **TASK-003**: ERC-8004 Agent Identity Contract (Foundry/Solidity)
-   - Spec: `docs/CONTRACTS.md`
-   - MoltcoachIdentity.sol — ERC-721 + URIStorage, `createAgent(agentURI)`, 1 agent per wallet
-   - Need to research ERC-8004 spec: https://eips.ethereum.org/EIPS/eip-8004
-   - Acceptance: `forge build` clean, `forge test` passes, >90% coverage
-2. **TASK-004**: $FIT Token Contract (Foundry/Solidity)
-   - Spec: `docs/CONTRACTS.md` + `docs/TOKENOMICS.md` (detailed)
-   - FitToken.sol — ERC-20, 1B max supply, 100K/day emission cap, authorized minters
-   - Acceptance: `forge build` clean, `forge test` passes, >90% coverage
-3. Set up Supabase database project
-4. Get Coinbase Wallet project ID
+1. **TASK-005**: ProtocolFeeCollector (P0)
+   - Spec: `docs/revenue_integration.md` (Patch 1)
+   - Central fee router: $FIT + USDC collection
+   - Treasury distribution: 40% dev / 30% buyback / 20% community / 10% insurance
+   - Configurable fee rates, capped at 5% max
+   - Depends on TASK-004 ($FIT address) — DONE
+2. **TASK-006**: FIT Staking (P1)
+   - Stake/unstake with tiers (Free/Basic/Pro/Elite)
+   - Early unstake penalty (5%) routed to FeeCollector
+   - Depends on TASK-004 + TASK-005
+3. Supabase project setup
+4. Coinbase Wallet project ID
 
 ---
 
 ## Decisions Made
 
 - **Theme**: Dark mode default, lime primary accent on zinc base
-- **wagmi version**: v3.4.2 (latest, upgraded from planned v2 — same API)
-- **Smart Wallet**: `smartWalletOnly` preference (no browser extension fallback)
-- **Tokenomics**: Now defined in `docs/TOKENOMICS.md` — no longer TBD
-- **Coaching skill**: Defined in `docs/FITNESS_COACHING_SKILL.md` (3 modes: Coach, Friend, Mentor)
+- **wagmi version**: v3.4.2 (latest)
+- **Smart Wallet**: `smartWalletOnly` preference
+- **ERC-8004**: Custom non-upgradeable implementation (not reference UUPS)
+- **Agent IDs**: Start at 1, 0 = sentinel for "no agent"
+- **Revenue model**: 9 streams, Stage 1 MVP focuses on 3 (tx fees, spawn fee, validation fees)
+- **Treasury split**: 40/30/20/10 (dev/buyback/community/insurance)
+- **Contract deploy order**: FIT → FeeCollector → Staking → Identity
+- **$FIT daily cap**: Adjustable between 10K-500K by owner (default 100K)
 
 ---
 
@@ -89,59 +90,55 @@ Nothing — clean handoff.
 - [ ] XMTP vs Telegram priority for agent comms
 - [ ] Agent-to-agent protocol at moltcoach.xyz
 - [ ] Which wearable integration first? (Strava likely easiest)
-- [ ] ERC-8004 spec details — need to read the actual EIP before TASK-003
+- [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
 
 ---
 
 ## State of Tests
 
-- `forge test`: N/A (no contracts yet)
-- `pnpm test`: N/A (no test suite yet)
-- `pnpm typecheck`: PASSES (zero errors)
-- `pnpm lint`: PASSES (zero errors)
-- `pnpm build`: PASSES (static prerender, ~800ms compile)
+- `forge test` (contracts/): **93 tests pass** (50 FitToken + 43 MoltcoachIdentity)
+- `forge coverage`: **100% lines** on FitToken.sol, **98.67% lines** on MoltcoachIdentity.sol
+- `pnpm typecheck`: PASSES
+- `pnpm lint`: PASSES
+- `pnpm build`: PASSES
 
 ---
 
-## Key Files (Session 2)
+## Key Files (Session 4)
 
 | File | Purpose |
 |------|---------|
-| `src/config/wagmi.ts` | wagmi config — Base Sepolia, Coinbase Smart Wallet, typed |
-| `src/components/providers/WalletProvider.tsx` | WagmiProvider + QueryClientProvider wrapper |
-| `src/components/ConnectWallet.tsx` | 4-state wallet button (accepts size prop) |
-| `src/app/layout.tsx` | Root layout with WalletProvider, dark mode, Geist fonts |
-| `src/app/page.tsx` | Landing page with live ConnectWallet components |
-| `src/app/globals.css` | Tailwind + shadcn theme (lime accent) |
-| `src/components/ui/button.tsx` | shadcn button component |
-| `src/lib/utils.ts` | cn() utility |
+| `contracts/src/FitToken.sol` | $FIT ERC-20 token (burn, permit, daily cap, max supply) |
+| `contracts/test/FitToken.t.sol` | 50 tests: deployment, minting, daily cap, burn, permit, fuzz |
+| `contracts/src/MoltcoachIdentity.sol` | ERC-8004 Identity Registry (ERC-721 + metadata + EIP-712 wallet) |
+| `contracts/test/MoltcoachIdentity.t.sol` | 43 tests: registration, URI, metadata, wallet, transfers, fuzz |
+| `contracts/script/Deploy.s.sol` | Deployment script for Base Sepolia |
 
 ---
 
 ## Environment Notes
 
-- **PATH issue**: Sandbox doesn't include `/usr/bin` by default. Must prefix commands with: `export PATH="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"`
-- **pnpm location**: `/opt/homebrew/bin/pnpm` (v10.29.1, upgraded from 9.15.1)
-- **create-next-app conflict**: Can't scaffold in a dir with existing files — use temp dir + copy
-- **React Compiler**: Declined during scaffold (not needed for MVP)
+- **Foundry**: v1.5.1 at `~/.foundry/bin/` — add to PATH: `export PATH="/Users/openclaw/.foundry/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"`
+- **pnpm**: `/opt/homebrew/bin/pnpm` (v10.29.1)
+- **forge commands**: Must run from `contracts/` directory (or use `cd contracts &&`)
+- **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
+- **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
 
 ---
 
-## Installed Packages
+## Installed Tools & Packages
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| next | 16.1.6 | Framework |
-| react / react-dom | 19.2.3 | UI |
-| wagmi | 3.4.2 | Web3 hooks |
-| viem | 2.45.1 | Ethereum utilities |
-| @tanstack/react-query | 5.90.20 | Server state |
-| tailwindcss | 4.1.18 | Styling |
-| shadcn | 3.8.4 | Component library CLI |
-| lucide-react | 0.563.0 | Icons |
-| typescript | 5.9.3 | Type checking |
-| eslint | 9.39.2 | Linting |
+| Tool/Package | Version | Location |
+|-------------|---------|----------|
+| forge | 1.5.1 | `~/.foundry/bin/forge` |
+| cast | 1.5.1 | `~/.foundry/bin/cast` |
+| anvil | 1.5.1 | `~/.foundry/bin/anvil` |
+| OpenZeppelin | 5.2.0 | `contracts/lib/openzeppelin-contracts/` |
+| forge-std | latest | `contracts/lib/forge-std/` |
+| next | 16.1.6 | node_modules |
+| wagmi | 3.4.2 | node_modules |
+| viem | 2.45.1 | node_modules |
 
 ---
 
-*Last updated: Feb 7, 2026 — Session 2*
+*Last updated: Feb 8, 2026 — Session 4*

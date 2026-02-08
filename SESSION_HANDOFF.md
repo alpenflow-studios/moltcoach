@@ -7,117 +7,124 @@
 ## Last Session
 
 - **Date**: 2026-02-07
-- **Session**: 4 (Documentation Completion)
-- **Duration**: ~20 messages
-- **Branch**: `docs/documentation-setup`
+- **Duration**: ~30 messages (full environment + project setup)
+- **Branch**: `main`
+- **Model**: Claude Opus 4.6 (first session — upgraded from Sonnet)
 
 ---
 
 ## What Was Done
 
-### Session 4 — Documentation Suite Completion
+### Dev Environment (from scratch)
+1. Installed Homebrew (`5.0.13`)
+2. Installed Node.js (`v25.6.0`) via brew
+3. Installed pnpm (`9.15.1`) via npm
+4. Installed GitHub CLI (`2.86.0`) via brew
+5. Authenticated GitHub as `alpenflow` (SSH, org: `alpenflow-studios`)
+6. Generated SSH key (`ed25519`) and uploaded to GitHub
+7. Set git config: `alpenflow-studios` / `hello@mikerichardson.io`
+8. Installed Foundry (`1.5.1` — forge, cast, anvil, chisel) + libusb
+9. Installed Vercel CLI (`50.13.2`) via npm
+10. Added Homebrew to `~/.zshrc` PATH
+11. Added GitHub SSH host key to `~/.ssh/known_hosts`
 
-1. **PRD.md v1.1** — Applied all 8 corrections:
-   - Revised health data from 4-track (Anthropic preferred) to 3-track (Wearable API / Image Upload / Manual)
-   - Added coach lifecycle model (Spawn → Bonding → Active → Evolve/Reset/Archive)
-   - Added 3 coaching modes (Coach/Friend/Mentor)
-   - Corrected validation tiers (removed Anthropic Tier 1, added Image Upload Tier 2 at 0.85x)
-   - Added streak bonuses, Tier 4 rate limiting, Data Export section, Competitive Landscape
-   - Dual success metrics: minimum viable (500/200) + stretch (5K/2K)
-   - Added to Out of Scope: multi-chain, Anthropic health SDK, agent-to-agent
+### Global Claude Config
+12. Created `~/.claude/CLAUDE.md` — Michael's global preferences, default stack, code rules, session management (75% rule, checklists, stop-and-ask)
 
-2. **ARCHITECTURE.md v1.1** — Applied all 9 corrections:
-   - Revised health data tracks (removed Anthropic, added Image Upload as Track B)
-   - Clarified SDK: `ClaudeSDKClient` for multi-turn, `query()` for one-shot
-   - Added agent lifecycle state diagram, 6 database indexes, migration strategy
-   - Added Tier 4 rate limiting, oracle error handling (fail closed, 3x retry)
-   - Added x402 protocol section, RLS `set_config()` pattern with code example
+### moltcoach Project Setup
+13. Cloned `alpenflow-studios/moltcoach` to `/Users/openclaw/moltcoach/`
+14. Created `CLAUDE.md` — project-specific context (ERC-8004, $FIT, Coinbase Smart Wallet, Claude Agent SDK)
+15. Created `SESSION_HANDOFF.md` (this file)
+16. Created `CURRENT_ISSUES.md` — empty bug tracker
+17. Created `tasks/CURRENT_SPRINT.md` — 4 tasks queued (TASK-001 through TASK-004)
+18. Created `docs/PRD.md` — 7 features scoped with acceptance criteria
+19. Created `docs/ARCHITECTURE.md` — system design, data model, auth flow, agent creation flow
+20. Created `docs/CONTRACTS.md` — MoltcoachIdentity, FitToken, FitStaking specs
+21. Created `docs/WEB3_COMMANDS.md` — forge/cast/anvil CLI reference
+22. Created `docs/MAINTENANCE.md` — update procedures
+23. Created `.claude/skills/update/SKILL.md` — system update skill
 
-3. **TOKENOMICS.md** — New: 1B max supply, 100K/day cap, demand-driven emission, burn mechanics, no-yield staking, anti-gaming, death spiral prevention
-
-4. **CURRENT_SPRINT.md** — New: 11 tasks (TASK-000 through TASK-010), dependency graph, sprint exit criteria
-
-5. **fitness-coaching/SKILL.md** — New: Mode-aware coaching personality, workout programming, recovery adjustments, exercise database, safety guardrails
-
-### Session 3
-
-6. **CONTRACTS.md** — All 6 MoltCoach contracts + ERC-8004 interfaces
-7. **CLAUDE.md** — Project config, quick links, domain concepts, MCP tools
+### Other Repos
+24. Installed deps for `web3-agentic-app` monorepo (Turborepo + pnpm) — fixed `tailwind-merge` version (`^2.7.0` → `^2.6.0`)
+25. Note: `web3-agentic-app` was a Sonnet-era scaffold, moltcoach is the real project
 
 ---
 
 ## What's In Progress
 
-Nothing — documentation phase complete.
+1. **Global CLAUDE.md AI layer**: Needs update from `Claude API + LangGraph` → `Claude Agent SDK, Claude API` (edit was rejected mid-session, still pending)
+2. **No code scaffolded yet**: Repo has docs only, no `src/` or `contracts/`
 
 ---
 
 ## What's Next
 
-Implementation. Priority from CURRENT_SPRINT.md:
-
-1. **TASK-001**: Deploy FITToken to Base Sepolia
-2. **TASK-002**: Deploy MoltCoachRegistry to Base Sepolia
-3. **TASK-003**: Deploy WorkoutValidator to Base Sepolia
-4. **TASK-004**: Deploy RewardDistributor to Base Sepolia
-5. **TASK-006**: Supabase Schema + RLS Setup
-6. **TASK-007**: Wallet Connection + Agent Spawn UI
-7. **TASK-008**: Workout Logging (Manual Entry)
-8. **TASK-009**: Image Upload Logging
-9. **TASK-010**: End-to-End Validation + Reward Claim
-10. **TASK-005**: Deploy StakingVault (P1)
+1. Update global `~/.claude/CLAUDE.md` AI layer to include Claude Agent SDK
+2. **TASK-001**: Scaffold Next.js app (App Router, Tailwind, shadcn/ui, wagmi)
+3. **TASK-002**: Coinbase Smart Wallet integration
+4. **TASK-003**: ERC-8004 agent identity contract (Foundry)
+5. **TASK-004**: $FIT token contract (ERC-20)
+6. Set up Supabase database project
+7. Get Coinbase Wallet project ID
 
 ---
 
 ## Decisions Made
 
-- **Session 4**: No staking yield (anti-Ponzi), demand-driven emission (no floor), sprint scoped to Base Sepolia with admin-as-oracle, single fitness skill file covers all 3 modes
-- **Session 3**: Health connectors consumer-only, 3-track model, coach lifecycle with modes, min viable 500/200
-- **Session 2**: Claude Agent SDK, ERC-8004 on Base, Coinbase Smart Wallet 2-of-2, $FIT ERC-20, XMTP/Telegram/Web, fitness-only MVP
+- **Model**: Opus 4.6 (upgraded from Sonnet)
+- **Auth**: Coinbase Smart Wallet (primary)
+- **Agent standard**: ERC-8004 (Trustless Agents) — live on mainnet Jan 2026, expanding to Base
+- **Agent framework**: Claude Agent SDK (not LangGraph)
+- **Token**: $FIT (ERC-20, move-to-earn)
+- **Chain**: Base (Sepolia for dev, mainnet for prod)
+- **Git name**: `alpenflow-studios` (commit author), `alpenflow` (GitHub username)
+- **Repo location**: `/Users/openclaw/moltcoach/`
 
 ---
 
 ## Open Questions
 
-- [ ] $FIT legal review — utility token classification?
-- [ ] Oracle architecture — TEE vs zkML? (admin for MVP)
-- [ ] ERC-8004 registry addresses on Base Sepolia — check 8004.org
-- [ ] Image validation confidence threshold for rewards?
-- [ ] Anthropic health connectors → Agent SDK roadmap?
-- [ ] $FIT secondary market — DEX pool or organic?
+- [ ] Supabase project — needs to be created
+- [ ] Coinbase Wallet project ID — needs to be obtained
+- [ ] $FIT tokenomics — supply, distribution, earn rates
+- [ ] XMTP vs Telegram priority for agent comms
+- [ ] Agent-to-agent protocol at moltcoach.xyz — what does this look like?
+- [ ] Which wearable integration first? (Strava likely easiest)
 
 ---
 
 ## State of Tests
 
-- `forge test`: ⚠️ No contracts yet
-- `pnpm test`: ⚠️ Not set up
-- `pnpm typecheck`: ⚠️ Not set up
-- `pnpm lint`: ⚠️ Not set up
-
----
-
-## Documentation Suite (Complete)
-
-| Document | Path | Version |
-|----------|------|---------|
-| Project Config | `CLAUDE.md` | 1.0 |
-| Product Requirements | `docs/PRD.md` | 1.1 |
-| Architecture | `docs/ARCHITECTURE.md` | 1.1 |
-| Contracts | `docs/CONTRACTS.md` | 1.0 |
-| Tokenomics | `docs/TOKENOMICS.md` | 1.0 |
-| Sprint Tasks | `tasks/CURRENT_SPRINT.md` | 1.0 |
-| Coaching Skill | `.claude/skills/fitness-coaching/SKILL.md` | 1.0 |
-| Session Handoff | `SESSION_HANDOFF.md` | current |
+- `forge test`: N/A (no contracts yet)
+- `pnpm test`: N/A (no app yet)
+- `pnpm typecheck`: N/A
+- `pnpm lint`: N/A
 
 ---
 
 ## Environment Notes
 
-- All docs need placement in MoltCoach repo per CLAUDE.md file structure
-- ERC-8004 registry addresses TBD
-- No code written yet — pure documentation phase complete
+- **Machine**: Mac Mini (Apple Silicon, macOS Darwin 25.2.0)
+- **Repo**: docs only — no `src/`, no `contracts/`, no `node_modules/`
+- **Uncommitted files**: All the docs we created this session (CLAUDE.md, docs/*, tasks/*, etc.)
+- **web3-agentic-app**: Exists at `/Users/openclaw/web3-agentic-app/` with deps installed — Sonnet-era project, secondary to moltcoach
+- **Homebrew path**: Added to `~/.zshrc` via `eval "$(/opt/homebrew/bin/brew shellenv)"`
+- **Foundry path**: Added to `~/.zshenv` by foundryup installer
 
 ---
 
-*Updated: February 7, 2026 — Session 4*
+## Installed Tools Summary
+
+| Tool | Version | Install Method |
+|------|---------|---------------|
+| Homebrew | 5.0.13 | curl installer |
+| Node.js | v25.6.0 | brew |
+| pnpm | 9.15.1 | npm global |
+| GitHub CLI | 2.86.0 | brew |
+| Foundry | 1.5.1 | foundryup |
+| Vercel CLI | 50.13.2 | npm global |
+| Git | 2.50.1 | Apple Git |
+
+---
+
+*Last updated: Feb 7, 2026 — Session 1*

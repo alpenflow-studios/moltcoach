@@ -1,14 +1,14 @@
-# CLAUDE.md — MoltCoach Project Context
+# CLAUDE.md — moltcoach Project Context
 
-> **Project**: moltcoach.xyz
+> **Project**: moltcoach
 > **Extends**: `~/.claude/CLAUDE.md` (global rules apply)
 
 ---
 
 ## Project Identity
 
-- **Name**: MoltCoach
-- **One-liner**: Autonomous AI fitness coaches with wallets, reputation, and move-to-earn rewards
+- **Name**: moltcoach
+- **One-liner**: AI coaching agent with on-chain identity and Coinbase Smart Wallet
 - **Repo**: github.com/alpenflow-studios/moltcoach
 - **Live**: https://moltcoach.xyz
 
@@ -18,14 +18,11 @@
 
 | Resource | URL |
 |----------|-----|
-| Supabase Dashboard | https://supabase.com/dashboard/project/[PROJECT_ID] |
-| Supabase SQL Editor | https://supabase.com/dashboard/project/[PROJECT_ID]/sql/new |
-| Vercel Dashboard | https://vercel.com/[team]/moltcoach |
 | GitHub Repo | https://github.com/alpenflow-studios/moltcoach |
-| Base Sepolia Explorer | https://sepolia.basescan.org |
 | ERC-8004 Spec | https://eips.ethereum.org/EIPS/eip-8004 |
-| Claude Agent SDK Docs | https://platform.claude.com/docs/en/agent-sdk/overview |
-| 8004.org | https://8004.org |
+| Base Sepolia Explorer | https://sepolia.basescan.org |
+| Supabase Dashboard | TBD |
+| Vercel Dashboard | TBD |
 
 ---
 
@@ -33,23 +30,12 @@
 
 | Contract | Address | Network |
 |----------|---------|---------|
-| MoltCoachRegistry | `TBD` | Base Sepolia (84532) |
-| WorkoutValidator | `TBD` | Base Sepolia (84532) |
-| FITToken | `TBD` | Base Sepolia (84532) |
-| RewardDistributor | `TBD` | Base Sepolia (84532) |
-| StakingVault | `TBD` | Base Sepolia (84532) |
-| MoltCoachWalletPolicy | `TBD` | Base Sepolia (84532) |
+| MoltcoachIdentity (ERC-8004) | TBD | Base Sepolia (84532) |
+| $FIT Token | TBD | Base Sepolia (84532) |
+| FIT Staking | TBD | Base Sepolia (84532) |
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | Base Sepolia (84532) |
 
-**ERC-8004 Registries** (singletons on Base — we do NOT deploy these):
-
-| Registry | Address | Network |
-|----------|---------|---------|
-| Identity Registry | `TBD — check 8004.org` | Base (8453) |
-| Reputation Registry | `TBD — check 8004.org` | Base (8453) |
-| Validation Registry | `TBD — check 8004.org` | Base (8453) |
-
-**Admin Wallet**: `TBD`
+**Admin Wallet**: TBD
 
 ---
 
@@ -57,159 +43,101 @@
 
 ```env
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 # Chain / Contracts
 NEXT_PUBLIC_CHAIN_ID=84532
-NEXT_PUBLIC_MOLTCOACH_REGISTRY_ADDRESS=
+NEXT_PUBLIC_MOLTCOACH_IDENTITY_ADDRESS=
 NEXT_PUBLIC_FIT_TOKEN_ADDRESS=
-NEXT_PUBLIC_STAKING_VAULT_ADDRESS=
-NEXT_PUBLIC_USDC_ADDRESS=0x036CbD53842c5426634e7929541eC2318f3dCF7e
+NEXT_PUBLIC_FIT_STAKING_ADDRESS=
 
-# ERC-8004 Registries
-NEXT_PUBLIC_IDENTITY_REGISTRY_ADDRESS=
-NEXT_PUBLIC_REPUTATION_REGISTRY_ADDRESS=
-NEXT_PUBLIC_VALIDATION_REGISTRY_ADDRESS=
+# Coinbase
+NEXT_PUBLIC_COINBASE_WALLET_PROJECT_ID=
 
-# Auth
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=
-
-# Agent
+# AI
 ANTHROPIC_API_KEY=
-
-# Messaging
-XMTP_ENV=production
-TELEGRAM_BOT_TOKEN=
 ```
 
 ---
 
-## Tech Stack (MoltCoach-Specific)
+## Tech Stack (moltcoach-Specific)
 
 > Overrides/extends global defaults where noted.
 
 | Layer | Technology |
-|-------|------------|
-| Agent Runtime | Claude Agent SDK (Python + TypeScript) |
-| Trust Layer | ERC-8004 (Identity, Reputation, Validation Registries) |
-| Wallet | Coinbase Smart Wallet SDK (2-of-2 multisig) |
-| Token | $FIT (ERC-20 on Base) |
-| Messaging | XMTP (primary), Telegram Bot API (secondary), Web chat (tertiary) |
-| Frontend | Next.js (App Router), TypeScript, TailwindCSS, shadcn/ui |
-| Web3 | wagmi v2, viem, WalletConnect |
-| Contracts | Solidity ^0.8.20, Foundry, OpenZeppelin 5.x |
-| Database | Supabase (Postgres + RLS) |
-| Health Data | Direct wearable APIs (Strava, Garmin, Whoop, Oura) + image upload + manual entry |
-| Hosting | Vercel |
+|-------|-----------|
+| Auth | Coinbase Smart Wallet (primary) |
+| Agent Framework | Claude Agent SDK (coaching agent runtime) |
+| Agent Identity | ERC-8004 (Trustless Agents) on Base |
+| Agent Comms | XMTP, Telegram |
+| Token | $FIT (ERC-20, move-to-earn rewards) |
+| Staking | $FIT staking contract |
+| Wearables | Strava, Apple Health, Garmin integrations |
+| Database | Supabase (project ID: TBD) |
+| Chain | Base Sepolia (84532) for dev, Base mainnet (8453) for prod |
 
 ---
 
 ## Domain Concepts
 
-### What is MoltCoach?
-A decentralized autonomous AI coaching platform. Each user spawns a personalized coaching agent that is an on-chain entity (ERC-8004 NFT) with its own wallet, reputation, and earnings capability.
-
-### Agent Relationship Modes
-| Mode | Personality | Use Case |
-|------|-------------|----------|
-| **Coach** | Structured, accountable, pushes you | "I need discipline and a plan" |
-| **Friend** | Encouraging, casual, celebrates wins | "I need someone in my corner" |
-| **Mentor** | Wise, strategic, long-view thinking | "I need guidance, not just a plan" |
+### What is moltcoach?
+A **moltcoach** is an AI coaching agent that lives on-chain via ERC-8004. Each user gets their own moltcoach agent when they verify and connect a Coinbase Smart Wallet. The agent has a persistent identity, personality, and reputation.
 
 ### Agent Lifecycle
 ```
-SPAWN → BONDING (7 days) → ACTIVE → [EVOLVE | RESET | ARCHIVE]
+USER CONNECTS WALLET → VERIFICATION → AGENT CREATION (ERC-8004)
+    → ONBOARDING (personality, heartbeat, persona via questions + metrics)
+    → ACTIVE COACHING (workouts, tracking, motivation)
+    → REWARDS ($FIT earned via move-to-earn)
+    → STAKING ($FIT staked for benefits)
 ```
 
-- **Evolve**: Change mode (Coach↔Friend↔Mentor). History preserved.
-- **Soft Reset**: Clear history + personality. Keep wallet, NFT, reputation.
-- **Hard Reset**: Archive old agent, spawn new one. Old reputation frozen.
-- **Archive**: Dormant. No rewards. Can reactivate.
+### ERC-8004 Integration
+moltcoach uses all three ERC-8004 registries:
+1. **Identity Registry** — Each moltcoach agent gets an on-chain identity (ERC-721 based) with an `agentURI` resolving to their registration file (personality, capabilities, specialization)
+2. **Reputation Registry** — Coaching effectiveness tracked on-chain (user outcomes, consistency scores, engagement metrics)
+3. **Validation Registry** — Workout verification via wearable data, proof-of-activity checks
 
-### Health Data Tracks
-| Track | Method | Confidence |
-|-------|--------|------------|
-| A: Device Sync | Direct wearable APIs (OAuth) | 70-90% |
-| B: Image Upload | Photo of health screen → vision parsing | 50-70% |
-| C: Manual Entry | Chat-based logging | 20-40% |
-
-**Design principle**: Anyone with a phone can use MoltCoach. No API, no wearable, no wallet required to start.
-
-### Validation Trust Tiers
-| Tier | Source | Reward Multiplier |
-|------|--------|-------------------|
-| 1 | Wearable API | 1.0x |
-| 2 | Image Upload | 0.85x |
-| 3 | Manual + Proof | 0.7x |
-| 4 | Manual Only | 0.5x (max 3/week) |
+### Onboarding — Personality, Heartbeat, Persona
+When a new moltcoach is created, it goes through an onboarding flow:
+- **Personality**: Communication style, tone, motivational approach
+- **Heartbeat**: Activity cadence, check-in frequency, response patterns
+- **Persona**: Coaching specialization (FHW initially, expandable to any category)
 
 ### $FIT Token
-- Earned via validated workouts
-- Stake for premium features (Basic/Pro/Elite tiers)
-- Required for agent spawning (anti-Sybil)
-- 1B max supply, 100K daily emission cap
-- Streak bonuses: 7-day (1.5x), 30-day (2.0x), 90-day (2.5x)
+- **Type**: ERC-20 on Base
+- **Earn**: Move-to-earn rewards from tracked workouts and class attendance
+- **Stake**: Stake $FIT for enhanced coaching features, community access
+- **Purpose**: Incentive alignment between agent and human
 
-### Smart Wallet Security
-- 2-of-2 multisig (agent + user)
-- $10/day auto-approve limit
-- 24h timelock for large withdrawals
-- Allowlist-only destinations
-- User can revoke agent signer anytime
+### Communication Channels
+- **XMTP** — Decentralized messaging (primary)
+- **Telegram** — Traditional messaging fallback
+- **Platform of choice** — Extensible to other channels
+
+### Expansion Model
+moltcoach starts with fitness, health, and wellness (FHW) but is architected to expand into any coaching category: career, finance, education, mental health, etc. Each category is a persona layer on top of the core agent framework.
+
+### Community Hub
+moltcoach.xyz is where moltcoach agents gather to interact, discuss, and implement agent ideas — a community of AI agents and their humans.
 
 ---
 
 ## Database Tables
 
-Core tables in Supabase:
+> To be created in Supabase.
 
-| Table | Purpose |
-|-------|---------|
-| `users` | Wallet address, agent ID, smart wallet, preferred channel |
-| `agents` | ERC-8004 token ID, owner, personality config, registration URI |
-| `workouts` | Type, details, duration, data source, validation status, reward |
-| `conversations` | Channel, messages (JSONB), agent ID |
-| `rewards` | Workout ID, amount, tx hash, status |
-
-**RLS requirement**: All policies use `current_setting('app.wallet_address')`. The API layer MUST call `set_config('app.wallet_address', ...)` on every request.
-
----
-
-## Claude Agent SDK — Key References
-
-```python
-# Two usage patterns:
-
-# 1. Simple (one-shot queries)
-from claude_agent_sdk import query, ClaudeAgentOptions
-async for message in query(prompt="...", options=ClaudeAgentOptions(...)):
-    ...
-
-# 2. Interactive (bidirectional, multi-turn — for coaching sessions)
-from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
-client = ClaudeSDKClient(options=ClaudeAgentOptions(
-    system_prompt=MOLTCOACH_SYSTEM_PROMPT,
-    allowed_tools=["Read", "Write", "Bash", "WebSearch"],
-    permission_mode='acceptEdits',
-    cwd="/app/moltcoach"
-))
-# Supports custom MCP tools, hooks, skills, subagents
-```
-
-**Custom MCP Tools** (to build):
-- `wearable_fetch` — OAuth queries to Strava/Garmin/Whoop/Oura
-- `reward_trigger` — Submit validation request to ERC-8004
-- `wallet_ops` — Smart wallet balance, transfers, staking
-- `erc8004_registry` — Read/write to Identity/Reputation/Validation registries
-- `health_query` — Image-based health data extraction (vision)
-
-**Skills** (`.claude/skills/`):
-- `fitness-coaching/SKILL.md` — Workout programming, periodization
-- `nutrition-guidance/SKILL.md` — Meal planning, macros
-- `motivation-support/SKILL.md` — Accountability, habit formation
-- `workout-tracking/SKILL.md` — Log workouts, sync data
-- `reward-management/SKILL.md` — $FIT staking, claiming
+Core tables (planned):
+- `users` — User profiles, wallet addresses
+- `agents` — Moltcoach agent instances (linked to ERC-8004 identity)
+- `agent_personas` — Personality, heartbeat, persona config per agent
+- `workouts` — Tracked workout data
+- `wearable_connections` — Strava, Apple Health, Garmin links
+- `fit_rewards` — $FIT earning history
+- `fit_stakes` — $FIT staking positions
+- `messages` — Agent-human conversation history
+- `coaching_sessions` — Structured coaching session records
 
 ---
 
@@ -217,39 +145,33 @@ client = ClaudeSDKClient(options=ClaudeAgentOptions(
 
 1. Read this file (automatic)
 2. Check `SESSION_HANDOFF.md` for context from last session
-3. Check `NEXT_STEPS.md` or `tasks/CURRENT_SPRINT.md` for current priorities
+3. Check `tasks/CURRENT_SPRINT.md` for current priorities
 4. Check `CURRENT_ISSUES.md` for known blockers
 
 | Task Type | Read First |
 |-----------|------------|
 | Feature work | `docs/PRD.md` |
 | Smart contracts | `docs/CONTRACTS.md` |
-| Database changes | Supabase dashboard (link above) |
+| Database changes | Supabase dashboard |
 | System design | `docs/ARCHITECTURE.md` |
 | Web3 commands | `docs/WEB3_COMMANDS.md` |
-| Agent SDK work | [SDK Docs](https://platform.claude.com/docs/en/agent-sdk/overview) |
-| ERC-8004 work | [EIP Spec](https://eips.ethereum.org/EIPS/eip-8004) |
+| ERC-8004 work | https://eips.ethereum.org/EIPS/eip-8004 |
 
 ---
 
 ## Related Documents
 
-| Document | Path | Notes |
-|----------|------|-------|
-| Product Requirements | `docs/PRD.md` | Features, lifecycle, acceptance criteria |
-| Architecture | `docs/ARCHITECTURE.md` | System design, data flow, security layers |
-| Smart Contracts | `docs/CONTRACTS.md` | All 6 contracts + ERC-8004 interfaces |
-| Session Handoff | `SESSION_HANDOFF.md` | Context for next session |
-| Current Issues | `CURRENT_ISSUES.md` | Known bugs and blockers |
+| Document | Path |
+|----------|------|
+| Product Requirements | `docs/PRD.md` |
+| Architecture | `docs/ARCHITECTURE.md` |
+| Smart Contracts | `docs/CONTRACTS.md` |
+| Web3 Commands | `docs/WEB3_COMMANDS.md` |
+| Maintenance | `docs/MAINTENANCE.md` |
+| Session Handoff | `SESSION_HANDOFF.md` |
+| Current Issues | `CURRENT_ISSUES.md` |
+| Current Sprint | `tasks/CURRENT_SPRINT.md` |
 
 ---
 
-## Known Issues (Historical)
-
-- **Health Connectors**: Claude's Apple Health / Android Health Connect integrations are consumer-app features only (Jan 2026). NOT available via Agent SDK. MoltCoach uses direct wearable APIs + image upload instead.
-- **ERC-8004 Registry Addresses**: Not yet published for Base. Monitor 8004.org for deployment announcements.
-- **Claude Agent SDK**: Class names changed from `ClaudeCodeSDK` → `claude_agent_sdk` with `query()` and `ClaudeSDKClient`. Verify against current docs before implementation.
-
----
-
-*Last updated: February 2026*
+*Last updated: Feb 7, 2026*

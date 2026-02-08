@@ -1,5 +1,6 @@
+import { ConnectWallet } from "@/components/ConnectWallet";
 import { Button } from "@/components/ui/button";
-import { Fingerprint, Zap, Sparkles, Wallet, ArrowRight } from "lucide-react";
+import { Fingerprint, Zap, Sparkles } from "lucide-react";
 
 const FEATURES = [
   {
@@ -30,10 +31,7 @@ export default function LandingPage() {
           <span className="text-lg font-bold tracking-tight">
             molt<span className="text-primary">coach</span>
           </span>
-          <Button variant="outline" size="sm" disabled>
-            <Wallet className="size-4" />
-            Connect Wallet
-          </Button>
+          <ConnectWallet />
         </nav>
       </header>
 
@@ -55,10 +53,7 @@ export default function LandingPage() {
             you — starting with fitness, expanding everywhere.
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Button size="lg" className="text-base" disabled>
-              Get Started
-              <ArrowRight className="size-4" />
-            </Button>
+            <ConnectWallet size="lg" />
             <Button variant="outline" size="lg" className="text-base" asChild>
               <a
                 href="https://eips.ethereum.org/EIPS/eip-8004"
@@ -110,10 +105,9 @@ export default function LandingPage() {
           <p className="mt-4 text-muted-foreground">
             Connect a Coinbase Smart Wallet on Base to get started.
           </p>
-          <Button size="lg" className="mt-8 text-base" disabled>
-            <Wallet className="size-4" />
-            Connect Wallet
-          </Button>
+          <div className="mt-8">
+            <ConnectWallet size="lg" />
+          </div>
         </section>
       </main>
 

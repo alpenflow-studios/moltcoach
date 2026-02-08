@@ -7,78 +7,78 @@
 ## Last Session
 
 - **Date**: 2026-02-07
-- **Duration**: ~30 messages (full environment + project setup)
+- **Duration**: ~25 messages (TASK-001 + TASK-002 completed)
 - **Branch**: `main`
-- **Model**: Claude Opus 4.6 (first session — upgraded from Sonnet)
+- **Model**: Claude Opus 4.6
 
 ---
 
 ## What Was Done
 
-### Dev Environment (from scratch)
-1. Installed Homebrew (`5.0.13`)
-2. Installed Node.js (`v25.6.0`) via brew
-3. Installed pnpm (`9.15.1`) via npm
-4. Installed GitHub CLI (`2.86.0`) via brew
-5. Authenticated GitHub as `alpenflow` (SSH, org: `alpenflow-studios`)
-6. Generated SSH key (`ed25519`) and uploaded to GitHub
-7. Set git config: `alpenflow-studios` / `hello@mikerichardson.io`
-8. Installed Foundry (`1.5.1` — forge, cast, anvil, chisel) + libusb
-9. Installed Vercel CLI (`50.13.2`) via npm
-10. Added Homebrew to `~/.zshrc` PATH
-11. Added GitHub SSH host key to `~/.ssh/known_hosts`
+### Session 2 (This Session)
 
-### Global Claude Config
-12. Created `~/.claude/CLAUDE.md` — Michael's global preferences, default stack, code rules, session management (75% rule, checklists, stop-and-ask)
+1. **Read entire codebase** — got up to speed on all docs, architecture, PRD, contracts spec
+2. **TASK-001: Scaffold Next.js App** — COMPLETE
+   - Next.js 16.1.6 (App Router, Turbopack), TypeScript strict mode
+   - Tailwind v4 + shadcn/ui (new-york style, zinc base)
+   - Custom dark theme with lime accent (`oklch(0.768 0.233 130.85)`) as primary
+   - Landing page: hero ("Your AI Coach. On-Chain."), 3 feature cards, CTA
+   - loading.tsx, error.tsx, not-found.tsx boundaries
+   - `.env.example` with all vars, `.gitignore`
+   - Commit: `97cbf6d`
+3. **TASK-002: Coinbase Smart Wallet Integration** — COMPLETE
+   - wagmi v3.4.2 + viem v2.45.1 + TanStack Query v5.90
+   - Coinbase Smart Wallet connector (`smartWalletOnly` preference)
+   - Base Sepolia (84532) chain config
+   - ConnectWallet component: 4 states (disconnected/connecting/wrong chain/connected)
+   - Truncated address display in header
+   - Disconnect clears state, wrong chain triggers switch prompt
+   - localStorage persistence for reconnect across refresh
+   - WalletProvider wrapping app in layout.tsx
+   - Commit: `46cdc47`
+4. **Merged remote docs** — pulled 8 "Add files via upload" commits from GitHub
+   - Discovered TOKENOMICS.md (detailed $FIT economics — 1B supply, 100K/day cap, tiers, staking)
+   - Discovered FITNESS_COACHING_SKILL.md (coaching modes, workout programming)
+   - Organized into docs/, removed root-level duplicates
+   - Commit: `85d65b0`
 
-### moltcoach Project Setup
-13. Cloned `alpenflow-studios/moltcoach` to `/Users/openclaw/moltcoach/`
-14. Created `CLAUDE.md` — project-specific context (ERC-8004, $FIT, Coinbase Smart Wallet, Claude Agent SDK)
-15. Created `SESSION_HANDOFF.md` (this file)
-16. Created `CURRENT_ISSUES.md` — empty bug tracker
-17. Created `tasks/CURRENT_SPRINT.md` — 4 tasks queued (TASK-001 through TASK-004)
-18. Created `docs/PRD.md` — 7 features scoped with acceptance criteria
-19. Created `docs/ARCHITECTURE.md` — system design, data model, auth flow, agent creation flow
-20. Created `docs/CONTRACTS.md` — MoltcoachIdentity, FitToken, FitStaking specs
-21. Created `docs/WEB3_COMMANDS.md` — forge/cast/anvil CLI reference
-22. Created `docs/MAINTENANCE.md` — update procedures
-23. Created `.claude/skills/update/SKILL.md` — system update skill
+### Session 1 (Previous)
 
-### Other Repos
-24. Installed deps for `web3-agentic-app` monorepo (Turborepo + pnpm) — fixed `tailwind-merge` version (`^2.7.0` → `^2.6.0`)
-25. Note: `web3-agentic-app` was a Sonnet-era scaffold, moltcoach is the real project
+- Full dev environment setup (Node, pnpm, Foundry, Vercel CLI, GitHub CLI)
+- All project documentation created (PRD, ARCHITECTURE, CONTRACTS, etc.)
+- See git log for full history
 
 ---
 
 ## What's In Progress
 
-1. **Global CLAUDE.md AI layer**: Needs update from `Claude API + LangGraph` → `Claude Agent SDK, Claude API` (edit was rejected mid-session, still pending)
-2. **No code scaffolded yet**: Repo has docs only, no `src/` or `contracts/`
+Nothing — clean handoff.
 
 ---
 
 ## What's Next
 
-1. Update global `~/.claude/CLAUDE.md` AI layer to include Claude Agent SDK
-2. **TASK-001**: Scaffold Next.js app (App Router, Tailwind, shadcn/ui, wagmi)
-3. **TASK-002**: Coinbase Smart Wallet integration
-4. **TASK-003**: ERC-8004 agent identity contract (Foundry)
-5. **TASK-004**: $FIT token contract (ERC-20)
-6. Set up Supabase database project
-7. Get Coinbase Wallet project ID
+1. **TASK-003**: ERC-8004 Agent Identity Contract (Foundry/Solidity)
+   - Spec: `docs/CONTRACTS.md`
+   - MoltcoachIdentity.sol — ERC-721 + URIStorage, `createAgent(agentURI)`, 1 agent per wallet
+   - Need to research ERC-8004 spec: https://eips.ethereum.org/EIPS/eip-8004
+   - Acceptance: `forge build` clean, `forge test` passes, >90% coverage
+2. **TASK-004**: $FIT Token Contract (Foundry/Solidity)
+   - Spec: `docs/CONTRACTS.md` + `docs/TOKENOMICS.md` (detailed)
+   - FitToken.sol — ERC-20, 1B max supply, 100K/day emission cap, authorized minters
+   - Acceptance: `forge build` clean, `forge test` passes, >90% coverage
+3. Set up Supabase database project
+4. Get Coinbase Wallet project ID
 
 ---
 
 ## Decisions Made
 
-- **Model**: Opus 4.6 (upgraded from Sonnet)
-- **Auth**: Coinbase Smart Wallet (primary)
-- **Agent standard**: ERC-8004 (Trustless Agents) — live on mainnet Jan 2026, expanding to Base
-- **Agent framework**: Claude Agent SDK (not LangGraph)
-- **Token**: $FIT (ERC-20, move-to-earn)
-- **Chain**: Base (Sepolia for dev, mainnet for prod)
-- **Git name**: `alpenflow-studios` (commit author), `alpenflow` (GitHub username)
-- **Repo location**: `/Users/openclaw/moltcoach/`
+- **Theme**: Dark mode default, lime primary accent on zinc base
+- **wagmi version**: v3.4.2 (latest, upgraded from planned v2 — same API)
+- **Smart Wallet**: `smartWalletOnly` preference (no browser extension fallback)
+- **Tokenomics**: Now defined in `docs/TOKENOMICS.md` — no longer TBD
+- **Coaching skill**: Defined in `docs/FITNESS_COACHING_SKILL.md` (3 modes: Coach, Friend, Mentor)
 
 ---
 
@@ -86,45 +86,62 @@
 
 - [ ] Supabase project — needs to be created
 - [ ] Coinbase Wallet project ID — needs to be obtained
-- [ ] $FIT tokenomics — supply, distribution, earn rates
 - [ ] XMTP vs Telegram priority for agent comms
-- [ ] Agent-to-agent protocol at moltcoach.xyz — what does this look like?
+- [ ] Agent-to-agent protocol at moltcoach.xyz
 - [ ] Which wearable integration first? (Strava likely easiest)
+- [ ] ERC-8004 spec details — need to read the actual EIP before TASK-003
 
 ---
 
 ## State of Tests
 
 - `forge test`: N/A (no contracts yet)
-- `pnpm test`: N/A (no app yet)
-- `pnpm typecheck`: N/A
-- `pnpm lint`: N/A
+- `pnpm test`: N/A (no test suite yet)
+- `pnpm typecheck`: PASSES (zero errors)
+- `pnpm lint`: PASSES (zero errors)
+- `pnpm build`: PASSES (static prerender, ~800ms compile)
+
+---
+
+## Key Files (Session 2)
+
+| File | Purpose |
+|------|---------|
+| `src/config/wagmi.ts` | wagmi config — Base Sepolia, Coinbase Smart Wallet, typed |
+| `src/components/providers/WalletProvider.tsx` | WagmiProvider + QueryClientProvider wrapper |
+| `src/components/ConnectWallet.tsx` | 4-state wallet button (accepts size prop) |
+| `src/app/layout.tsx` | Root layout with WalletProvider, dark mode, Geist fonts |
+| `src/app/page.tsx` | Landing page with live ConnectWallet components |
+| `src/app/globals.css` | Tailwind + shadcn theme (lime accent) |
+| `src/components/ui/button.tsx` | shadcn button component |
+| `src/lib/utils.ts` | cn() utility |
 
 ---
 
 ## Environment Notes
 
-- **Machine**: Mac Mini (Apple Silicon, macOS Darwin 25.2.0)
-- **Repo**: docs only — no `src/`, no `contracts/`, no `node_modules/`
-- **Uncommitted files**: All the docs we created this session (CLAUDE.md, docs/*, tasks/*, etc.)
-- **web3-agentic-app**: Exists at `/Users/openclaw/web3-agentic-app/` with deps installed — Sonnet-era project, secondary to moltcoach
-- **Homebrew path**: Added to `~/.zshrc` via `eval "$(/opt/homebrew/bin/brew shellenv)"`
-- **Foundry path**: Added to `~/.zshenv` by foundryup installer
+- **PATH issue**: Sandbox doesn't include `/usr/bin` by default. Must prefix commands with: `export PATH="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"`
+- **pnpm location**: `/opt/homebrew/bin/pnpm` (v10.29.1, upgraded from 9.15.1)
+- **create-next-app conflict**: Can't scaffold in a dir with existing files — use temp dir + copy
+- **React Compiler**: Declined during scaffold (not needed for MVP)
 
 ---
 
-## Installed Tools Summary
+## Installed Packages
 
-| Tool | Version | Install Method |
-|------|---------|---------------|
-| Homebrew | 5.0.13 | curl installer |
-| Node.js | v25.6.0 | brew |
-| pnpm | 9.15.1 | npm global |
-| GitHub CLI | 2.86.0 | brew |
-| Foundry | 1.5.1 | foundryup |
-| Vercel CLI | 50.13.2 | npm global |
-| Git | 2.50.1 | Apple Git |
+| Package | Version | Purpose |
+|---------|---------|---------|
+| next | 16.1.6 | Framework |
+| react / react-dom | 19.2.3 | UI |
+| wagmi | 3.4.2 | Web3 hooks |
+| viem | 2.45.1 | Ethereum utilities |
+| @tanstack/react-query | 5.90.20 | Server state |
+| tailwindcss | 4.1.18 | Styling |
+| shadcn | 3.8.4 | Component library CLI |
+| lucide-react | 0.563.0 | Icons |
+| typescript | 5.9.3 | Type checking |
+| eslint | 9.39.2 | Linting |
 
 ---
 
-*Last updated: Feb 7, 2026 — Session 1*
+*Last updated: Feb 7, 2026 — Session 2*

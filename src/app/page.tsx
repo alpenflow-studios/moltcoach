@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { Button } from "@/components/ui/button";
 import { Fingerprint, Zap, Sparkles } from "lucide-react";
@@ -55,13 +56,7 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
             <ConnectWallet size="lg" />
             <Button variant="outline" size="lg" className="text-base" asChild>
-              <a
-                href="https://eips.ethereum.org/EIPS/eip-8004"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Learn about ERC-8004
-              </a>
+              <Link href="/staking">Start Staking</Link>
             </Button>
           </div>
         </section>

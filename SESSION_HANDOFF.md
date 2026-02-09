@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-08
-- **Duration**: Session 5
+- **Duration**: Session 6
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,31 +15,42 @@
 
 ## What Was Done
 
-### Session 5 (This Session)
+### Session 6 (This Session)
 
-1. **TASK-006: FIT Staking Contract** — COMPLETE
-   - `FitStaking.sol` — Utility-only $FIT staking:
-     - Ownable + ReentrancyGuard + SafeERC20
-     - `stake(amount)` — transfer FIT from user, record StakeInfo
-     - `unstake(amount)` — partial/full unstaking supported
-     - Early unstake (< 30 days): 5% penalty routed to ProtocolFeeCollector via `collectFitFee`
-     - Normal unstake (≥ 30 days): no penalty, full payout
-     - stakedAt set on first stake only (not reset on top-up)
-     - stakedAt reset to 0 on full unstake (restaking starts fresh timer)
-     - Tier enum: Free(0), Basic(100 FIT), Pro(1K FIT), Elite(10K FIT)
-     - `getTier(address)` — computed dynamically from staked balance
-     - `isEarlyUnstake(address)` — check if within 30-day window
-     - `updateThresholds(basic, pro, elite)` — owner-only, strictly increasing
-     - TierChanged event emitted on stake/unstake when tier changes
-     - `totalStaked` protocol-level metric tracked
-     - IFeeCollector interface defined inline for penalty routing
-     - forceApprove + collectFitFee pattern for safe penalty transfer
-   - 62 tests (57 unit + 5 fuzz), **100% coverage** (lines, statements, branches, functions)
+1. **TASK-006 committed and pushed** — FitStaking contract code + docs from Session 5
+
+2. **Deploy script updated** — `Deploy.s.sol` now deploys all 4 contracts in dependency order:
+   - FitToken → ProtocolFeeCollector → FitStaking → MoltcoachIdentity
+   - Auto-selects USDC by chain ID (Base Sepolia / Base Mainnet)
+   - Treasury wallets default to deployer for testnet convenience
+   - Dry-run verified on Base Sepolia fork (~0.00001 ETH gas)
+
+3. **Testnet deployment** — All 4 contracts deployed and verified on Base Sepolia:
+   - FitToken: `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138`
+   - ProtocolFeeCollector: `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2`
+   - FitStaking: `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737`
+   - MoltcoachIdentity: `0x949488bD2F10884a0E2eB89e4947837b48814c9a`
+   - All verified with `exact_match` status
+
+4. **Supabase prompt created** — Full prompt for Claude.ai with Supabase MCP to set up 9 database tables with RLS, triggers, indexes. Michael is running this separately.
+
+5. **Frontend staking UI** — COMPLETE
+   - Foundation: `src/config/contracts.ts` (minimal ABIs + addresses), `src/types/staking.ts`, `src/lib/format.ts`
+   - shadcn/ui: card, input, badge, progress, separator, tabs, alert, skeleton, label
+   - Hooks: `useStakingReads` (all contract reads), `useStakeAction` (approve→stake 2-tx flow), `useUnstakeAction`
+   - Components: StakingPageContent, StakingHeader, TierCard, StakeInfoCard, StakeActions, StakeForm, UnstakeForm, TierBenefitsCard
+   - `/staking` route with page, loading, error
+   - Landing page updated with "Start Staking" link
+   - `tsconfig.json` target ES2017→ES2020 for BigInt support
+   - `pnpm typecheck`, `pnpm lint`, `pnpm build` all pass
+
+### Session 5 (Previous)
+
+- TASK-006 (FitStaking) completed — 62 tests, 100% coverage
 
 ### Session 4 (Previous)
 
 - TASK-004 ($FIT Token) and TASK-005 (ProtocolFeeCollector) completed
-- See session 4 handoff for details
 
 ### Session 3 (Previous)
 
@@ -59,23 +70,17 @@
 
 Nothing — clean handoff.
 
-### Testnet Deployment (Session 6)
-
-All 4 contracts deployed and verified on Base Sepolia:
-- FitToken: `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138`
-- ProtocolFeeCollector: `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2`
-- FitStaking: `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737`
-- MoltcoachIdentity: `0x949488bD2F10884a0E2eB89e4947837b48814c9a`
-
 ---
 
 ## What's Next
 
-1. **Deploy scripts update** — Update `Deploy.s.sol` to include FitStaking in deployment order
-2. **Supabase project setup** — Create project, define tables
-3. **Coinbase Wallet project ID** — Obtain from Coinbase developer portal
-4. **Testnet deployment** — Deploy all 4 contracts to Base Sepolia
-5. **Frontend contract integration** — Wire up wagmi hooks for staking UI
+1. **Supabase project setup** — Michael is doing this with Claude.ai + MCP
+2. **Manual testing of staking UI** — Connect wallet on localhost, verify reads/writes work with deployed contracts
+3. **Mint test $FIT** — Need to call `FitToken.mint()` from deployer wallet to give test users tokens
+4. **Coinbase Wallet project ID** — Obtain from Coinbase developer portal
+5. **Frontend polish** — Visual testing of staking page on mobile/desktop
+6. **Agent creation UI** — MoltcoachIdentity frontend integration
+7. **Shared nav component** — Extract header/footer from landing page and staking page into shared layout
 
 ---
 
@@ -93,12 +98,17 @@ All 4 contracts deployed and verified on Base Sepolia:
 - **Staking penalty**: 5% constant (not adjustable), routed to FeeCollector (not burned)
 - **stakedAt timer**: Not reset on top-up, only on full unstake + restake
 - **Penalty routing**: forceApprove + collectFitFee pattern (preserves FeeCollector tracking)
+- **Deploy wallet**: MetaMask for development, Coinbase Wallet for funds
+- **Staking UI ABI strategy**: Minimal `as const` ABIs in TypeScript (not Foundry JSON artifacts)
+- **Approve flow**: 2-tx approve→stake (not ERC20Permit) for Smart Wallet reliability
+- **Staking route**: Dedicated `/staking` (not `/dashboard`) — dashboard later when more features exist
+- **tsconfig target**: ES2020 (was ES2017, needed for BigInt literals)
 
 ---
 
 ## Open Questions
 
-- [ ] Supabase project — needs to be created
+- [ ] Supabase project — Michael setting up with Claude.ai
 - [ ] Coinbase Wallet project ID — needs to be obtained
 - [ ] XMTP vs Telegram priority for agent comms
 - [ ] Agent-to-agent protocol at moltcoach.xyz
@@ -121,19 +131,23 @@ All 4 contracts deployed and verified on Base Sepolia:
 
 ---
 
-## Key Files (Session 5)
+## Key Files (Session 6)
 
 | File | Purpose |
 |------|---------|
-| `contracts/src/FitStaking.sol` | $FIT staking contract (tiers, early unstake penalty) |
-| `contracts/test/FitStaking.t.sol` | 62 tests: staking, tiers, unstaking, penalties, admin, fuzz |
-| `contracts/src/fees/ProtocolFeeCollector.sol` | Central fee router ($FIT + USDC, treasury distribution) |
-| `contracts/test/ProtocolFeeCollector.t.sol` | 61 tests: collection, distribution, allocation, fee updates |
-| `contracts/src/FitToken.sol` | $FIT ERC-20 token (burn, permit, daily cap, max supply) |
-| `contracts/test/FitToken.t.sol` | 50 tests: deployment, minting, daily cap, burn, permit, fuzz |
-| `contracts/src/MoltcoachIdentity.sol` | ERC-8004 Identity Registry (ERC-721 + metadata + EIP-712 wallet) |
-| `contracts/test/MoltcoachIdentity.t.sol` | 43 tests: registration, URI, metadata, wallet, transfers, fuzz |
-| `contracts/script/Deploy.s.sol` | Deployment script for Base Sepolia |
+| `contracts/script/Deploy.s.sol` | Deploy all 4 contracts (updated this session) |
+| `src/config/contracts.ts` | Minimal ABIs + contract addresses for wagmi |
+| `src/hooks/useStakingReads.ts` | All staking contract read hooks |
+| `src/hooks/useStakeAction.ts` | Approve→stake 2-tx write flow |
+| `src/hooks/useUnstakeAction.ts` | Unstake write flow |
+| `src/components/staking/StakingPageContent.tsx` | Top-level staking page orchestrator |
+| `src/components/staking/StakeForm.tsx` | Stake input + approve/stake buttons |
+| `src/components/staking/UnstakeForm.tsx` | Unstake input + penalty preview |
+| `src/components/staking/TierCard.tsx` | Current tier + progress bar |
+| `src/components/staking/StakeInfoCard.tsx` | Staked balance + penalty countdown |
+| `src/components/staking/TierBenefitsCard.tsx` | All 4 tiers comparison grid |
+| `src/app/staking/page.tsx` | /staking route entry |
+| `src/lib/format.ts` | formatFit(), formatStakeDate(), daysUntilPenaltyFree() |
 
 ---
 
@@ -144,6 +158,7 @@ All 4 contracts deployed and verified on Base Sepolia:
 - **forge commands**: Must run from `contracts/` directory (or use `cd contracts &&`)
 - **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
 - **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
+- **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
 
 ---
 
@@ -162,4 +177,4 @@ All 4 contracts deployed and verified on Base Sepolia:
 
 ---
 
-*Last updated: Feb 8, 2026 — Session 5*
+*Last updated: Feb 8, 2026 — Session 6*

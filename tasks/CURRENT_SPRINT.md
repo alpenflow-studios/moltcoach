@@ -4,10 +4,10 @@
 
 ---
 
-## Sprint: Foundation + Revenue
+## Sprint: Frontend Integration + UX
 
 ### Goal
-> Core contracts deployed (identity, token, fee collector), wallet connected, revenue capture from day one.
+> Full frontend connected to deployed contracts. Agent creation, staking, dashboard — all working end-to-end on Base Sepolia.
 
 ---
 
@@ -15,13 +15,63 @@
 
 ### Not Started
 
-> No pending contract tasks in this sprint. Next up: Supabase setup, deployment scripts.
+#### TASK-008: Manual Testing + Mint Test Tokens
+- **Priority**: P0
+- **Scope**: `pnpm dev` testing, `MintTestTokens.s.sol` execution
+- **Acceptance Criteria**:
+  - [ ] Run `pnpm dev`, all 4 routes render correctly (/, /staking, /agent, /dashboard)
+  - [ ] Connect Coinbase Smart Wallet on Base Sepolia
+  - [ ] Execute MintTestTokens script to mint 10K FIT to deployer
+  - [ ] Staking page reads show correct data from deployed contracts
+  - [ ] Agent registration works end-to-end on Base Sepolia
+  - [ ] Dashboard shows correct stats after staking + agent creation
+
+#### TASK-009: Supabase Integration
+- **Priority**: P1
+- **Scope**: `src/lib/supabase.ts`, new hooks, API routes
+- **Depends on**: Michael completing Supabase project setup with Claude.ai
+- **Acceptance Criteria**:
+  - [ ] Supabase project ID and anon key in `.env.local`
+  - [ ] User record created on wallet connect
+  - [ ] Agent registration synced to Supabase
+  - [ ] Workout data stored in Supabase
+  - [ ] RLS policies working (users can only read/write own data)
+
+#### TASK-010: Agent Coaching Chat
+- **Priority**: P1
+- **Scope**: New chat interface, Claude API integration
+- **Acceptance Criteria**:
+  - [ ] Chat interface at `/chat` or within `/agent`
+  - [ ] Messages sent to Claude API with coaching personality
+  - [ ] Agent coaching style (selected at registration) reflected in responses
+  - [ ] Conversation history stored in Supabase
+  - [ ] `pnpm typecheck` passes
 
 ---
 
 ### In Progress
 
-> Move tasks here when work begins. Note the session/branch.
+#### TASK-007: Frontend Pages + Shared Layout (Session 7)
+- **Priority**: P0
+- **Scope**: Layout, agent UI, dashboard, Supabase scaffold
+- **Started**: Session 7 (Feb 8, 2026)
+- **Status**: ~90% complete. All code written, builds pass. Needs commit + push + minor toast additions.
+- **Acceptance Criteria**:
+  - [x] Shared Navbar with responsive mobile menu
+  - [x] Shared Footer with nav links
+  - [x] Root layout includes Navbar + Footer (no per-page duplication)
+  - [x] `/agent` route — register agent or view profile
+  - [x] `/dashboard` route — overview of wallet, staking, agent
+  - [x] Supabase client scaffold (`src/lib/supabase.ts` + types)
+  - [x] MoltcoachIdentity ABI + address in `contracts.ts`
+  - [x] Agent hooks (`useAgentReads`, `useRegisterAgent`)
+  - [x] Toast notifications (sonner) installed and wired to layout
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm lint` passes
+  - [x] `pnpm build` passes
+  - [ ] Toast on unstake success
+  - [ ] Toast on agent registration success
+  - [ ] All changes committed + pushed
 
 ---
 

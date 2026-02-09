@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-08
-- **Duration**: Session 6
+- **Duration**: Session 7
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,72 +15,77 @@
 
 ## What Was Done
 
-### Session 6 (This Session)
+### Session 7 (This Session)
 
-1. **TASK-006 committed and pushed** — FitStaking contract code + docs from Session 5
+1. **Staking UI audit** — Verified all ABIs match deployed contracts, confirmed contract addresses, no critical bugs. `.env.local` was missing — created it with all 4 deployed contract addresses.
 
-2. **Deploy script updated** — `Deploy.s.sol` now deploys all 4 contracts in dependency order:
-   - FitToken → ProtocolFeeCollector → FitStaking → MoltcoachIdentity
-   - Auto-selects USDC by chain ID (Base Sepolia / Base Mainnet)
-   - Treasury wallets default to deployer for testnet convenience
-   - Dry-run verified on Base Sepolia fork (~0.00001 ETH gas)
+2. **Mint script** — `contracts/script/MintTestTokens.s.sol` created. Mints 10,000 FIT to deployer for testing. Usage: `forge script script/MintTestTokens.s.sol --rpc-url base_sepolia --broadcast`
 
-3. **Testnet deployment** — All 4 contracts deployed and verified on Base Sepolia:
-   - FitToken: `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138`
-   - ProtocolFeeCollector: `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2`
-   - FitStaking: `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737`
-   - MoltcoachIdentity: `0x949488bD2F10884a0E2eB89e4947837b48814c9a`
-   - All verified with `exact_match` status
+3. **Shared layout system** — Major refactor:
+   - `src/components/Navbar.tsx` — Responsive nav with mobile hamburger menu, active route highlighting, links to Home/Staking/Agent/Dashboard
+   - `src/components/Footer.tsx` — Shared footer with nav links
+   - Root `layout.tsx` updated to include Navbar + Footer globally
+   - Landing page (`page.tsx`) stripped of duplicated header/footer, now renders inside layout
+   - Staking page (`staking/page.tsx`) stripped of duplicated header/footer, simplified to content only
 
-4. **Supabase prompt created** — Full prompt for Claude.ai with Supabase MCP to set up 9 database tables with RLS, triggers, indexes. Michael is running this separately.
+4. **Agent Creation UI** — Full MoltcoachIdentity frontend integration:
+   - `src/config/contracts.ts` — Added `MOLTCOACH_IDENTITY_ADDRESS` + `moltcoachIdentityAbi` (register, hasAgent, getAgent, tokenURI, getMetadata, setMetadata, setAgentURI)
+   - `src/hooks/useAgentReads.ts` — Reads: hasAgent, getAgent, tokenURI
+   - `src/hooks/useRegisterAgent.ts` — Write: register(agentURI) with state machine
+   - `src/components/agent/AgentPageContent.tsx` — Orchestrator (wallet check, loading, has/no agent routing)
+   - `src/components/agent/RegisterAgentForm.tsx` — Agent creation form with name input, 4 coaching style picker (Motivator/Drill Sergeant/Scientist/Friend), live preview card, data URI generation
+   - `src/components/agent/AgentProfileCard.tsx` — Existing agent display with on-chain data, URI parsing, BaseScan link, capabilities badges
+   - `/agent` route with page, loading, error
 
-5. **Frontend staking UI** — COMPLETE
-   - Foundation: `src/config/contracts.ts` (minimal ABIs + addresses), `src/types/staking.ts`, `src/lib/format.ts`
-   - shadcn/ui: card, input, badge, progress, separator, tabs, alert, skeleton, label
-   - Hooks: `useStakingReads` (all contract reads), `useStakeAction` (approve→stake 2-tx flow), `useUnstakeAction`
-   - Components: StakingPageContent, StakingHeader, TierCard, StakeInfoCard, StakeActions, StakeForm, UnstakeForm, TierBenefitsCard
-   - `/staking` route with page, loading, error
-   - Landing page updated with "Start Staking" link
-   - `tsconfig.json` target ES2017→ES2020 for BigInt support
-   - `pnpm typecheck`, `pnpm lint`, `pnpm build` all pass
+5. **Dashboard page** — New `/dashboard` route:
+   - `src/components/dashboard/DashboardContent.tsx` — Overview with 4 stat cards (FIT balance, staked, tier, agent), staking detail card with tier progress, agent status card with activity placeholders
+   - `/dashboard` route with page, loading, error
 
-### Session 5 (Previous)
+6. **Supabase scaffold** — Ready for when Michael finishes DB setup:
+   - Installed `@supabase/supabase-js` v2.95.3
+   - `src/lib/supabase.ts` — Client with Database type
+   - `src/types/database.ts` — Types for users, agents, workouts, coaching_sessions tables
 
-- TASK-006 (FitStaking) completed — 62 tests, 100% coverage
+7. **Coinbase Wallet project ID** — `wagmi.ts` updated to read `NEXT_PUBLIC_COINBASE_WALLET_PROJECT_ID` from env
 
-### Session 4 (Previous)
+8. **Toast notifications** — Installed shadcn sonner component:
+   - `src/components/ui/sonner.tsx` — Hardcoded to dark theme (no next-themes dependency)
+   - Added `<Toaster>` to root layout
+   - StakeForm has toast on successful stake
 
-- TASK-004 ($FIT Token) and TASK-005 (ProtocolFeeCollector) completed
+### Session 6 (Previous)
 
-### Session 3 (Previous)
+- All 4 contracts deployed & verified on Base Sepolia
+- Full staking UI built
+- Deploy script updated for all 4 contracts
 
-- TASK-003 (ERC-8004 Identity) completed
+### Sessions 1-5
 
-### Session 2 (Previous)
-
-- TASK-001 (scaffold) + TASK-002 (wallet) completed
-
-### Session 1 (Previous)
-
-- Dev environment setup, all project docs created
+- Dev environment, scaffold, wallet, contracts (Identity, FIT, FeeCollector, Staking), 216 tests
 
 ---
 
 ## What's In Progress
 
-Nothing — clean handoff.
+**Toast notifications** — StakeForm has toast on success. Still need to add toast to:
+- `UnstakeForm.tsx` — on successful unstake
+- `RegisterAgentForm.tsx` — on successful agent registration
+
+These are ~3-line additions each (import toast, add toast.success in useEffect).
 
 ---
 
 ## What's Next
 
-1. **Supabase project setup** — Michael is doing this with Claude.ai + MCP
-2. **Manual testing of staking UI** — Connect wallet on localhost, verify reads/writes work with deployed contracts
-3. **Mint test $FIT** — Need to call `FitToken.mint()` from deployer wallet to give test users tokens
-4. **Coinbase Wallet project ID** — Obtain from Coinbase developer portal
-5. **Frontend polish** — Visual testing of staking page on mobile/desktop
-6. **Agent creation UI** — MoltcoachIdentity frontend integration
-7. **Shared nav component** — Extract header/footer from landing page and staking page into shared layout
+1. **Finish toast notifications** — Add to UnstakeForm + RegisterAgentForm (quick, ~5 min)
+2. **Commit + push all Session 7 work** — Large commit with all new files
+3. **Manual testing** — Run `pnpm dev`, connect wallet, verify all 4 routes render correctly
+4. **Mint test FIT** — Run the MintTestTokens script to give deployer tokens for testing staking
+5. **Test agent registration** — Register an agent on Base Sepolia via the /agent UI
+6. **Supabase integration** — Wire up supabase client once Michael has DB ready
+7. **Coinbase Wallet project ID** — Michael needs to obtain from Coinbase developer portal
+8. **Wearable integration** — Start Strava OAuth flow (likely first wearable)
+9. **Agent coaching chat** — Build the actual coaching interface (Claude API integration)
 
 ---
 
@@ -103,13 +108,18 @@ Nothing — clean handoff.
 - **Approve flow**: 2-tx approve→stake (not ERC20Permit) for Smart Wallet reliability
 - **Staking route**: Dedicated `/staking` (not `/dashboard`) — dashboard later when more features exist
 - **tsconfig target**: ES2020 (was ES2017, needed for BigInt literals)
+- **Layout**: Shared Navbar + Footer in root layout, pages render content only (no per-page headers)
+- **Agent URI**: `data:application/json,` encoded URI with name, style, version, category
+- **Coaching styles**: 4 options — Motivator, Drill Sergeant, Scientist, Friend
+- **Toaster**: sonner with hardcoded dark theme (no next-themes dep)
+- **Supabase types**: Manual types in `src/types/database.ts` (will replace with generated types later)
 
 ---
 
 ## Open Questions
 
 - [ ] Supabase project — Michael setting up with Claude.ai
-- [ ] Coinbase Wallet project ID — needs to be obtained
+- [ ] Coinbase Wallet project ID — needs to be obtained from developer portal
 - [ ] XMTP vs Telegram priority for agent comms
 - [ ] Agent-to-agent protocol at moltcoach.xyz
 - [ ] Which wearable integration first? (Strava likely easiest)
@@ -120,34 +130,42 @@ Nothing — clean handoff.
 ## State of Tests
 
 - `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
-- `forge coverage`:
-  - **100% lines** on FitStaking.sol
-  - **100% lines** on ProtocolFeeCollector.sol
-  - **100% lines** on FitToken.sol
-  - **98.67% lines** on MoltcoachIdentity.sol
+- `forge build`: Compiles (pre-existing notes/warnings only, no errors)
 - `pnpm typecheck`: PASSES
 - `pnpm lint`: PASSES
-- `pnpm build`: PASSES
+- `pnpm build`: PASSES (all 4 routes: /, /staking, /agent, /dashboard)
 
 ---
 
-## Key Files (Session 6)
+## Key Files (Session 7 — New/Modified)
 
 | File | Purpose |
 |------|---------|
-| `contracts/script/Deploy.s.sol` | Deploy all 4 contracts (updated this session) |
-| `src/config/contracts.ts` | Minimal ABIs + contract addresses for wagmi |
-| `src/hooks/useStakingReads.ts` | All staking contract read hooks |
-| `src/hooks/useStakeAction.ts` | Approve→stake 2-tx write flow |
-| `src/hooks/useUnstakeAction.ts` | Unstake write flow |
-| `src/components/staking/StakingPageContent.tsx` | Top-level staking page orchestrator |
-| `src/components/staking/StakeForm.tsx` | Stake input + approve/stake buttons |
-| `src/components/staking/UnstakeForm.tsx` | Unstake input + penalty preview |
-| `src/components/staking/TierCard.tsx` | Current tier + progress bar |
-| `src/components/staking/StakeInfoCard.tsx` | Staked balance + penalty countdown |
-| `src/components/staking/TierBenefitsCard.tsx` | All 4 tiers comparison grid |
-| `src/app/staking/page.tsx` | /staking route entry |
-| `src/lib/format.ts` | formatFit(), formatStakeDate(), daysUntilPenaltyFree() |
+| `.env.local` | **NEW** — Local env with all 4 deployed contract addresses |
+| `contracts/script/MintTestTokens.s.sol` | **NEW** — Mint test FIT tokens to deployer |
+| `src/components/Navbar.tsx` | **NEW** — Shared responsive navbar with mobile menu |
+| `src/components/Footer.tsx` | **NEW** — Shared footer |
+| `src/app/layout.tsx` | **MODIFIED** — Now includes Navbar, Footer, Toaster |
+| `src/app/page.tsx` | **MODIFIED** — Stripped header/footer, renders content only |
+| `src/app/staking/page.tsx` | **MODIFIED** — Stripped header/footer, simplified |
+| `src/config/contracts.ts` | **MODIFIED** — Added MoltcoachIdentity address + ABI |
+| `src/config/wagmi.ts` | **MODIFIED** — Added Coinbase project ID env var |
+| `src/hooks/useAgentReads.ts` | **NEW** — Agent reads (hasAgent, getAgent, tokenURI) |
+| `src/hooks/useRegisterAgent.ts` | **NEW** — Agent registration write hook |
+| `src/components/agent/AgentPageContent.tsx` | **NEW** — Agent page orchestrator |
+| `src/components/agent/RegisterAgentForm.tsx` | **NEW** — Agent creation form with style picker |
+| `src/components/agent/AgentProfileCard.tsx` | **NEW** — Agent profile display |
+| `src/app/agent/page.tsx` | **NEW** — /agent route |
+| `src/app/agent/loading.tsx` | **NEW** — Agent loading state |
+| `src/app/agent/error.tsx` | **NEW** — Agent error boundary |
+| `src/components/dashboard/DashboardContent.tsx` | **NEW** — Dashboard overview page |
+| `src/app/dashboard/page.tsx` | **NEW** — /dashboard route |
+| `src/app/dashboard/loading.tsx` | **NEW** — Dashboard loading state |
+| `src/app/dashboard/error.tsx` | **NEW** — Dashboard error boundary |
+| `src/lib/supabase.ts` | **NEW** — Supabase client |
+| `src/types/database.ts` | **NEW** — Supabase table types |
+| `src/components/ui/sonner.tsx` | **NEW** — Toast notification component |
+| `src/components/staking/StakeForm.tsx` | **MODIFIED** — Added toast on success |
 
 ---
 
@@ -159,6 +177,7 @@ Nothing — clean handoff.
 - **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
 - **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
+- **NOTHING IS COMMITTED YET** — All Session 7 work is unstaged. Commit + push is the first task for Session 8.
 
 ---
 
@@ -174,7 +193,9 @@ Nothing — clean handoff.
 | next | 16.1.6 | node_modules |
 | wagmi | 3.4.2 | node_modules |
 | viem | 2.45.1 | node_modules |
+| @supabase/supabase-js | 2.95.3 | node_modules (**NEW**) |
+| sonner | latest | node_modules (**NEW**) |
 
 ---
 
-*Last updated: Feb 8, 2026 — Session 6*
+*Last updated: Feb 8, 2026 — Session 7*

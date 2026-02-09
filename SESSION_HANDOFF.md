@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-08
-- **Duration**: Session 4
+- **Duration**: Session 5
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,36 +15,35 @@
 
 ## What Was Done
 
-### Session 4 (This Session)
+### Session 5 (This Session)
 
-1. **TASK-004: $FIT Token Contract** — COMPLETE
-   - `FitToken.sol` — ERC-20 move-to-earn token:
-     - ERC20 + ERC20Burnable + ERC20Permit + Ownable
-     - Name: "MoltCoach FIT", Symbol: "FIT", 18 decimals
-     - `MAX_SUPPLY`: 1B (immutable constant)
-     - `dailyEmissionCap`: 100K/day (adjustable by owner, range 10K-500K)
-     - UTC day tracking with automatic rollover
-     - Owner-only `mint()` enforcing both max supply and daily cap
-     - Custom errors (gas-optimized)
-   - 50 tests, **100% coverage**
+1. **TASK-006: FIT Staking Contract** — COMPLETE
+   - `FitStaking.sol` — Utility-only $FIT staking:
+     - Ownable + ReentrancyGuard + SafeERC20
+     - `stake(amount)` — transfer FIT from user, record StakeInfo
+     - `unstake(amount)` — partial/full unstaking supported
+     - Early unstake (< 30 days): 5% penalty routed to ProtocolFeeCollector via `collectFitFee`
+     - Normal unstake (≥ 30 days): no penalty, full payout
+     - stakedAt set on first stake only (not reset on top-up)
+     - stakedAt reset to 0 on full unstake (restaking starts fresh timer)
+     - Tier enum: Free(0), Basic(100 FIT), Pro(1K FIT), Elite(10K FIT)
+     - `getTier(address)` — computed dynamically from staked balance
+     - `isEarlyUnstake(address)` — check if within 30-day window
+     - `updateThresholds(basic, pro, elite)` — owner-only, strictly increasing
+     - TierChanged event emitted on stake/unstake when tier changes
+     - `totalStaked` protocol-level metric tracked
+     - IFeeCollector interface defined inline for penalty routing
+     - forceApprove + collectFitFee pattern for safe penalty transfer
+   - 62 tests (57 unit + 5 fuzz), **100% coverage** (lines, statements, branches, functions)
 
-2. **TASK-005: ProtocolFeeCollector Contract** — COMPLETE
-   - `fees/ProtocolFeeCollector.sol` — central fee router:
-     - Ownable + ReentrancyGuard, SafeERC20 for all transfers
-     - Collects $FIT and USDC fees (`collectFitFee`, `collectUsdcFee`)
-     - `distribute()` splits to 4 treasury wallets (40/30/20/10 default)
-     - Allocation update enforces sum = 10000 bps
-     - Transaction fee capped at 5% max (`MAX_TRANSACTION_FEE_BPS = 500`)
-     - 8 configurable fee rates (spawn, validation, evolution, mode switch, reset)
-     - Treasury wallet addresses updatable (zero-address guarded)
-     - All state changes emit events
-   - 61 tests (56 unit + 5 fuzz), **100% coverage**
+### Session 4 (Previous)
+
+- TASK-004 ($FIT Token) and TASK-005 (ProtocolFeeCollector) completed
+- See session 4 handoff for details
 
 ### Session 3 (Previous)
 
 - TASK-003 (ERC-8004 Identity) completed
-- Revenue model docs integrated (TASK-005, TASK-006 added)
-- See session 3 handoff for details
 
 ### Session 2 (Previous)
 
@@ -64,16 +63,11 @@ Nothing — clean handoff.
 
 ## What's Next
 
-1. **TASK-006**: FIT Staking (P1) — **ready to start** (all dependencies met)
-   - Spec: `docs/TOKENOMICS.md` (Section 5) + `docs/revenue_integration.md` (Patch 4)
-   - Stake/unstake $FIT with ReentrancyGuard
-   - Tiers: Free(0), Basic(100 FIT), Pro(1K FIT), Elite(10K FIT)
-   - Early unstake (< 30 days) charges 5% penalty → ProtocolFeeCollector
-   - Normal unstake (≥ 30 days) has no penalty
-   - No staking rewards (utility-only — feature access, not yield)
-   - Depends on TASK-004 ($FIT) + TASK-005 (FeeCollector) — both DONE
-2. Supabase project setup
-3. Coinbase Wallet project ID
+1. **Deploy scripts update** — Update `Deploy.s.sol` to include FitStaking in deployment order
+2. **Supabase project setup** — Create project, define tables
+3. **Coinbase Wallet project ID** — Obtain from Coinbase developer portal
+4. **Testnet deployment** — Deploy all 4 contracts to Base Sepolia
+5. **Frontend contract integration** — Wire up wagmi hooks for staking UI
 
 ---
 
@@ -88,6 +82,9 @@ Nothing — clean handoff.
 - **Treasury split**: 40/30/20/10 (dev/buyback/community/insurance)
 - **Contract deploy order**: FIT → FeeCollector → Staking → Identity
 - **$FIT daily cap**: Adjustable between 10K-500K by owner (default 100K)
+- **Staking penalty**: 5% constant (not adjustable), routed to FeeCollector (not burned)
+- **stakedAt timer**: Not reset on top-up, only on full unstake + restake
+- **Penalty routing**: forceApprove + collectFitFee pattern (preserves FeeCollector tracking)
 
 ---
 
@@ -104,20 +101,26 @@ Nothing — clean handoff.
 
 ## State of Tests
 
-- `forge test` (contracts/): **154 tests pass** (61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
-- `forge coverage`: **100% lines** on ProtocolFeeCollector.sol, **100% lines** on FitToken.sol, **98.67% lines** on MoltcoachIdentity.sol
+- `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
+- `forge coverage`:
+  - **100% lines** on FitStaking.sol
+  - **100% lines** on ProtocolFeeCollector.sol
+  - **100% lines** on FitToken.sol
+  - **98.67% lines** on MoltcoachIdentity.sol
 - `pnpm typecheck`: PASSES
 - `pnpm lint`: PASSES
 - `pnpm build`: PASSES
 
 ---
 
-## Key Files (Session 4)
+## Key Files (Session 5)
 
 | File | Purpose |
 |------|---------|
+| `contracts/src/FitStaking.sol` | $FIT staking contract (tiers, early unstake penalty) |
+| `contracts/test/FitStaking.t.sol` | 62 tests: staking, tiers, unstaking, penalties, admin, fuzz |
 | `contracts/src/fees/ProtocolFeeCollector.sol` | Central fee router ($FIT + USDC, treasury distribution) |
-| `contracts/test/ProtocolFeeCollector.t.sol` | 61 tests: collection, distribution, allocation, fee updates, wallet updates, fuzz |
+| `contracts/test/ProtocolFeeCollector.t.sol` | 61 tests: collection, distribution, allocation, fee updates |
 | `contracts/src/FitToken.sol` | $FIT ERC-20 token (burn, permit, daily cap, max supply) |
 | `contracts/test/FitToken.t.sol` | 50 tests: deployment, minting, daily cap, burn, permit, fuzz |
 | `contracts/src/MoltcoachIdentity.sol` | ERC-8004 Identity Registry (ERC-721 + metadata + EIP-712 wallet) |
@@ -151,4 +154,4 @@ Nothing — clean handoff.
 
 ---
 
-*Last updated: Feb 8, 2026 — Session 4*
+*Last updated: Feb 8, 2026 — Session 5*

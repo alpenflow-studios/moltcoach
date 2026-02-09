@@ -15,19 +15,7 @@
 
 ### Not Started
 
-#### TASK-006: FIT Staking Contract
-- **Priority**: P1
-- **Scope**: `contracts/src/FitStaking.sol`, `contracts/test/FitStaking.t.sol`
-- **Acceptance Criteria**:
-  - [ ] `forge build` passes with zero warnings
-  - [ ] `forge test` passes all tests
-  - [ ] Stake/unstake $FIT with ReentrancyGuard
-  - [ ] Staking tiers: Free(0), Basic(100), Pro(1K), Elite(10K)
-  - [ ] Early unstake (< 30 days) charges 5% penalty to ProtocolFeeCollector
-  - [ ] Normal unstake (≥ 30 days) has no penalty
-  - [ ] `forge coverage` shows >90% line coverage
-- **Dependencies**: TASK-004, TASK-005
-- **Notes**: No staking rewards (utility-only). See `docs/TOKENOMICS.md` for tier thresholds.
+> No pending contract tasks in this sprint. Next up: Supabase setup, deployment scripts.
 
 ---
 
@@ -38,6 +26,19 @@
 ---
 
 ### Done
+
+#### TASK-006: FIT Staking Contract
+- **Priority**: P1
+- **Scope**: `contracts/src/FitStaking.sol`, `contracts/test/FitStaking.t.sol`
+- **Completed**: Session 5 (Feb 8, 2026)
+- **Acceptance Criteria**:
+  - [x] `forge build` passes with zero warnings
+  - [x] `forge test` passes all 62 tests (including 5 fuzz tests)
+  - [x] Stake/unstake $FIT with ReentrancyGuard
+  - [x] Staking tiers: Free(0), Basic(100), Pro(1K), Elite(10K)
+  - [x] Early unstake (< 30 days) charges 5% penalty to ProtocolFeeCollector
+  - [x] Normal unstake (≥ 30 days) has no penalty
+  - [x] `forge coverage` shows 100% line coverage on contract
 
 #### TASK-005: ProtocolFeeCollector Contract
 - **Priority**: P0

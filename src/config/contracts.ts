@@ -1,6 +1,7 @@
 // Contract addresses from environment variables (Base Sepolia)
 export const FIT_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_FIT_TOKEN_ADDRESS ?? "") as `0x${string}`;
 export const FIT_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_FIT_STAKING_ADDRESS ?? "") as `0x${string}`;
+export const MOLTCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_MOLTCOACH_IDENTITY_ADDRESS ?? "") as `0x${string}`;
 
 // Tier metadata
 export const TIER_NAMES = ["Free", "Basic", "Pro", "Elite"] as const;
@@ -146,5 +147,77 @@ export const fitStakingAbi = [
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
+  },
+] as const;
+
+// Minimal MoltcoachIdentity ABI — only functions the frontend calls
+export const moltcoachIdentityAbi = [
+  {
+    type: "function",
+    name: "register",
+    inputs: [{ name: "agentURI", type: "string" }],
+    outputs: [{ name: "agentId", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "hasAgent",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getAgent",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "tokenURI",
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getMetadata",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "metadataKey", type: "string" },
+    ],
+    outputs: [{ name: "", type: "bytes" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setMetadata",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "metadataKey", type: "string" },
+      { name: "metadataValue", type: "bytes" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setAgentURI",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "newURI", type: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "event",
+    name: "Registered",
+    inputs: [
+      { name: "agentId", type: "uint256", indexed: true },
+      { name: "agentURI", type: "string", indexed: false },
+      { name: "owner", type: "address", indexed: true },
+    ],
   },
 ] as const;

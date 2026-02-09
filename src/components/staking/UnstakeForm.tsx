@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { formatFit } from "@/lib/format";
 import { useUnstakeAction } from "@/hooks/useUnstakeAction";
 import type { StakeInfo } from "@/types/staking";
@@ -35,16 +36,21 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
 
   const isProcessing = state === "unstaking" || state === "waiting";
 
-  // Reset form on success
+  // Toast + reset on success
   useEffect(() => {
     if (state === "success") {
+      toast.success(`Unstaked ${amountStr} FIT`, {
+        description: isEarlyUnstake
+          ? `5% penalty applied. You received ${formatFit(payout)} FIT.`
+          : "Your tokens have been unstaked successfully.",
+      });
       const timer = setTimeout(() => {
         setAmountStr("");
         reset();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [state, reset]);
+  }, [state, reset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSubmit() {
     if (!canUnstake) return;

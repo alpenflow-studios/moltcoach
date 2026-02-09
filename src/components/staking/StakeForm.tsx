@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { formatFit } from "@/lib/format";
 import { useStakeAction } from "@/hooks/useStakeAction";
 
@@ -30,16 +31,19 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
   const needsApproval = parsedAmount > 0n && allowance < parsedAmount;
   const canStake = parsedAmount > 0n && parsedAmount <= walletBalance && !parseError;
 
-  // Reset form on success
+  // Toast + reset on success
   useEffect(() => {
     if (state === "success") {
+      toast.success(`Staked ${amountStr} FIT`, {
+        description: "Your tokens have been staked successfully.",
+      });
       const timer = setTimeout(() => {
         setAmountStr("");
         reset();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [state, reset]);
+  }, [state, reset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSubmit() {
     if (!canStake) return;

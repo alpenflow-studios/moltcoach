@@ -30,13 +30,13 @@
 
 | Contract | Address | Network |
 |----------|---------|---------|
-| MoltcoachIdentity (ERC-8004) | TBD | Base Sepolia (84532) |
-| $FIT Token | TBD | Base Sepolia (84532) |
-| ProtocolFeeCollector | TBD | Base Sepolia (84532) |
-| FIT Staking | TBD | Base Sepolia (84532) |
+| MoltcoachIdentity (ERC-8004) | `0x949488bD2F10884a0E2eB89e4947837b48814c9a` | Base Sepolia (84532) |
+| $FIT Token | `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138` | Base Sepolia (84532) |
+| ProtocolFeeCollector | `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2` | Base Sepolia (84532) |
+| FIT Staking | `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737` | Base Sepolia (84532) |
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | Base Sepolia (84532) |
 
-**Admin Wallet**: TBD
+**Admin Wallet**: Deployer (MetaMask dev wallet)
 
 ---
 

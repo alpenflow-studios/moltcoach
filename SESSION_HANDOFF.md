@@ -59,6 +59,14 @@
 
 Nothing — clean handoff.
 
+### Testnet Deployment (Session 6)
+
+All 4 contracts deployed and verified on Base Sepolia:
+- FitToken: `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138`
+- ProtocolFeeCollector: `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2`
+- FitStaking: `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737`
+- MoltcoachIdentity: `0x949488bD2F10884a0E2eB89e4947837b48814c9a`
+
 ---
 
 ## What's Next

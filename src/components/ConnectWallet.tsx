@@ -61,20 +61,20 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
     );
   }
 
-  // State: disconnected
+  // State: disconnected — show a button per connector
   return (
-    <Button
-      variant="outline"
-      size={size}
-      onClick={() => {
-        const connector = connectors[0];
-        if (connector) {
-          connect({ connector });
-        }
-      }}
-    >
-      <Wallet className="size-4" />
-      Connect Wallet
-    </Button>
+    <div className="flex items-center gap-2">
+      {connectors.map((connector) => (
+        <Button
+          key={connector.uid}
+          variant="outline"
+          size={size}
+          onClick={() => connect({ connector })}
+        >
+          <Wallet className="size-4" />
+          {connector.name}
+        </Button>
+      ))}
+    </div>
   );
 }

@@ -104,13 +104,14 @@ export default function LandingPage() {
             I AM NOT
           </Button>
         </div>
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row">
-          <ConnectWallet size="lg" />
-          <Button variant="outline" size="lg" className="text-base" asChild>
-            <Link href="/staking">Start Staking</Link>
-          </Button>
-        </div>
       </section>
+
+      <div className="flex items-center justify-center gap-4 pb-16">
+        <ConnectWallet size="lg" />
+        <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+          <Link href="/staking">Start Staking</Link>
+        </Button>
+      </div>
 
       {/* Features */}
       <section className="border-t border-border/50 bg-muted/30">

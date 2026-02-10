@@ -15,7 +15,7 @@
 
 ### Not Started
 
-#### TASK-009: Supabase Integration
+#### TASK-009: Supabase Integration (Blocked)
 - **Priority**: P1
 - **Scope**: `src/lib/supabase.ts`, new hooks, API routes
 - **Depends on**: Michael completing Supabase project setup with Claude.ai
@@ -25,16 +25,6 @@
   - [ ] Agent registration synced to Supabase
   - [ ] Workout data stored in Supabase
   - [ ] RLS policies working (users can only read/write own data)
-
-#### TASK-010: Agent Coaching Chat
-- **Priority**: P1
-- **Scope**: New chat interface, Claude API integration
-- **Acceptance Criteria**:
-  - [ ] Chat interface at `/chat` or within `/agent`
-  - [ ] Messages sent to Claude API with coaching personality
-  - [ ] Agent coaching style (selected at registration) reflected in responses
-  - [ ] Conversation history stored in Supabase
-  - [ ] `pnpm typecheck` passes
 
 #### TASK-011: Wire Landing Page Placeholders
 - **Priority**: P1
@@ -49,7 +39,23 @@
 
 ### In Progress
 
-> Nothing currently in progress.
+#### TASK-010: Agent Coaching Chat
+- **Priority**: P1
+- **Scope**: New chat interface, Claude API integration
+- **Started**: Session 10 (Feb 10, 2026)
+- **Status**: ~70% coded. Backend complete. Need AgentChat.tsx container + AgentPageContent integration.
+- **Acceptance Criteria**:
+  - [x] Chat interface within `/agent` page (below AgentProfileCard)
+  - [x] Streaming API route at `/api/chat` using Anthropic SDK
+  - [x] System prompt built from FITNESS_COACHING_SKILL.md per coaching style
+  - [x] useChat hook with streaming fetch via ReadableStream
+  - [x] ChatMessage + ChatInput components
+  - [ ] AgentChat container component (auto-scroll, empty state greeting)
+  - [ ] Integration into AgentPageContent (parse agentURI, render chat)
+  - [ ] Conversation history stored in Supabase (deferred to TASK-009)
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm lint` passes
+  - [ ] `pnpm build` passes
 
 ---
 

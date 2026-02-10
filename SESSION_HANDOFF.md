@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-10
-- **Duration**: Session 10
+- **Duration**: Session 10 (hit 75% context limit)
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -17,18 +17,27 @@
 
 ### Session 10 (This Session)
 
-1. **TASK-008 completed** — Finished all remaining manual testing items:
+1. **TASK-008 completed** — Finished all remaining manual testing:
    - Fixed stale Next.js process + lock file after project move from `~/moltcoach` → `~/Projects/moltcoach`
    - Verified all 5 routes render (/, /staking, /agent, /dashboard, /pricing)
-   - Confirmed no hardcoded paths in codebase (only stale `.claude/settings.local.json` entries)
+   - Confirmed no hardcoded paths in codebase after project move
    - Staked 10,000 FIT successfully (auto-chain approve→stake flow works)
    - Unstaked 500 FIT — 5% early penalty (25 FIT) correctly routed to FeeCollector, 475 FIT returned to wallet
    - Tier correctly dropped from Elite → Pro after unstake
-   - Dashboard displays correct stats (staking, tier, agent)
+   - Dashboard displays correct stats
 
-2. **On-chain verification** — All contract interactions confirmed working end-to-end via frontend + `cast` checks
+2. **TASK-010 started (~70% coded)** — Agent coaching chat implementation:
+   - Installed `@anthropic-ai/sdk` (^0.74.0)
+   - Created `src/types/chat.ts` — ChatMessage type
+   - Created `src/lib/agentURI.ts` — Shared parseAgentURI utility (extracted from AgentProfileCard)
+   - Created `src/lib/systemPrompt.ts` — Server-only system prompt builder with 4 coaching style mappings
+   - Created `src/app/api/chat/route.ts` — Streaming Claude API route (first API route in the project!)
+   - Created `src/hooks/useChat.ts` — Client-side chat state + streaming fetch with ReadableStream
+   - Created `src/components/agent/ChatMessage.tsx` — Message bubble component
+   - Created `src/components/agent/ChatInput.tsx` — Text input with Enter-to-send, auto-resize
+   - Modified `src/components/agent/AgentProfileCard.tsx` — Uses shared parseAgentURI
 
-3. **No code changes this session** — purely testing + doc updates
+3. **Session stopped at 75% context** — Two pieces remain to complete TASK-010 (see "What's In Progress")
 
 ### Session 9 (Previous)
 
@@ -42,18 +51,63 @@
 
 ## What's In Progress
 
-> Nothing currently in progress. TASK-008 completed this session.
+**TASK-010 — Agent Coaching Chat** (~70% coded, ~30% remaining):
+
+### DONE:
+- [x] Install `@anthropic-ai/sdk`
+- [x] `src/types/chat.ts` — ChatMessage type
+- [x] `src/lib/agentURI.ts` — Shared parseAgentURI (extracted from AgentProfileCard)
+- [x] `src/lib/systemPrompt.ts` — System prompt builder with coaching style mapping
+- [x] `src/app/api/chat/route.ts` — Streaming API route (POST, uses Anthropic SDK)
+- [x] `src/hooks/useChat.ts` — Client-side chat state + streaming
+- [x] `src/components/agent/ChatMessage.tsx` — Message bubble (user right-aligned, assistant left with Bot icon)
+- [x] `src/components/agent/ChatInput.tsx` — Textarea with Enter-to-send, Shift+Enter newline, auto-resize
+- [x] `src/components/agent/AgentProfileCard.tsx` — Refactored to use shared parseAgentURI
+
+### REMAINING (must be done in order):
+- [ ] **`src/components/agent/AgentChat.tsx`** — Main chat container component. Needs:
+  - Props: `agentName: string`, `coachingStyle: string`
+  - Uses `useChat` hook
+  - Card wrapper → scrollable messages list → ChatInput at bottom
+  - Auto-scroll to bottom on new messages via `useRef` + `scrollIntoView`
+  - Empty state: greeting message from agent based on coaching style
+  - Error display via sonner toast
+- [ ] **`src/components/agent/AgentPageContent.tsx`** — Modify to add AgentChat below AgentProfileCard when agent exists. Needs:
+  - Import `parseAgentURI` from `@/lib/agentURI`
+  - Parse the agentURI to extract `name` and `style`
+  - Render `<AgentChat agentName={name} coachingStyle={style} />` below the profile card
+- [ ] **Verification** — `pnpm typecheck`, `pnpm lint`, `pnpm build` must all pass
+- [ ] **Manual test** — Chat with Agent #1 ("daddy", style: "motivator") and verify streaming works
+
+### Architecture Overview:
+```
+User types message → ChatInput.tsx → AgentChat.tsx → useChat hook
+  → fetch POST /api/chat (with messages + agentName + coachingStyle)
+  → route.ts builds system prompt via buildSystemPrompt()
+  → Anthropic SDK streams response (claude-sonnet-4-5)
+  → ReadableStream → useChat reads chunks → updates messages state
+  → ChatMessage.tsx renders streamed text in real-time
+```
+
+### Style → Coaching Mode Mapping (in systemPrompt.ts):
+| Agent Style | Coaching Mode | Personality |
+|-------------|--------------|-------------|
+| motivator | Coach | High energy, positive reinforcement, accountability |
+| drill-sergeant | Drill Sergeant | Tough love, no excuses, military intensity |
+| scientist | Mentor (data-driven) | Analytical, systems-thinking, evidence-based |
+| friend | Friend | Warm, supportive, conversational |
 
 ---
 
 ## What's Next
 
-1. **TASK-009: Supabase integration** — Depends on Michael completing Supabase project setup
-2. **TASK-010: Agent coaching chat** — Claude API integration, chat UI
-3. **TASK-011: Wire landing page placeholders** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up
-4. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing, not just FIT stake amounts
-5. **Privy integration** — For email/social onboarding (placeholder already in landing page)
-6. **Wearable integration** — Strava OAuth flow
+1. **Finish TASK-010** — Build AgentChat.tsx + modify AgentPageContent.tsx + verify (see REMAINING above)
+2. **TASK-011: Wire landing page placeholders** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up
+3. **TASK-009: Supabase integration** — Depends on Michael completing Supabase project setup
+4. **Chat persistence** — Store conversation history in Supabase (after TASK-009)
+5. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing
+6. **Privy integration** — For email/social onboarding
+7. **Wearable integration** — Strava OAuth flow
 
 ---
 
@@ -85,6 +139,11 @@
 - **ConnectWallet**: Single button with shadcn DropdownMenu, connectors deduplicated by name
 - **Pricing tiers**: Free/Basic(100)/Pro(1000)/Elite(10000) — may change to ETH/USDC pricing later
 - **Landing page CTAs**: "I AM HUMAN"/"I AM NOT" pills, "Purchase $FIT" button, email sign-up link (all placeholders)
+- **Chat model**: claude-sonnet-4-5-20250929 for coaching responses (fast + capable)
+- **Chat architecture**: No external chat library — native fetch + ReadableStream for streaming
+- **Chat persistence**: React state only for now (no Supabase yet — TASK-009)
+- **Chat location**: Below AgentProfileCard on `/agent` page (not separate route)
+- **System prompt**: Built from FITNESS_COACHING_SKILL.md content, customized per coaching style
 
 ---
 
@@ -108,16 +167,26 @@
 
 - `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
 - `forge build`: Compiles (pre-existing notes/warnings only, no errors)
-- `pnpm typecheck`: PASSES
-- `pnpm lint`: PASSES
-- `pnpm build`: PASSES (5 routes: /, /staking, /agent, /pricing, /dashboard)
+- `pnpm typecheck`: NOT YET VERIFIED (TASK-010 in progress)
+- `pnpm lint`: NOT YET VERIFIED (TASK-010 in progress)
+- `pnpm build`: NOT YET VERIFIED (TASK-010 in progress)
 
 ---
 
-## Key Files (Session 10 — No Code Changes)
+## Key Files (Session 10 — Created/Modified)
 
-> No source code modified this session. Session 10 was testing + documentation only.
-> See Session 9 key files in git log for last code changes.
+| File | Action | Status |
+|------|--------|--------|
+| `src/types/chat.ts` | **NEW** | Complete — ChatMessage type |
+| `src/lib/agentURI.ts` | **NEW** | Complete — Shared parseAgentURI |
+| `src/lib/systemPrompt.ts` | **NEW** | Complete — System prompt builder with 4 coaching styles |
+| `src/app/api/chat/route.ts` | **NEW** | Complete — Streaming POST route using Anthropic SDK |
+| `src/hooks/useChat.ts` | **NEW** | Complete — Chat state + streaming fetch |
+| `src/components/agent/ChatMessage.tsx` | **NEW** | Complete — Message bubble component |
+| `src/components/agent/ChatInput.tsx` | **NEW** | Complete — Text input with auto-resize |
+| `src/components/agent/AgentProfileCard.tsx` | **MODIFIED** | Complete — Uses shared parseAgentURI |
+| `src/components/agent/AgentChat.tsx` | **NOT CREATED** | Needs building — main chat container |
+| `src/components/agent/AgentPageContent.tsx` | **NOT MODIFIED** | Needs chat integration |
 
 ---
 
@@ -144,8 +213,9 @@
 - **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
 - **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
-- **Project path**: Moved from `~/moltcoach` → `~/Projects/moltcoach` (no code changes needed, all paths relative)
-- **All committed + pushed** — working tree clean (doc updates pending commit)
+- **Project path**: `~/Projects/moltcoach` (moved from `~/moltcoach` in Session 10)
+- **ANTHROPIC_API_KEY**: Must be set in `.env.local` for chat to work
+- **Uncommitted work**: TASK-010 files staged but not committed (commit before continuing)
 
 ---
 
@@ -162,6 +232,7 @@
 | wagmi | 3.4.2 | node_modules |
 | viem | 2.45.1 | node_modules |
 | @supabase/supabase-js | 2.95.3 | node_modules |
+| @anthropic-ai/sdk | ^0.74.0 | node_modules (NEW — Session 10) |
 | sonner | latest | node_modules |
 | @radix-ui/react-dropdown-menu | latest | node_modules (via shadcn) |
 

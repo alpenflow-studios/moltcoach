@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Bot, ExternalLink, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { parseAgentURI } from "@/lib/agentURI";
 import { useState } from "react";
 
 type AgentProfileCardProps = {
@@ -15,18 +16,6 @@ type AgentProfileCardProps = {
 
 function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
-function parseAgentURI(uri: string): Record<string, string> | null {
-  try {
-    const prefix = "data:application/json,";
-    if (uri.startsWith(prefix)) {
-      return JSON.parse(decodeURIComponent(uri.slice(prefix.length))) as Record<string, string>;
-    }
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 export function AgentProfileCard({ agentId, agentURI, ownerAddress }: AgentProfileCardProps) {

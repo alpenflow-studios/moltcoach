@@ -43,7 +43,41 @@ export default function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="mx-auto flex max-w-4xl flex-col items-center px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
+      <section className="relative mx-auto flex max-w-4xl flex-col items-center overflow-hidden px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
+        {/* Orb — layered breathing glow */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[500px] w-[500px] sm:h-[600px] sm:w-[600px]"
+        >
+          {/* Core green glow */}
+          <div
+            className="absolute inset-0 rounded-full blur-[100px]"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.768 0.233 130.85 / 0.6) 0%, oklch(0.768 0.233 130.85 / 0.15) 40%, transparent 70%)",
+              animation: "orb-breathe 6s ease-in-out infinite",
+            }}
+          />
+          {/* White halo — offset cycle */}
+          <div
+            className="absolute inset-0 rounded-full blur-[120px]"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(1 0 0 / 0.35) 0%, oklch(1 0 0 / 0.08) 35%, transparent 65%)",
+              animation: "orb-drift 8s ease-in-out infinite",
+            }}
+          />
+          {/* Outer green ring — slow rotation */}
+          <div
+            className="absolute -inset-12 rounded-full blur-[80px]"
+            style={{
+              background:
+                "conic-gradient(from 0deg, oklch(0.768 0.233 130.85 / 0.12), transparent 30%, oklch(0.768 0.233 130.85 / 0.08), transparent 60%, oklch(1 0 0 / 0.06), transparent 90%)",
+              animation: "orb-rotate 20s linear infinite",
+            }}
+          />
+        </div>
+
         <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#8A63D2]/20 bg-[#8A63D2]/10 px-4 py-1.5 text-sm text-[#8A63D2]">
           <FarcasterIcon className="size-3.5" />
           Forged on Farcaster

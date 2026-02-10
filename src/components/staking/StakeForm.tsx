@@ -18,7 +18,7 @@ type StakeFormProps = {
 
 export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProps) {
   const [amountStr, setAmountStr] = useState("");
-  const { state, error, startApprove, startStake, reset } = useStakeAction({ onSuccess });
+  const { state, error, startApproveAndStake, startStake, reset } = useStakeAction({ onSuccess });
 
   let parsedAmount = 0n;
   let parseError = false;
@@ -48,17 +48,13 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
   function handleSubmit() {
     if (!canStake) return;
     if (needsApproval) {
-      startApprove(parsedAmount);
+      startApproveAndStake(parsedAmount);
     } else {
       startStake(parsedAmount);
     }
   }
 
-  function handleContinueStake() {
-    if (parsedAmount > 0n) startStake(parsedAmount);
-  }
-
-  const isProcessing = state !== "idle" && state !== "approved" && state !== "success" && state !== "error";
+  const isProcessing = state !== "idle" && state !== "success" && state !== "error";
 
   function getButtonLabel(): string {
     switch (state) {
@@ -66,10 +62,8 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
         return "Approve in wallet...";
       case "waitingApproval":
         return "Confirming approval...";
-      case "approved":
-        return `Stake ${amountStr} FIT`;
       case "staking":
-        return "Confirm in wallet...";
+        return "Confirm stake in wallet...";
       case "waitingStake":
         return "Confirming stake...";
       case "success":
@@ -116,29 +110,16 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
         </p>
       </div>
 
-      {state === "approved" ? (
-        <div className="space-y-2">
-          <p className="text-xs text-primary">Approved! Now stake your tokens.</p>
-          <Button
-            className="w-full"
-            onClick={handleContinueStake}
-            disabled={!canStake}
-          >
-            Stake {amountStr} FIT
-          </Button>
-        </div>
-      ) : (
-        <Button
-          className="w-full"
-          onClick={state === "error" ? reset : handleSubmit}
-          disabled={
-            (state === "idle" && !canStake) || isProcessing || state === "success"
-          }
-        >
-          {isProcessing && <Loader2 className="mr-2 size-4 animate-spin" />}
-          {getButtonLabel()}
-        </Button>
-      )}
+      <Button
+        className="w-full"
+        onClick={state === "error" ? reset : handleSubmit}
+        disabled={
+          (state === "idle" && !canStake) || isProcessing || state === "success"
+        }
+      >
+        {isProcessing && <Loader2 className="mr-2 size-4 animate-spin" />}
+        {getButtonLabel()}
+      </Button>
 
       {error && (
         <p className="text-xs text-destructive">{error}</p>

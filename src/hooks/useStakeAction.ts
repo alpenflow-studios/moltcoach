@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import {
   FIT_TOKEN_ADDRESS,
@@ -13,7 +13,6 @@ type StakeState =
   | "idle"
   | "approving"
   | "waitingApproval"
-  | "approved"
   | "staking"
   | "waitingStake"
   | "success"
@@ -22,32 +21,46 @@ type StakeState =
 export function useStakeAction(options: { onSuccess?: () => void }) {
   const [state, setState] = useState<StakeState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const pendingAmount = useRef<bigint>(0n);
 
   const approve = useWriteContract();
   const stake = useWriteContract();
 
   const approveReceipt = useWaitForTransactionReceipt({
     hash: approve.data,
-    query: {
-      enabled: !!approve.data,
-    },
+    query: { enabled: !!approve.data },
   });
 
   const stakeReceipt = useWaitForTransactionReceipt({
     hash: stake.data,
-    query: {
-      enabled: !!stake.data,
-    },
+    query: { enabled: !!stake.data },
   });
 
-  // Handle approval confirmation — show "approved" state so user can click Stake
-  if (state === "waitingApproval" && approveReceipt.isSuccess) {
-    setState("approved");
-  }
-  if (state === "waitingApproval" && approveReceipt.isError) {
-    setState("error");
-    setError("Approval transaction failed");
-  }
+  // Auto-stake after approval confirms
+  useEffect(() => {
+    if (state === "waitingApproval" && approveReceipt.isSuccess) {
+      setState("staking");
+      stake.writeContract(
+        {
+          address: FIT_STAKING_ADDRESS,
+          abi: fitStakingAbi,
+          functionName: "stake",
+          args: [pendingAmount.current],
+        },
+        {
+          onSuccess: () => setState("waitingStake"),
+          onError: (err) => {
+            setState("error");
+            setError(err.message.split("\n")[0] ?? "Stake rejected");
+          },
+        },
+      );
+    }
+    if (state === "waitingApproval" && approveReceipt.isError) {
+      setState("error");
+      setError("Approval transaction failed");
+    }
+  }, [state, approveReceipt.isSuccess, approveReceipt.isError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle stake confirmation
   if (state === "waitingStake" && stakeReceipt.isSuccess) {
@@ -59,8 +72,9 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
     setError("Stake transaction failed");
   }
 
-  const startApprove = useCallback(
+  const startApproveAndStake = useCallback(
     (amount: bigint) => {
+      pendingAmount.current = amount;
       setState("approving");
       setError(null);
       approve.writeContract(
@@ -84,6 +98,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
 
   const startStake = useCallback(
     (amount: bigint) => {
+      pendingAmount.current = amount;
       setState("staking");
       setError(null);
       stake.writeContract(
@@ -108,6 +123,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
   const reset = useCallback(() => {
     setState("idle");
     setError(null);
+    pendingAmount.current = 0n;
     approve.reset();
     stake.reset();
   }, [approve, stake]);
@@ -115,7 +131,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
   return {
     state,
     error,
-    startApprove,
+    startApproveAndStake,
     startStake,
     reset,
   };

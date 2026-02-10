@@ -1,7 +1,7 @@
 # ARCHITECTURE.md — System Design
 
 > **Version**: 1.0.0
-> **Project**: moltcoach
+> **Project**: ClawCoach
 
 ---
 
@@ -11,8 +11,8 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │                            CLIENTS                                  │
 │  ┌──────────┐   ┌──────────┐   ┌────────────┐   ┌──────────────┐  │
-│  │  Web App  │   │  XMTP    │   │  Telegram   │   │  moltcoach   │  │
-│  │ (Next.js) │   │  Client  │   │    Bot      │   │   .xyz Hub   │  │
+│  │  Web App  │   │  XMTP    │   │  Telegram   │   │  ClawCoach   │  │
+│  │ (Next.js) │   │  Client  │   │    Bot      │   │   .ai Hub    │  │
 │  └─────┬─────┘   └─────┬────┘   └──────┬──────┘   └──────┬───────┘  │
 └────────┼───────────────┼───────────────┼────────────────┼───────────┘
          │               │               │                │
@@ -58,7 +58,7 @@ POST /api/auth/verify
 Authenticated session established
     │
     ▼
-Check: Does wallet have a moltcoach agent?
+Check: Does wallet have a ClawCoach agent?
     │
     ├── YES → Load agent, go to dashboard
     └── NO  → Redirect to agent creation + onboarding
@@ -78,6 +78,7 @@ POST /api/agent/create
     │
     ▼
 Smart Contract: MoltcoachIdentity.createAgent(agentURI)
+    │  - NOTE: MoltcoachIdentity will be renamed to ClawcoachIdentity for mainnet
     │  - Mints ERC-721 to user wallet
     │  - Registers in ERC-8004 Identity Registry
     │

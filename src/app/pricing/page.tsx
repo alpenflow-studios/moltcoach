@@ -6,7 +6,7 @@ import { Check, Dumbbell, BarChart3, Crown, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Pricing | moltcoach",
+  title: "Pricing | ClawCoach",
   description:
     "Stake $FIT to unlock premium coaching tiers. No subscriptions — stake once, keep access as long as you hold.",
 };

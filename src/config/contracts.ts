@@ -1,7 +1,7 @@
 // Contract addresses from environment variables (Base Sepolia)
 export const FIT_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_FIT_TOKEN_ADDRESS ?? "") as `0x${string}`;
 export const FIT_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_FIT_STAKING_ADDRESS ?? "") as `0x${string}`;
-export const MOLTCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_MOLTCOACH_IDENTITY_ADDRESS ?? "") as `0x${string}`;
+export const CLAWCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS ?? "") as `0x${string}`;
 
 // Tier metadata
 export const TIER_NAMES = ["Free", "Basic", "Pro", "Elite"] as const;
@@ -150,8 +150,8 @@ export const fitStakingAbi = [
   },
 ] as const;
 
-// Minimal MoltcoachIdentity ABI — only functions the frontend calls
-export const moltcoachIdentityAbi = [
+// Minimal ClawcoachIdentity ABI — only functions the frontend calls
+export const clawcoachIdentityAbi = [
   {
     type: "function",
     name: "register",

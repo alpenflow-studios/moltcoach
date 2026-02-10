@@ -1,16 +1,16 @@
-# CLAUDE.md — moltcoach Project Context
+# CLAUDE.md — ClawCoach Project Context
 
-> **Project**: moltcoach
+> **Project**: ClawCoach
 > **Extends**: `~/.claude/CLAUDE.md` (global rules apply)
 
 ---
 
 ## Project Identity
 
-- **Name**: moltcoach
+- **Name**: ClawCoach
 - **One-liner**: AI coaching agent with on-chain identity and Coinbase Smart Wallet
 - **Repo**: github.com/alpenflow-studios/moltcoach
-- **Live**: https://moltcoach.xyz
+- **Live**: https://clawcoach.ai
 
 ---
 
@@ -38,6 +38,8 @@
 
 **Admin Wallet**: Deployer (MetaMask dev wallet)
 
+> **Note**: Contract names (MoltcoachIdentity, etc.) will be renamed to ClawcoachIdentity at mainnet deployment. See `docs/CONTRACTS.md` for the mainnet prep checklist.
+
 ---
 
 ## Contract Deployment Order
@@ -60,7 +62,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 # Chain / Contracts
 NEXT_PUBLIC_CHAIN_ID=84532
-NEXT_PUBLIC_MOLTCOACH_IDENTITY_ADDRESS=
+NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS=
 NEXT_PUBLIC_FIT_TOKEN_ADDRESS=
 NEXT_PUBLIC_FIT_STAKING_ADDRESS=
 
@@ -73,7 +75,7 @@ ANTHROPIC_API_KEY=
 
 ---
 
-## Tech Stack (moltcoach-Specific)
+## Tech Stack (ClawCoach-Specific)
 
 > Overrides/extends global defaults where noted.
 
@@ -93,8 +95,8 @@ ANTHROPIC_API_KEY=
 
 ## Domain Concepts
 
-### What is moltcoach?
-A **moltcoach** is an AI coaching agent that lives on-chain via ERC-8004. Each user gets their own moltcoach agent when they verify and connect a Coinbase Smart Wallet. The agent has a persistent identity, personality, and reputation.
+### What is ClawCoach?
+A **ClawCoach** is an AI coaching agent that lives on-chain via ERC-8004. Each user gets their own ClawCoach agent when they verify and connect a Coinbase Smart Wallet. The agent has a persistent identity, personality, and reputation.
 
 ### Agent Lifecycle
 ```
@@ -106,13 +108,13 @@ USER CONNECTS WALLET → VERIFICATION → AGENT CREATION (ERC-8004)
 ```
 
 ### ERC-8004 Integration
-moltcoach uses all three ERC-8004 registries:
-1. **Identity Registry** — Each moltcoach agent gets an on-chain identity (ERC-721 based) with an `agentURI` resolving to their registration file (personality, capabilities, specialization)
+ClawCoach uses all three ERC-8004 registries:
+1. **Identity Registry** — Each ClawCoach agent gets an on-chain identity (ERC-721 based) with an `agentURI` resolving to their registration file (personality, capabilities, specialization)
 2. **Reputation Registry** — Coaching effectiveness tracked on-chain (user outcomes, consistency scores, engagement metrics)
 3. **Validation Registry** — Workout verification via wearable data, proof-of-activity checks
 
 ### Onboarding — Personality, Heartbeat, Persona
-When a new moltcoach is created, it goes through an onboarding flow:
+When a new ClawCoach is created, it goes through an onboarding flow:
 - **Personality**: Communication style, tone, motivational approach
 - **Heartbeat**: Activity cadence, check-in frequency, response patterns
 - **Persona**: Coaching specialization (FHW initially, expandable to any category)
@@ -129,10 +131,10 @@ When a new moltcoach is created, it goes through an onboarding flow:
 - **Platform of choice** — Extensible to other channels
 
 ### Expansion Model
-moltcoach starts with fitness, health, and wellness (FHW) but is architected to expand into any coaching category: career, finance, education, mental health, etc. Each category is a persona layer on top of the core agent framework.
+ClawCoach starts with fitness, health, and wellness (FHW) but is architected to expand into any coaching category: career, finance, education, mental health, etc. Each category is a persona layer on top of the core agent framework.
 
 ### Community Hub
-moltcoach.xyz is where moltcoach agents gather to interact, discuss, and implement agent ideas — a community of AI agents and their humans.
+clawcoach.ai is where ClawCoach agents gather to interact, discuss, and implement agent ideas — a community of AI agents and their humans.
 
 ---
 
@@ -142,7 +144,7 @@ moltcoach.xyz is where moltcoach agents gather to interact, discuss, and impleme
 
 Core tables (planned):
 - `users` — User profiles, wallet addresses
-- `agents` — Moltcoach agent instances (linked to ERC-8004 identity)
+- `agents` — ClawCoach agent instances (linked to ERC-8004 identity)
 - `agent_personas` — Personality, heartbeat, persona config per agent
 - `workouts` — Tracked workout data
 - `wearable_connections` — Strava, Apple Health, Garmin links
@@ -191,4 +193,4 @@ Core tables (planned):
 
 ---
 
-*Last updated: Feb 8, 2026*
+*Last updated: Feb 10, 2026*

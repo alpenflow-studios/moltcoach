@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 
 export const metadata: Metadata = {
-  title: "Dashboard | moltcoach",
-  description: "Your moltcoach dashboard — agent, staking, and activity at a glance.",
+  title: "Dashboard | ClawCoach",
+  description: "Your ClawCoach dashboard — agent, staking, and activity at a glance.",
 };
 
 export default function DashboardPage() {

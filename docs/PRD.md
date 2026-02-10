@@ -1,7 +1,7 @@
 # PRD.md — Product Requirements Document
 
 > **Version**: 1.0.0
-> **Project**: moltcoach
+> **Project**: ClawCoach
 > **Last Updated**: Feb 7, 2026
 
 ---
@@ -9,7 +9,7 @@
 ## 1. Overview
 
 ### What Is This?
-moltcoach is an AI coaching agent that lives on-chain via ERC-8004. Each user gets a personalized coaching agent when they connect a Coinbase Smart Wallet. The agent provides fitness, health, and wellness coaching with workout tracking, wearable integration, and move-to-earn $FIT token rewards. Built to expand into any coaching category.
+ClawCoach is an AI coaching agent that lives on-chain via ERC-8004. Each user gets a personalized coaching agent when they connect a Coinbase Smart Wallet. The agent provides fitness, health, and wellness coaching with workout tracking, wearable integration, and move-to-earn $FIT token rewards. Built to expand into any coaching category.
 
 ### One-Liner
 AI coaching agent with on-chain identity and $FIT rewards.
@@ -58,7 +58,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 ## 4. Features
 
 ### 4.1 Wallet Connection & Auth
-**User Story**: As a user, I want to connect my Coinbase Smart Wallet to start using moltcoach.
+**User Story**: As a user, I want to connect my Coinbase Smart Wallet to start using ClawCoach.
 
 **Acceptance Criteria**:
 - [ ] Coinbase Smart Wallet connects on Base Sepolia
@@ -69,17 +69,17 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] Connection persists across page refresh
 
 ### 4.2 Agent Creation (ERC-8004)
-**User Story**: As a verified user, I want to create my moltcoach agent so it has an on-chain identity.
+**User Story**: As a verified user, I want to create my ClawCoach agent so it has an on-chain identity.
 
 **Acceptance Criteria**:
-- [ ] User can mint their moltcoach agent (1 per wallet)
+- [ ] User can mint their ClawCoach agent (1 per wallet)
 - [ ] Agent gets ERC-8004 identity (ERC-721 token with agentURI)
 - [ ] agentURI resolves to agent registration file (personality, capabilities)
 - [ ] Agent creation triggers onboarding flow
 - [ ] `pnpm typecheck` passes
 
 ### 4.3 Agent Onboarding
-**User Story**: As a new moltcoach owner, I want to customize my agent's personality and coaching style.
+**User Story**: As a new ClawCoach owner, I want to customize my agent's personality and coaching style.
 
 **Acceptance Criteria**:
 - [ ] Onboarding asks questions to determine personality, heartbeat, persona
@@ -90,7 +90,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] `pnpm typecheck` passes
 
 ### 4.4 Workout Tracking
-**User Story**: As a user, I want my moltcoach to track my workouts and activity.
+**User Story**: As a user, I want my ClawCoach to track my workouts and activity.
 
 **Acceptance Criteria**:
 - [ ] Manual workout logging (type, duration, intensity)
@@ -118,7 +118,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] `pnpm typecheck` passes
 
 ### 4.7 Agent Communication
-**User Story**: As a user, I want my moltcoach to message me through my preferred channel.
+**User Story**: As a user, I want my ClawCoach to message me through my preferred channel.
 
 **Acceptance Criteria**:
 - [ ] XMTP messaging between agent and user
@@ -149,10 +149,10 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] At least 2 wearable integrations live
 
 ### Stage 3: Community & Expansion
-**Goal**: moltcoach.xyz community hub. Expand beyond FHW. Agent-to-agent interactions.
+**Goal**: clawcoach.ai community hub. Expand beyond FHW. Agent-to-agent interactions.
 
 **Exit Criteria**:
-- [ ] Community hub at moltcoach.xyz
+- [ ] Community hub at clawcoach.ai
 - [ ] At least 1 non-FHW coaching category live
 - [ ] Agent-to-agent interactions demonstrated
 
@@ -183,4 +183,4 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] $FIT tokenomics: total supply, distribution, earn rates
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] XMTP vs Telegram: which is primary for MVP?
-- [ ] Agent-to-agent protocol at moltcoach.xyz — what does this look like?
+- [ ] Agent-to-agent protocol at clawcoach.ai — what does this look like?

@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import {
-  MOLTCOACH_IDENTITY_ADDRESS,
-  moltcoachIdentityAbi,
+  CLAWCOACH_IDENTITY_ADDRESS,
+  clawcoachIdentityAbi,
 } from "@/config/contracts";
 
 type RegisterState = "idle" | "registering" | "waiting" | "success" | "error";
@@ -37,8 +37,8 @@ export function useRegisterAgent(options: { onSuccess?: () => void }) {
       setError(null);
       register.writeContract(
         {
-          address: MOLTCOACH_IDENTITY_ADDRESS,
-          abi: moltcoachIdentityAbi,
+          address: CLAWCOACH_IDENTITY_ADDRESS,
+          abi: clawcoachIdentityAbi,
           functionName: "register",
           args: [agentURI],
         },

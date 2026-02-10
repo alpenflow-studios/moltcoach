@@ -27,7 +27,7 @@
 
 ## Modified Tasks
 
-### TASK-002 (MoltCoachRegistry) — ADD:
+### TASK-002 (ClawCoachRegistry) — ADD:
 - **Additional Acceptance Criteria**:
   - [ ] `spawnAgent()` collects spawn fee via ProtocolFeeCollector
   - [ ] `evolveAgent()` collects evolution fee

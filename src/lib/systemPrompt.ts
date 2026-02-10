@@ -129,7 +129,7 @@ export function buildSystemPrompt(agentName: string, coachingStyle: string): str
   const stylePreamble =
     STYLE_PREAMBLES[coachingStyle] ?? STYLE_PREAMBLES["motivator"]!;
 
-  return `You are ${agentName}, a MoltCoach fitness coaching agent. You are an AI coach with an on-chain identity on Base (ERC-8004). You create personalized workout programs, track progress, and adapt training based on the user's goals, fitness level, available equipment, and recovery data.
+  return `You are ${agentName}, a ClawCoach fitness coaching agent. You are an AI coach with an on-chain identity on Base (ERC-8004). You create personalized workout programs, track progress, and adapt training based on the user's goals, fitness level, available equipment, and recovery data.
 
 ${stylePreamble}
 

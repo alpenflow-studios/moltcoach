@@ -1,4 +1,4 @@
-# REVENUE_MODEL.md — MoltCoach Revenue Streams
+# REVENUE_MODEL.md — ClawCoach Revenue Streams
 
 > **Version**: 1.0
 > **Last Updated**: February 8, 2026
@@ -8,7 +8,7 @@
 
 ## Overview
 
-MoltCoach generates revenue through micro-fees across every layer of the platform. No single fee is large enough to deter users, but they compound at scale. Revenue flows to the **Protocol Treasury** (multisig → DAO governance in Stage 3).
+ClawCoach generates revenue through micro-fees across every layer of the platform. No single fee is large enough to deter users, but they compound at scale. Revenue flows to the **Protocol Treasury** (multisig → DAO governance in Stage 3).
 
 **Design Principle**: Every on-chain action that creates value should capture a small fraction of that value for the protocol.
 
@@ -159,9 +159,9 @@ Revenue from user-generated content and services traded on the platform.
 
 | Source | Fee | Notes |
 |--------|-----|-------|
-| **x402 Payment Routing** | 0.1% per API call | Micro-fee on every x402 transaction through MoltCoach infra |
-| **Agent-to-Agent Fees** | 0.5% per interaction | When MoltCoach agents interact with other ERC-8004 agents (Stage 3) |
-| **ERC-8004 Registry** | Referral fee from registry | If MoltCoach becomes a gateway to agent ecosystem |
+| **x402 Payment Routing** | 0.1% per API call | Micro-fee on every x402 transaction through ClawCoach infra |
+| **Agent-to-Agent Fees** | 0.5% per interaction | When ClawCoach agents interact with other ERC-8004 agents (Stage 3) |
+| **ERC-8004 Registry** | Referral fee from registry | If ClawCoach becomes a gateway to agent ecosystem |
 
 ---
 

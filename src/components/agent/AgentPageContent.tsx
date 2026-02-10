@@ -42,7 +42,7 @@ export function AgentPageContent() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Your <span className="text-primary">moltcoach</span>
+          Your <span className="text-primary">ClawCoach</span>
         </h1>
         <p className="mt-2 text-muted-foreground">
           {data.hasAgent

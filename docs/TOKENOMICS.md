@@ -1,8 +1,8 @@
 # TOKENOMICS.md — $FIT Token Economics
 
 > **Version**: 1.0.0
-> **Project**: MoltCoach
-> **Token**: $FIT (MoltCoach FIT)
+> **Project**: ClawCoach
+> **Token**: $FIT (ClawCoach FIT)
 > **Chain**: Base (chainId 8453)
 > **Standard**: ERC-20 (OpenZeppelin 5.x)
 > **Last Updated**: February 7, 2026
@@ -11,11 +11,11 @@
 
 ## 1. Token Overview
 
-$FIT is MoltCoach's move-to-earn utility token on Base. It incentivizes consistent, verified workout completion and gates premium platform features via staking.
+$FIT is ClawCoach's move-to-earn utility token on Base. It incentivizes consistent, verified workout completion and gates premium platform features via staking.
 
 | Property | Value |
 |----------|-------|
-| Name | MoltCoach FIT |
+| Name | ClawCoach FIT |
 | Symbol | FIT |
 | Decimals | 18 |
 | Max Supply | 1,000,000,000 (1B) |
@@ -185,7 +185,7 @@ Staking $FIT unlocks premium platform features. Staked tokens remain in `Staking
 
 ### Why No Staking Rewards?
 
-Many move-to-earn tokens fail because staking rewards create circular incentives (stake to earn more tokens to stake to earn more tokens). MoltCoach breaks this by:
+Many move-to-earn tokens fail because staking rewards create circular incentives (stake to earn more tokens to stake to earn more tokens). ClawCoach breaks this by:
 - Staking = access to features (real utility, not yield)
 - Earning = completing workouts (real activity, not capital)
 - No compounding: you can't earn $FIT by holding $FIT
@@ -309,7 +309,7 @@ All values configurable by admin (multi-sig initially, governance post-Stage 3):
 
 ## 10. Open Questions
 
-- [ ] **Secondary market**: Should MoltCoach facilitate $FIT/USDC trading (DEX pool), or let it emerge organically?
+- [ ] **Secondary market**: Should ClawCoach facilitate $FIT/USDC trading (DEX pool), or let it emerge organically?
 - [ ] **Treasury allocation**: When governance launches, what % of daily emission should feed a treasury?
 - [ ] **Dynamic base reward**: Should base reward auto-adjust based on daily claim volume (algorithmic)?
 - [ ] **Cross-project utility**: Could $FIT be used in other projects (SMASH stakes, for example)?

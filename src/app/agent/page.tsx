@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AgentPageContent } from "@/components/agent/AgentPageContent";
 
 export const metadata: Metadata = {
-  title: "Your Agent | moltcoach",
+  title: "Your Agent | ClawCoach",
   description: "Create and manage your on-chain AI coaching agent powered by ERC-8004.",
 };
 

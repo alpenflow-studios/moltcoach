@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "moltcoach — Your AI Coach, On-Chain",
+  title: "ClawCoach — Your AI Coach, On-Chain",
   description:
     "AI coaching agent with on-chain identity, move-to-earn $FIT rewards, and personalized coaching powered by ERC-8004 on Base.",
   keywords: ["AI coach", "fitness", "Web3", "ERC-8004", "Base", "move-to-earn"],

@@ -47,7 +47,7 @@ export function RegisterAgentForm({ onSuccess }: RegisterAgentFormProps) {
     const agentURI = `data:application/json,${encodeURIComponent(
       JSON.stringify({
         name: agentName.trim(),
-        type: "moltcoach",
+        type: "clawcoach",
         style: selectedStyle,
         version: "1.0.0",
         category: "fitness",

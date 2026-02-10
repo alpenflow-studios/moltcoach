@@ -2,32 +2,32 @@
 
 import { useReadContract } from "wagmi";
 import {
-  MOLTCOACH_IDENTITY_ADDRESS,
-  moltcoachIdentityAbi,
+  CLAWCOACH_IDENTITY_ADDRESS,
+  clawcoachIdentityAbi,
 } from "@/config/contracts";
 
 export function useAgentReads(userAddress: `0x${string}` | undefined) {
   const enabled = !!userAddress;
 
   const hasAgent = useReadContract({
-    address: MOLTCOACH_IDENTITY_ADDRESS,
-    abi: moltcoachIdentityAbi,
+    address: CLAWCOACH_IDENTITY_ADDRESS,
+    abi: clawcoachIdentityAbi,
     functionName: "hasAgent",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled },
   });
 
   const agentId = useReadContract({
-    address: MOLTCOACH_IDENTITY_ADDRESS,
-    abi: moltcoachIdentityAbi,
+    address: CLAWCOACH_IDENTITY_ADDRESS,
+    abi: clawcoachIdentityAbi,
     functionName: "getAgent",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled: enabled && hasAgent.data === true },
   });
 
   const agentURI = useReadContract({
-    address: MOLTCOACH_IDENTITY_ADDRESS,
-    abi: moltcoachIdentityAbi,
+    address: CLAWCOACH_IDENTITY_ADDRESS,
+    abi: clawcoachIdentityAbi,
     functionName: "tokenURI",
     args: agentId.data ? [agentId.data] : undefined,
     query: { enabled: !!agentId.data },

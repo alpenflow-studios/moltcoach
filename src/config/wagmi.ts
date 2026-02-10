@@ -13,7 +13,7 @@ export const config = createConfig({
   connectors: [
     injected(),
     coinbaseWallet({
-      appName: "moltcoach",
+      appName: "ClawCoach",
       preference: "smartWalletOnly",
       ...(cbProjectId ? { appChainIds: [baseSepolia.id] } : {}),
     }),
@@ -22,9 +22,9 @@ export const config = createConfig({
           walletConnect({
             projectId: wcProjectId,
             metadata: {
-              name: "moltcoach",
+              name: "ClawCoach",
               description: "AI coaching agent with on-chain identity",
-              url: "https://moltcoach.xyz",
+              url: "https://clawcoach.ai",
               icons: [],
             },
           }),

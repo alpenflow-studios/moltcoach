@@ -32,7 +32,7 @@ contracts/
 
 ### MoltcoachIdentity.sol
 - **Standard**: ERC-8004 Identity Registry (extends ERC-721 + URIStorage)
-- **Purpose**: On-chain identity for each moltcoach agent
+- **Purpose**: On-chain identity for each ClawCoach agent
 - **Key functions**:
   - `createAgent(string agentURI)` — Mint new agent to msg.sender (1 per wallet)
   - `updateAgentURI(uint256 agentId, string newURI)` — Update agent registration file

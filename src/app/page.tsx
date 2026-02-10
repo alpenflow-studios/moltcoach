@@ -177,7 +177,7 @@ export default function LandingPage() {
       <section className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           Ready to meet your{" "}
-          <span className="text-primary">moltcoach</span>?
+          <span className="text-primary">ClawCoach</span>?
         </h2>
         <p className="mt-4 text-muted-foreground">
           A coach that knows and grows with you — connect your wallet to get started.

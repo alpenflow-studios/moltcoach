@@ -391,4 +391,4 @@ forge test --match-test testDistributeEmptyBalance
 ---
 
 *Generated: February 8, 2026*
-*For Claude Code integration with MoltCoach contracts*
+*For Claude Code integration with ClawCoach contracts*

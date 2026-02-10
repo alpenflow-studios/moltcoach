@@ -11,6 +11,7 @@ import { ChatInput } from "./ChatInput";
 type AgentChatProps = {
   agentName: string;
   coachingStyle: string;
+  walletAddress?: string;
 };
 
 const STYLE_GREETINGS: Record<string, string> = {
@@ -24,10 +25,11 @@ const STYLE_GREETINGS: Record<string, string> = {
     "Hey there! So glad you're here. I'd love to help you with your fitness journey — no pressure, just good vibes. What are you hoping to work on?",
 };
 
-export function AgentChat({ agentName, coachingStyle }: AgentChatProps) {
+export function AgentChat({ agentName, coachingStyle, walletAddress }: AgentChatProps) {
   const { messages, isStreaming, error, sendMessage } = useChat({
     agentName,
     coachingStyle,
+    walletAddress,
   });
   const scrollRef = useRef<HTMLDivElement>(null);
 

@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
+import { checkRateLimit } from "@/lib/rateLimit";
 import type { ChatMessage } from "@/types/chat";
 
 const anthropic = new Anthropic();
@@ -23,6 +24,25 @@ function isValidBody(body: unknown): body is ChatRequestBody {
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // Rate limit by wallet address (cost protection for Anthropic API)
+    const walletAddress = req.headers.get("x-wallet-address");
+    if (walletAddress) {
+      const rl = await checkRateLimit(walletAddress);
+      if (!rl.success) {
+        const retryAfterSec = rl.reset
+          ? Math.ceil((rl.reset - Date.now()) / 1000)
+          : 60;
+        const timeStr =
+          retryAfterSec > 60
+            ? `${Math.ceil(retryAfterSec / 60)} minutes`
+            : `${retryAfterSec} seconds`;
+        return Response.json(
+          { error: `You've hit the ${rl.window} message limit (${rl.limit}). Try again in ${timeStr}.` },
+          { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+        );
+      }
+    }
+
     const body: unknown = await req.json();
 
     if (!isValidBody(body)) {

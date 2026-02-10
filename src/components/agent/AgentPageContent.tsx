@@ -62,7 +62,7 @@ export function AgentPageContent() {
             const parsed = parseAgentURI(data.agentURI);
             const name = parsed?.name ?? "Coach";
             const style = parsed?.style ?? "motivator";
-            return <AgentChat agentName={name} coachingStyle={style} />;
+            return <AgentChat agentName={name} coachingStyle={style} walletAddress={address} />;
           })()}
         </>
       ) : (

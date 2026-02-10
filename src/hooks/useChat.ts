@@ -6,9 +6,10 @@ import type { ChatMessage } from "@/types/chat";
 type UseChatOptions = {
   agentName: string;
   coachingStyle: string;
+  walletAddress?: string;
 };
 
-export function useChat({ agentName, coachingStyle }: UseChatOptions) {
+export function useChat({ agentName, coachingStyle, walletAddress }: UseChatOptions) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,10 @@ export function useChat({ agentName, coachingStyle }: UseChatOptions) {
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(walletAddress ? { "X-Wallet-Address": walletAddress } : {}),
+          },
           body: JSON.stringify({
             messages: updatedMessages,
             agentName,
@@ -85,7 +89,7 @@ export function useChat({ agentName, coachingStyle }: UseChatOptions) {
         abortRef.current = null;
       }
     },
-    [messages, isStreaming, agentName, coachingStyle],
+    [messages, isStreaming, agentName, coachingStyle, walletAddress],
   );
 
   const reset = useCallback(() => {

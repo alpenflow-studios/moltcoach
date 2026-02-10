@@ -4,8 +4,10 @@ import { useAccount } from "wagmi";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgentReads } from "@/hooks/useAgentReads";
+import { parseAgentURI } from "@/lib/agentURI";
 import { RegisterAgentForm } from "./RegisterAgentForm";
 import { AgentProfileCard } from "./AgentProfileCard";
+import { AgentChat } from "./AgentChat";
 
 export function AgentPageContent() {
   const { address, isConnected } = useAccount();
@@ -50,11 +52,19 @@ export function AgentPageContent() {
       </div>
 
       {data.hasAgent ? (
-        <AgentProfileCard
-          agentId={data.agentId}
-          agentURI={data.agentURI}
-          ownerAddress={address!}
-        />
+        <>
+          <AgentProfileCard
+            agentId={data.agentId}
+            agentURI={data.agentURI}
+            ownerAddress={address!}
+          />
+          {(() => {
+            const parsed = parseAgentURI(data.agentURI);
+            const name = parsed?.name ?? "Coach";
+            const style = parsed?.style ?? "motivator";
+            return <AgentChat agentName={name} coachingStyle={style} />;
+          })()}
+        </>
       ) : (
         <RegisterAgentForm onSuccess={data.refetchAll} />
       )}

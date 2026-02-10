@@ -112,6 +112,12 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <div className="flex justify-center pb-16">
+        <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold">
+          Purchase $FIT
+        </Button>
+      </div>
+
       {/* Features */}
       <section className="border-t border-border/50 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20 sm:py-28">

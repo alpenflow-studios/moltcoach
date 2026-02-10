@@ -36,6 +36,15 @@
   - [ ] Conversation history stored in Supabase
   - [ ] `pnpm typecheck` passes
 
+#### TASK-011: Wire Landing Page Placeholders
+- **Priority**: P1
+- **Scope**: `src/app/page.tsx`, new components/routes
+- **Acceptance Criteria**:
+  - [ ] "I AM HUMAN" / "I AM NOT" buttons trigger distinct onboarding paths
+  - [ ] "Purchase $FIT" links to DEX/swap or purchase mechanism
+  - [ ] "Sign up with your email" opens Privy modal (depends on Privy integration)
+  - [ ] Pricing page tiers show ETH/Base ETH/USDC amounts (not just FIT)
+
 ---
 
 ### In Progress
@@ -44,15 +53,17 @@
 - **Priority**: P0
 - **Scope**: `pnpm dev` testing, wallet connection, staking + agent registration
 - **Started**: Session 8 (Feb 9, 2026)
-- **Status**: ~50% complete. Routes verified, FIT minted, wallet connectors added. Need wallet-connected testing.
+- **Status**: ~75% complete. Staking UX bug found + fixed. Agent registered on-chain. Staking re-test needed.
 - **Acceptance Criteria**:
-  - [x] Run `pnpm dev`, all 4 routes render correctly (/, /staking, /agent, /dashboard)
+  - [x] Run `pnpm dev`, all 5 routes render correctly (/, /staking, /agent, /pricing, /dashboard)
   - [x] Execute MintTestTokens script to mint 10K FIT to deployer
   - [x] Multi-wallet support (MetaMask, Coinbase, WalletConnect)
-  - [ ] Consolidate wallet buttons into single "Connect Wallet" dropdown
-  - [ ] Connect wallet on Base Sepolia and verify connection
-  - [ ] Staking page reads show correct data from deployed contracts
-  - [ ] Agent registration works end-to-end on Base Sepolia
+  - [x] Consolidate wallet buttons into single "Connect Wallet" dropdown
+  - [x] Connect wallet on Base Sepolia and verify connection
+  - [x] Agent registration works end-to-end on Base Sepolia (Agent #1 minted)
+  - [ ] Staking page reads show correct data from deployed contracts (re-test after fix)
+  - [ ] Complete stake flow with fixed auto-chain (allowance already set)
+  - [ ] Unstake flow test after successful stake
   - [ ] Dashboard shows correct stats after staking + agent creation
 
 ---

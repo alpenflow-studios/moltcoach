@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-09
-- **Duration**: Session 8
+- **Duration**: Session 9
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,49 +15,62 @@
 
 ## What Was Done
 
-### Session 8 (This Session)
+### Session 9 (This Session)
 
-1. **Finished TASK-007** — Added toast notifications to UnstakeForm and RegisterAgentForm (the last 2 items from Session 7). Committed + pushed all Session 7 work in 2 commits (docs + code).
+1. **ConnectWallet consolidation** — Deduplicated wagmi connectors by name and replaced 6 separate buttons with a single "Connect Wallet" dropdown using shadcn `DropdownMenu`. Installed `dropdown-menu` component.
 
-2. **TASK-008 started — Manual testing + Mint tokens**:
-   - `pnpm dev` verified: all 4 routes return HTTP 200 (/, /staking, /agent, /dashboard)
-   - **Minted 10,000 FIT** to deployer (`0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`) on Base Sepolia via MintTestTokens script
-   - `contracts/.env` created with deployer PRIVATE_KEY (gitignored)
+2. **Staking UX fix** — Diagnosed that Michael's "successful stake" was actually only an approval — the 2-step approve→stake flow required a manual second click that was easy to miss. Fixed `useStakeAction` to auto-chain the stake tx after approval confirms. One button click, two wallet popups, no missed steps.
 
-3. **Multi-wallet support** — Expanded wallet connection beyond Coinbase Smart Wallet only:
-   - Added `injected()` connector (MetaMask, Brave, etc.)
-   - Added `walletConnect()` connector (conditionally, needs project ID)
-   - Michael created WalletConnect Cloud project, got project ID, added to `.env.local`
-   - ConnectWallet component updated to show per-connector buttons
+3. **On-chain verification** — Used `cast` to verify:
+   - Agent #1 registered by deployer (name: "daddy", style: "motivator", category: "fitness")
+   - FIT allowance to staking contract: 10,000 (approve went through)
+   - Actual staked amount: 0 (stake tx was never sent — now fixed)
 
-4. **Farcaster badge** — Added "Forged on Farcaster" pill with inline SVG Farcaster logo in Farcaster purple (`#8A63D2`) above the existing "Built on Base" badge on landing page.
+4. **Hero orb** — Added a breathing green/white glow effect behind "Your AI Coach. On-Chain." on the landing page. Three layers: green core (6s breathe), white halo (8s drift), conic ring (20s rotate). All CSS animations.
 
-5. **WalletConnect Cloud setup** — Michael created project at cloud.walletconnect.com, `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` added to `.env.local` and `.env.example`.
+5. **Pricing page** — New `/pricing` route with 4 staking tier cards (Free/Basic/Pro/Elite), feature lists, stake amounts, CTAs linking to /staking. Added to navbar between Agent and Dashboard.
 
-### Session 7 (Previous)
+6. **Landing page layout** — Added:
+   - "I AM HUMAN" / "I AM NOT" pill buttons (placeholder, will wire to onboarding flows)
+   - "Purchase $FIT" large pill button (placeholder, will wire to DEX/purchase flow)
+   - "Don't have a wallet? Sign up with your email" text in How it Works (placeholder for Privy)
+   - Removed `overflow-hidden` from hero so orb glow extends seamlessly
 
-- Shared Navbar/Footer, Agent Creation UI, Dashboard, Supabase scaffold, toast notifications, MoltcoachIdentity ABI + hooks, MintTestTokens script
+7. **8 commits pushed** this session, all on `main`
 
-### Sessions 1-6
+### Session 8 (Previous)
 
-- Dev environment, scaffold, wallet, 4 contracts (Identity, FIT, FeeCollector, Staking), 216 tests, staking UI, Base Sepolia deployment + verification
+- Finished TASK-007 toasts, minted 10K FIT, multi-wallet support, Farcaster badge, WalletConnect setup
+
+### Sessions 1-7
+
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications
 
 ---
 
 ## What's In Progress
 
-**ConnectWallet consolidation** — Currently shows 6 separate wallet buttons (wagmi detects duplicates from injected). Needs to be consolidated into a single "Connect Wallet" button that opens a dropdown/modal to pick wallet. This is the immediate next task.
+**TASK-008 — Manual Testing** (~75% complete):
+- [x] All routes render (/, /staking, /agent, /dashboard, /pricing)
+- [x] FIT minted (10K to deployer)
+- [x] Multi-wallet support
+- [x] ConnectWallet consolidated into dropdown
+- [x] Staking approve→stake flow fixed (auto-chains)
+- [x] Agent #1 registered on-chain
+- [ ] Complete staking flow test (approve already done, need to stake + verify on-chain)
+- [ ] Unstake flow test (after successful stake)
+- [ ] Dashboard shows correct stats after staking + agent creation
 
 ---
 
 ## What's Next
 
-1. **Consolidate wallet buttons** — Single "Connect Wallet" → dropdown with wallet options (deduplicate injected connectors)
-2. **Manual wallet testing** — Connect MetaMask, test staking flow with minted FIT, test agent registration on Base Sepolia
-3. **Test all pages connected** — Staking reads, dashboard stats, agent creation end-to-end
+1. **Finish TASK-008** — Michael needs to re-test staking now that the auto-chain fix is in. Allowance is already set, so "Stake 10000 FIT" should work directly.
+2. **Wire placeholder buttons** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up link
+3. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing, not just FIT stake amounts
 4. **TASK-009: Supabase integration** — If Michael has DB ready
 5. **TASK-010: Agent coaching chat** — Claude API integration
-6. **Privy integration** — For production onboarding (email + social + wallets), planned for pre-launch
+6. **Privy integration** — For email/social onboarding (placeholder already in landing page)
 7. **Wearable integration** — Strava OAuth flow
 
 ---
@@ -78,15 +91,18 @@
 - **Penalty routing**: forceApprove + collectFitFee pattern (preserves FeeCollector tracking)
 - **Deploy wallet**: MetaMask for development, Coinbase Wallet for funds
 - **Staking UI ABI strategy**: Minimal `as const` ABIs in TypeScript (not Foundry JSON artifacts)
-- **Approve flow**: 2-tx approve→stake (not ERC20Permit) for Smart Wallet reliability
-- **Staking route**: Dedicated `/staking` (not `/dashboard`) — dashboard later when more features exist
+- **Approve flow**: Auto-chained approve→stake (fixed in Session 9, was broken 2-click before)
+- **Staking route**: Dedicated `/staking` (not `/dashboard`)
 - **tsconfig target**: ES2020 (was ES2017, needed for BigInt literals)
-- **Layout**: Shared Navbar + Footer in root layout, pages render content only (no per-page headers)
+- **Layout**: Shared Navbar + Footer in root layout, pages render content only
 - **Agent URI**: `data:application/json,` encoded URI with name, style, version, category
 - **Coaching styles**: 4 options — Motivator, Drill Sergeant, Scientist, Friend
 - **Toaster**: sonner with hardcoded dark theme (no next-themes dep)
 - **Supabase types**: Manual types in `src/types/database.ts` (will replace with generated types later)
 - **Farcaster**: "Forged on Farcaster" badge on landing page hero
+- **ConnectWallet**: Single button with shadcn DropdownMenu, connectors deduplicated by name
+- **Pricing tiers**: Free/Basic(100)/Pro(1000)/Elite(10000) — may change to ETH/USDC pricing later
+- **Landing page CTAs**: "I AM HUMAN"/"I AM NOT" pills, "Purchase $FIT" button, email sign-up link (all placeholders)
 
 ---
 
@@ -100,6 +116,9 @@
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
 - [ ] Privy free tier limits for production auth
+- [ ] Pricing in ETH/Base ETH/USDC — Michael flagged this for tiers
+- [ ] What do "I AM HUMAN" and "I AM NOT" buttons do? (onboarding paths?)
+- [ ] Purchase $FIT mechanism — DEX pool, in-app swap, or external link?
 
 ---
 
@@ -109,21 +128,22 @@
 - `forge build`: Compiles (pre-existing notes/warnings only, no errors)
 - `pnpm typecheck`: PASSES
 - `pnpm lint`: PASSES
-- `pnpm build`: PASSES (all 4 routes: /, /staking, /agent, /dashboard)
+- `pnpm build`: PASSES (5 routes: /, /staking, /agent, /pricing, /dashboard)
 
 ---
 
-## Key Files (Session 8 — Modified)
+## Key Files (Session 9 — Modified/Created)
 
 | File | Change |
 |------|--------|
-| `src/config/wagmi.ts` | **MODIFIED** — Added injected + walletConnect connectors |
-| `src/components/ConnectWallet.tsx` | **MODIFIED** — Shows per-connector buttons (needs consolidation) |
-| `src/app/page.tsx` | **MODIFIED** — Added Farcaster badge + FarcasterIcon SVG |
-| `.env.example` | **MODIFIED** — Added NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID |
-| `src/components/staking/UnstakeForm.tsx` | **MODIFIED** — Added toast import + toast.success on unstake |
-| `src/components/agent/RegisterAgentForm.tsx` | **MODIFIED** — Added toast import + toast.success on register |
-| `contracts/.env` | **NEW** — Deployer PRIVATE_KEY (gitignored) |
+| `src/components/ConnectWallet.tsx` | **MODIFIED** — Single dropdown with deduplicated connectors |
+| `src/components/ui/dropdown-menu.tsx` | **NEW** — shadcn dropdown-menu component |
+| `src/hooks/useStakeAction.ts` | **MODIFIED** — Auto-chains stake after approval via useEffect |
+| `src/components/staking/StakeForm.tsx` | **MODIFIED** — Simplified (removed manual "approved" step) |
+| `src/app/page.tsx` | **MODIFIED** — Hero orb, pill buttons, Purchase $FIT, email sign-up |
+| `src/app/globals.css` | **MODIFIED** — Orb animation keyframes (breathe, drift, rotate) |
+| `src/app/pricing/page.tsx` | **NEW** — Pricing page with 4 staking tier cards |
+| `src/components/Navbar.tsx` | **MODIFIED** — Added /pricing link |
 
 ---
 
@@ -132,8 +152,9 @@
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
 - **FIT total supply**: 10,000 FIT (minted in Session 8)
 - **FIT daily mint remaining**: 90,000 FIT
-- **No agents registered yet** — awaiting manual testing
-- **No stakes yet** — awaiting manual testing
+- **Agent #1 registered**: owner=deployer, name="daddy", style="motivator"
+- **FIT allowance to staking**: 10,000 FIT (approve succeeded, stake pending)
+- **Staked amount**: 0 (Michael needs to re-test with fixed flow)
 
 ---
 
@@ -164,7 +185,8 @@
 | viem | 2.45.1 | node_modules |
 | @supabase/supabase-js | 2.95.3 | node_modules |
 | sonner | latest | node_modules |
+| @radix-ui/react-dropdown-menu | latest | node_modules (via shadcn) |
 
 ---
 
-*Last updated: Feb 9, 2026 — Session 8*
+*Last updated: Feb 9, 2026 — Session 9*

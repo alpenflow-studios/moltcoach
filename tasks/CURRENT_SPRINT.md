@@ -15,17 +15,6 @@
 
 ### Not Started
 
-#### TASK-008: Manual Testing + Mint Test Tokens
-- **Priority**: P0
-- **Scope**: `pnpm dev` testing, `MintTestTokens.s.sol` execution
-- **Acceptance Criteria**:
-  - [ ] Run `pnpm dev`, all 4 routes render correctly (/, /staking, /agent, /dashboard)
-  - [ ] Connect Coinbase Smart Wallet on Base Sepolia
-  - [ ] Execute MintTestTokens script to mint 10K FIT to deployer
-  - [ ] Staking page reads show correct data from deployed contracts
-  - [ ] Agent registration works end-to-end on Base Sepolia
-  - [ ] Dashboard shows correct stats after staking + agent creation
-
 #### TASK-009: Supabase Integration
 - **Priority**: P1
 - **Scope**: `src/lib/supabase.ts`, new hooks, API routes
@@ -51,11 +40,29 @@
 
 ### In Progress
 
-#### TASK-007: Frontend Pages + Shared Layout (Session 7)
+#### TASK-008: Manual Testing + Mint Test Tokens
+- **Priority**: P0
+- **Scope**: `pnpm dev` testing, wallet connection, staking + agent registration
+- **Started**: Session 8 (Feb 9, 2026)
+- **Status**: ~50% complete. Routes verified, FIT minted, wallet connectors added. Need wallet-connected testing.
+- **Acceptance Criteria**:
+  - [x] Run `pnpm dev`, all 4 routes render correctly (/, /staking, /agent, /dashboard)
+  - [x] Execute MintTestTokens script to mint 10K FIT to deployer
+  - [x] Multi-wallet support (MetaMask, Coinbase, WalletConnect)
+  - [ ] Consolidate wallet buttons into single "Connect Wallet" dropdown
+  - [ ] Connect wallet on Base Sepolia and verify connection
+  - [ ] Staking page reads show correct data from deployed contracts
+  - [ ] Agent registration works end-to-end on Base Sepolia
+  - [ ] Dashboard shows correct stats after staking + agent creation
+
+---
+
+### Done
+
+#### TASK-007: Frontend Pages + Shared Layout
 - **Priority**: P0
 - **Scope**: Layout, agent UI, dashboard, Supabase scaffold
-- **Started**: Session 7 (Feb 8, 2026)
-- **Status**: ~90% complete. All code written, builds pass. Needs commit + push + minor toast additions.
+- **Completed**: Session 8 (Feb 9, 2026)
 - **Acceptance Criteria**:
   - [x] Shared Navbar with responsive mobile menu
   - [x] Shared Footer with nav links
@@ -65,17 +72,11 @@
   - [x] Supabase client scaffold (`src/lib/supabase.ts` + types)
   - [x] MoltcoachIdentity ABI + address in `contracts.ts`
   - [x] Agent hooks (`useAgentReads`, `useRegisterAgent`)
-  - [x] Toast notifications (sonner) installed and wired to layout
+  - [x] Toast notifications (sonner) on stake, unstake, agent registration
   - [x] `pnpm typecheck` passes
   - [x] `pnpm lint` passes
   - [x] `pnpm build` passes
-  - [ ] Toast on unstake success
-  - [ ] Toast on agent registration success
-  - [ ] All changes committed + pushed
-
----
-
-### Done
+  - [x] All changes committed + pushed
 
 #### TASK-006: FIT Staking Contract
 - **Priority**: P1

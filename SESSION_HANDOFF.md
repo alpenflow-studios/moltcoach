@@ -6,8 +6,8 @@
 
 ## Last Session
 
-- **Date**: 2026-02-08
-- **Duration**: Session 7
+- **Date**: 2026-02-09
+- **Duration**: Session 8
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,77 +15,50 @@
 
 ## What Was Done
 
-### Session 7 (This Session)
+### Session 8 (This Session)
 
-1. **Staking UI audit** — Verified all ABIs match deployed contracts, confirmed contract addresses, no critical bugs. `.env.local` was missing — created it with all 4 deployed contract addresses.
+1. **Finished TASK-007** — Added toast notifications to UnstakeForm and RegisterAgentForm (the last 2 items from Session 7). Committed + pushed all Session 7 work in 2 commits (docs + code).
 
-2. **Mint script** — `contracts/script/MintTestTokens.s.sol` created. Mints 10,000 FIT to deployer for testing. Usage: `forge script script/MintTestTokens.s.sol --rpc-url base_sepolia --broadcast`
+2. **TASK-008 started — Manual testing + Mint tokens**:
+   - `pnpm dev` verified: all 4 routes return HTTP 200 (/, /staking, /agent, /dashboard)
+   - **Minted 10,000 FIT** to deployer (`0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`) on Base Sepolia via MintTestTokens script
+   - `contracts/.env` created with deployer PRIVATE_KEY (gitignored)
 
-3. **Shared layout system** — Major refactor:
-   - `src/components/Navbar.tsx` — Responsive nav with mobile hamburger menu, active route highlighting, links to Home/Staking/Agent/Dashboard
-   - `src/components/Footer.tsx` — Shared footer with nav links
-   - Root `layout.tsx` updated to include Navbar + Footer globally
-   - Landing page (`page.tsx`) stripped of duplicated header/footer, now renders inside layout
-   - Staking page (`staking/page.tsx`) stripped of duplicated header/footer, simplified to content only
+3. **Multi-wallet support** — Expanded wallet connection beyond Coinbase Smart Wallet only:
+   - Added `injected()` connector (MetaMask, Brave, etc.)
+   - Added `walletConnect()` connector (conditionally, needs project ID)
+   - Michael created WalletConnect Cloud project, got project ID, added to `.env.local`
+   - ConnectWallet component updated to show per-connector buttons
 
-4. **Agent Creation UI** — Full MoltcoachIdentity frontend integration:
-   - `src/config/contracts.ts` — Added `MOLTCOACH_IDENTITY_ADDRESS` + `moltcoachIdentityAbi` (register, hasAgent, getAgent, tokenURI, getMetadata, setMetadata, setAgentURI)
-   - `src/hooks/useAgentReads.ts` — Reads: hasAgent, getAgent, tokenURI
-   - `src/hooks/useRegisterAgent.ts` — Write: register(agentURI) with state machine
-   - `src/components/agent/AgentPageContent.tsx` — Orchestrator (wallet check, loading, has/no agent routing)
-   - `src/components/agent/RegisterAgentForm.tsx` — Agent creation form with name input, 4 coaching style picker (Motivator/Drill Sergeant/Scientist/Friend), live preview card, data URI generation
-   - `src/components/agent/AgentProfileCard.tsx` — Existing agent display with on-chain data, URI parsing, BaseScan link, capabilities badges
-   - `/agent` route with page, loading, error
+4. **Farcaster badge** — Added "Forged on Farcaster" pill with inline SVG Farcaster logo in Farcaster purple (`#8A63D2`) above the existing "Built on Base" badge on landing page.
 
-5. **Dashboard page** — New `/dashboard` route:
-   - `src/components/dashboard/DashboardContent.tsx` — Overview with 4 stat cards (FIT balance, staked, tier, agent), staking detail card with tier progress, agent status card with activity placeholders
-   - `/dashboard` route with page, loading, error
+5. **WalletConnect Cloud setup** — Michael created project at cloud.walletconnect.com, `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` added to `.env.local` and `.env.example`.
 
-6. **Supabase scaffold** — Ready for when Michael finishes DB setup:
-   - Installed `@supabase/supabase-js` v2.95.3
-   - `src/lib/supabase.ts` — Client with Database type
-   - `src/types/database.ts` — Types for users, agents, workouts, coaching_sessions tables
+### Session 7 (Previous)
 
-7. **Coinbase Wallet project ID** — `wagmi.ts` updated to read `NEXT_PUBLIC_COINBASE_WALLET_PROJECT_ID` from env
+- Shared Navbar/Footer, Agent Creation UI, Dashboard, Supabase scaffold, toast notifications, MoltcoachIdentity ABI + hooks, MintTestTokens script
 
-8. **Toast notifications** — Installed shadcn sonner component:
-   - `src/components/ui/sonner.tsx` — Hardcoded to dark theme (no next-themes dependency)
-   - Added `<Toaster>` to root layout
-   - StakeForm has toast on successful stake
+### Sessions 1-6
 
-### Session 6 (Previous)
-
-- All 4 contracts deployed & verified on Base Sepolia
-- Full staking UI built
-- Deploy script updated for all 4 contracts
-
-### Sessions 1-5
-
-- Dev environment, scaffold, wallet, contracts (Identity, FIT, FeeCollector, Staking), 216 tests
+- Dev environment, scaffold, wallet, 4 contracts (Identity, FIT, FeeCollector, Staking), 216 tests, staking UI, Base Sepolia deployment + verification
 
 ---
 
 ## What's In Progress
 
-**Toast notifications** — StakeForm has toast on success. Still need to add toast to:
-- `UnstakeForm.tsx` — on successful unstake
-- `RegisterAgentForm.tsx` — on successful agent registration
-
-These are ~3-line additions each (import toast, add toast.success in useEffect).
+**ConnectWallet consolidation** — Currently shows 6 separate wallet buttons (wagmi detects duplicates from injected). Needs to be consolidated into a single "Connect Wallet" button that opens a dropdown/modal to pick wallet. This is the immediate next task.
 
 ---
 
 ## What's Next
 
-1. **Finish toast notifications** — Add to UnstakeForm + RegisterAgentForm (quick, ~5 min)
-2. **Commit + push all Session 7 work** — Large commit with all new files
-3. **Manual testing** — Run `pnpm dev`, connect wallet, verify all 4 routes render correctly
-4. **Mint test FIT** — Run the MintTestTokens script to give deployer tokens for testing staking
-5. **Test agent registration** — Register an agent on Base Sepolia via the /agent UI
-6. **Supabase integration** — Wire up supabase client once Michael has DB ready
-7. **Coinbase Wallet project ID** — Michael needs to obtain from Coinbase developer portal
-8. **Wearable integration** — Start Strava OAuth flow (likely first wearable)
-9. **Agent coaching chat** — Build the actual coaching interface (Claude API integration)
+1. **Consolidate wallet buttons** — Single "Connect Wallet" → dropdown with wallet options (deduplicate injected connectors)
+2. **Manual wallet testing** — Connect MetaMask, test staking flow with minted FIT, test agent registration on Base Sepolia
+3. **Test all pages connected** — Staking reads, dashboard stats, agent creation end-to-end
+4. **TASK-009: Supabase integration** — If Michael has DB ready
+5. **TASK-010: Agent coaching chat** — Claude API integration
+6. **Privy integration** — For production onboarding (email + social + wallets), planned for pre-launch
+7. **Wearable integration** — Strava OAuth flow
 
 ---
 
@@ -93,7 +66,7 @@ These are ~3-line additions each (import toast, add toast.success in useEffect).
 
 - **Theme**: Dark mode default, lime primary accent on zinc base
 - **wagmi version**: v3.4.2 (latest)
-- **Smart Wallet**: `smartWalletOnly` preference
+- **Wallet strategy**: Multi-wallet — injected (MetaMask) + Coinbase Smart Wallet + WalletConnect. Privy planned for production.
 - **ERC-8004**: Custom non-upgradeable implementation (not reference UUPS)
 - **Agent IDs**: Start at 1, 0 = sentinel for "no agent"
 - **Revenue model**: 9 streams, Stage 1 MVP focuses on 3 (tx fees, spawn fee, validation fees)
@@ -113,17 +86,20 @@ These are ~3-line additions each (import toast, add toast.success in useEffect).
 - **Coaching styles**: 4 options — Motivator, Drill Sergeant, Scientist, Friend
 - **Toaster**: sonner with hardcoded dark theme (no next-themes dep)
 - **Supabase types**: Manual types in `src/types/database.ts` (will replace with generated types later)
+- **Farcaster**: "Forged on Farcaster" badge on landing page hero
 
 ---
 
 ## Open Questions
 
 - [ ] Supabase project — Michael setting up with Claude.ai
+- [x] WalletConnect project ID — obtained from cloud.walletconnect.com
 - [ ] Coinbase Wallet project ID — needs to be obtained from developer portal
 - [ ] XMTP vs Telegram priority for agent comms
 - [ ] Agent-to-agent protocol at moltcoach.xyz
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
+- [ ] Privy free tier limits for production auth
 
 ---
 
@@ -137,35 +113,27 @@ These are ~3-line additions each (import toast, add toast.success in useEffect).
 
 ---
 
-## Key Files (Session 7 — New/Modified)
+## Key Files (Session 8 — Modified)
 
-| File | Purpose |
-|------|---------|
-| `.env.local` | **NEW** — Local env with all 4 deployed contract addresses |
-| `contracts/script/MintTestTokens.s.sol` | **NEW** — Mint test FIT tokens to deployer |
-| `src/components/Navbar.tsx` | **NEW** — Shared responsive navbar with mobile menu |
-| `src/components/Footer.tsx` | **NEW** — Shared footer |
-| `src/app/layout.tsx` | **MODIFIED** — Now includes Navbar, Footer, Toaster |
-| `src/app/page.tsx` | **MODIFIED** — Stripped header/footer, renders content only |
-| `src/app/staking/page.tsx` | **MODIFIED** — Stripped header/footer, simplified |
-| `src/config/contracts.ts` | **MODIFIED** — Added MoltcoachIdentity address + ABI |
-| `src/config/wagmi.ts` | **MODIFIED** — Added Coinbase project ID env var |
-| `src/hooks/useAgentReads.ts` | **NEW** — Agent reads (hasAgent, getAgent, tokenURI) |
-| `src/hooks/useRegisterAgent.ts` | **NEW** — Agent registration write hook |
-| `src/components/agent/AgentPageContent.tsx` | **NEW** — Agent page orchestrator |
-| `src/components/agent/RegisterAgentForm.tsx` | **NEW** — Agent creation form with style picker |
-| `src/components/agent/AgentProfileCard.tsx` | **NEW** — Agent profile display |
-| `src/app/agent/page.tsx` | **NEW** — /agent route |
-| `src/app/agent/loading.tsx` | **NEW** — Agent loading state |
-| `src/app/agent/error.tsx` | **NEW** — Agent error boundary |
-| `src/components/dashboard/DashboardContent.tsx` | **NEW** — Dashboard overview page |
-| `src/app/dashboard/page.tsx` | **NEW** — /dashboard route |
-| `src/app/dashboard/loading.tsx` | **NEW** — Dashboard loading state |
-| `src/app/dashboard/error.tsx` | **NEW** — Dashboard error boundary |
-| `src/lib/supabase.ts` | **NEW** — Supabase client |
-| `src/types/database.ts` | **NEW** — Supabase table types |
-| `src/components/ui/sonner.tsx` | **NEW** — Toast notification component |
-| `src/components/staking/StakeForm.tsx` | **MODIFIED** — Added toast on success |
+| File | Change |
+|------|--------|
+| `src/config/wagmi.ts` | **MODIFIED** — Added injected + walletConnect connectors |
+| `src/components/ConnectWallet.tsx` | **MODIFIED** — Shows per-connector buttons (needs consolidation) |
+| `src/app/page.tsx` | **MODIFIED** — Added Farcaster badge + FarcasterIcon SVG |
+| `.env.example` | **MODIFIED** — Added NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID |
+| `src/components/staking/UnstakeForm.tsx` | **MODIFIED** — Added toast import + toast.success on unstake |
+| `src/components/agent/RegisterAgentForm.tsx` | **MODIFIED** — Added toast import + toast.success on register |
+| `contracts/.env` | **NEW** — Deployer PRIVATE_KEY (gitignored) |
+
+---
+
+## On-Chain State (Base Sepolia)
+
+- **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
+- **FIT total supply**: 10,000 FIT (minted in Session 8)
+- **FIT daily mint remaining**: 90,000 FIT
+- **No agents registered yet** — awaiting manual testing
+- **No stakes yet** — awaiting manual testing
 
 ---
 
@@ -174,10 +142,11 @@ These are ~3-line additions each (import toast, add toast.success in useEffect).
 - **Foundry**: v1.5.1 at `~/.foundry/bin/` — add to PATH: `export PATH="/Users/openclaw/.foundry/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"`
 - **pnpm**: `/opt/homebrew/bin/pnpm` (v10.29.1)
 - **forge commands**: Must run from `contracts/` directory (or use `cd contracts &&`)
+- **forge .env loading**: Use `export $(grep -v '^#' .env | xargs)` before forge commands (source .env fails on macOS)
 - **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
 - **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
-- **NOTHING IS COMMITTED YET** — All Session 7 work is unstaged. Commit + push is the first task for Session 8.
+- **All committed + pushed** — working tree clean
 
 ---
 
@@ -193,9 +162,9 @@ These are ~3-line additions each (import toast, add toast.success in useEffect).
 | next | 16.1.6 | node_modules |
 | wagmi | 3.4.2 | node_modules |
 | viem | 2.45.1 | node_modules |
-| @supabase/supabase-js | 2.95.3 | node_modules (**NEW**) |
-| sonner | latest | node_modules (**NEW**) |
+| @supabase/supabase-js | 2.95.3 | node_modules |
+| sonner | latest | node_modules |
 
 ---
 
-*Last updated: Feb 8, 2026 — Session 7*
+*Last updated: Feb 9, 2026 — Session 8*

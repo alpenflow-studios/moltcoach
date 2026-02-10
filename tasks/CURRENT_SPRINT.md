@@ -49,11 +49,17 @@
 
 ### In Progress
 
+> Nothing currently in progress.
+
+---
+
+### Done
+
 #### TASK-008: Manual Testing + Mint Test Tokens
 - **Priority**: P0
 - **Scope**: `pnpm dev` testing, wallet connection, staking + agent registration
 - **Started**: Session 8 (Feb 9, 2026)
-- **Status**: ~75% complete. Staking UX bug found + fixed. Agent registered on-chain. Staking re-test needed.
+- **Completed**: Session 10 (Feb 10, 2026)
 - **Acceptance Criteria**:
   - [x] Run `pnpm dev`, all 5 routes render correctly (/, /staking, /agent, /pricing, /dashboard)
   - [x] Execute MintTestTokens script to mint 10K FIT to deployer
@@ -61,14 +67,10 @@
   - [x] Consolidate wallet buttons into single "Connect Wallet" dropdown
   - [x] Connect wallet on Base Sepolia and verify connection
   - [x] Agent registration works end-to-end on Base Sepolia (Agent #1 minted)
-  - [ ] Staking page reads show correct data from deployed contracts (re-test after fix)
-  - [ ] Complete stake flow with fixed auto-chain (allowance already set)
-  - [ ] Unstake flow test after successful stake
-  - [ ] Dashboard shows correct stats after staking + agent creation
-
----
-
-### Done
+  - [x] Staking page reads show correct data from deployed contracts
+  - [x] Complete stake flow with fixed auto-chain (10,000 FIT staked)
+  - [x] Unstake flow test (500 FIT unstaked, 5% penalty to FeeCollector, tier dropped to Pro)
+  - [x] Dashboard shows correct stats after staking + agent creation
 
 #### TASK-007: Frontend Pages + Shared Layout
 - **Priority**: P0

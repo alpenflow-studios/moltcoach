@@ -6,8 +6,8 @@
 
 ## Last Session
 
-- **Date**: 2026-02-09
-- **Duration**: Session 9
+- **Date**: 2026-02-10
+- **Duration**: Session 10
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,63 +15,45 @@
 
 ## What Was Done
 
-### Session 9 (This Session)
+### Session 10 (This Session)
 
-1. **ConnectWallet consolidation** — Deduplicated wagmi connectors by name and replaced 6 separate buttons with a single "Connect Wallet" dropdown using shadcn `DropdownMenu`. Installed `dropdown-menu` component.
+1. **TASK-008 completed** — Finished all remaining manual testing items:
+   - Fixed stale Next.js process + lock file after project move from `~/moltcoach` → `~/Projects/moltcoach`
+   - Verified all 5 routes render (/, /staking, /agent, /dashboard, /pricing)
+   - Confirmed no hardcoded paths in codebase (only stale `.claude/settings.local.json` entries)
+   - Staked 10,000 FIT successfully (auto-chain approve→stake flow works)
+   - Unstaked 500 FIT — 5% early penalty (25 FIT) correctly routed to FeeCollector, 475 FIT returned to wallet
+   - Tier correctly dropped from Elite → Pro after unstake
+   - Dashboard displays correct stats (staking, tier, agent)
 
-2. **Staking UX fix** — Diagnosed that Michael's "successful stake" was actually only an approval — the 2-step approve→stake flow required a manual second click that was easy to miss. Fixed `useStakeAction` to auto-chain the stake tx after approval confirms. One button click, two wallet popups, no missed steps.
+2. **On-chain verification** — All contract interactions confirmed working end-to-end via frontend + `cast` checks
 
-3. **On-chain verification** — Used `cast` to verify:
-   - Agent #1 registered by deployer (name: "daddy", style: "motivator", category: "fitness")
-   - FIT allowance to staking contract: 10,000 (approve went through)
-   - Actual staked amount: 0 (stake tx was never sent — now fixed)
+3. **No code changes this session** — purely testing + doc updates
 
-4. **Hero orb** — Added a breathing green/white glow effect behind "Your AI Coach. On-Chain." on the landing page. Three layers: green core (6s breathe), white halo (8s drift), conic ring (20s rotate). All CSS animations.
+### Session 9 (Previous)
 
-5. **Pricing page** — New `/pricing` route with 4 staking tier cards (Free/Basic/Pro/Elite), feature lists, stake amounts, CTAs linking to /staking. Added to navbar between Agent and Dashboard.
+- ConnectWallet dropdown consolidation, staking UX fix (auto-chain approve→stake), hero orb, pricing page, landing page pill buttons + placeholders, 8 commits
 
-6. **Landing page layout** — Added:
-   - "I AM HUMAN" / "I AM NOT" pill buttons (placeholder, will wire to onboarding flows)
-   - "Purchase $FIT" large pill button (placeholder, will wire to DEX/purchase flow)
-   - "Don't have a wallet? Sign up with your email" text in How it Works (placeholder for Privy)
-   - Removed `overflow-hidden` from hero so orb glow extends seamlessly
+### Sessions 1-8
 
-7. **8 commits pushed** this session, all on `main`
-
-### Session 8 (Previous)
-
-- Finished TASK-007 toasts, minted 10K FIT, multi-wallet support, Farcaster badge, WalletConnect setup
-
-### Sessions 1-7
-
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications, 10K FIT minted, multi-wallet support
 
 ---
 
 ## What's In Progress
 
-**TASK-008 — Manual Testing** (~75% complete):
-- [x] All routes render (/, /staking, /agent, /dashboard, /pricing)
-- [x] FIT minted (10K to deployer)
-- [x] Multi-wallet support
-- [x] ConnectWallet consolidated into dropdown
-- [x] Staking approve→stake flow fixed (auto-chains)
-- [x] Agent #1 registered on-chain
-- [ ] Complete staking flow test (approve already done, need to stake + verify on-chain)
-- [ ] Unstake flow test (after successful stake)
-- [ ] Dashboard shows correct stats after staking + agent creation
+> Nothing currently in progress. TASK-008 completed this session.
 
 ---
 
 ## What's Next
 
-1. **Finish TASK-008** — Michael needs to re-test staking now that the auto-chain fix is in. Allowance is already set, so "Stake 10000 FIT" should work directly.
-2. **Wire placeholder buttons** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up link
-3. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing, not just FIT stake amounts
-4. **TASK-009: Supabase integration** — If Michael has DB ready
-5. **TASK-010: Agent coaching chat** — Claude API integration
-6. **Privy integration** — For email/social onboarding (placeholder already in landing page)
-7. **Wearable integration** — Strava OAuth flow
+1. **TASK-009: Supabase integration** — Depends on Michael completing Supabase project setup
+2. **TASK-010: Agent coaching chat** — Claude API integration, chat UI
+3. **TASK-011: Wire landing page placeholders** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up
+4. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing, not just FIT stake amounts
+5. **Privy integration** — For email/social onboarding (placeholder already in landing page)
+6. **Wearable integration** — Strava OAuth flow
 
 ---
 
@@ -132,18 +114,10 @@
 
 ---
 
-## Key Files (Session 9 — Modified/Created)
+## Key Files (Session 10 — No Code Changes)
 
-| File | Change |
-|------|--------|
-| `src/components/ConnectWallet.tsx` | **MODIFIED** — Single dropdown with deduplicated connectors |
-| `src/components/ui/dropdown-menu.tsx` | **NEW** — shadcn dropdown-menu component |
-| `src/hooks/useStakeAction.ts` | **MODIFIED** — Auto-chains stake after approval via useEffect |
-| `src/components/staking/StakeForm.tsx` | **MODIFIED** — Simplified (removed manual "approved" step) |
-| `src/app/page.tsx` | **MODIFIED** — Hero orb, pill buttons, Purchase $FIT, email sign-up |
-| `src/app/globals.css` | **MODIFIED** — Orb animation keyframes (breathe, drift, rotate) |
-| `src/app/pricing/page.tsx` | **NEW** — Pricing page with 4 staking tier cards |
-| `src/components/Navbar.tsx` | **MODIFIED** — Added /pricing link |
+> No source code modified this session. Session 10 was testing + documentation only.
+> See Session 9 key files in git log for last code changes.
 
 ---
 
@@ -153,8 +127,11 @@
 - **FIT total supply**: 10,000 FIT (minted in Session 8)
 - **FIT daily mint remaining**: 90,000 FIT
 - **Agent #1 registered**: owner=deployer, name="daddy", style="motivator"
-- **FIT allowance to staking**: 10,000 FIT (approve succeeded, stake pending)
-- **Staked amount**: 0 (Michael needs to re-test with fixed flow)
+- **FIT wallet balance**: 475 FIT (unstaked 500, got 475 after 5% penalty)
+- **Staked amount**: 9,500 FIT
+- **Staking tier**: Pro (2)
+- **FeeCollector balance**: 25 FIT (from early unstake penalty)
+- **Protocol total staked**: 9,500 FIT
 
 ---
 
@@ -167,7 +144,8 @@
 - **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
 - **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
-- **All committed + pushed** — working tree clean
+- **Project path**: Moved from `~/moltcoach` → `~/Projects/moltcoach` (no code changes needed, all paths relative)
+- **All committed + pushed** — working tree clean (doc updates pending commit)
 
 ---
 
@@ -189,4 +167,4 @@
 
 ---
 
-*Last updated: Feb 9, 2026 — Session 9*
+*Last updated: Feb 10, 2026 — Session 10*

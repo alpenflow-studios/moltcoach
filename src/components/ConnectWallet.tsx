@@ -1,9 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { Button } from "@/components/ui/button";
-import { Wallet, LogOut, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Wallet, LogOut, AlertTriangle, Loader2, ChevronDown } from "lucide-react";
 import type { ComponentProps } from "react";
 
 type ButtonSize = ComponentProps<typeof Button>["size"];
@@ -17,6 +24,16 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
   const { connect, connectors, isPending: isConnecting } = useConnect();
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
+
+  // Deduplicate connectors by name (wagmi can return duplicates for injected providers)
+  const uniqueConnectors = useMemo(() => {
+    const seen = new Set<string>();
+    return connectors.filter((c) => {
+      if (seen.has(c.name)) return false;
+      seen.add(c.name);
+      return true;
+    });
+  }, [connectors]);
 
   // State: connecting
   if (isConnecting) {
@@ -61,20 +78,27 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
     );
   }
 
-  // State: disconnected — show a button per connector
+  // State: disconnected — single button with dropdown for wallet selection
   return (
-    <div className="flex items-center gap-2">
-      {connectors.map((connector) => (
-        <Button
-          key={connector.uid}
-          variant="outline"
-          size={size}
-          onClick={() => connect({ connector })}
-        >
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size={size}>
           <Wallet className="size-4" />
-          {connector.name}
+          Connect Wallet
+          <ChevronDown className="size-3" />
         </Button>
-      ))}
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {uniqueConnectors.map((connector) => (
+          <DropdownMenuItem
+            key={connector.uid}
+            onClick={() => connect({ connector })}
+          >
+            <Wallet className="size-4" />
+            {connector.name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -43,7 +43,7 @@ export default function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative mx-auto flex max-w-4xl flex-col items-center overflow-hidden px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
+      <section className="relative mx-auto flex max-w-4xl flex-col items-center px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
         {/* Orb — layered breathing glow */}
         <div
           aria-hidden="true"
@@ -104,14 +104,13 @@ export default function LandingPage() {
             I AM NOT
           </Button>
         </div>
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <ConnectWallet size="lg" />
+          <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+            <Link href="/staking">Start Staking</Link>
+          </Button>
+        </div>
       </section>
-
-      <div className="flex items-center justify-center gap-4 pb-16">
-        <ConnectWallet size="lg" />
-        <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
-          <Link href="/staking">Start Staking</Link>
-        </Button>
-      </div>
 
       {/* Features */}
       <section className="border-t border-border/50 bg-muted/30">

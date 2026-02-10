@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { Button } from "@/components/ui/button";
-import { Fingerprint, Zap, Sparkles, ArrowRight } from "lucide-react";
+import { Fingerprint, Zap, Sparkles, ArrowRight, Send, MessageCircle } from "lucide-react";
 
 function FarcasterIcon({ className }: { className?: string }) {
   return (
@@ -23,19 +23,19 @@ const FEATURES = [
     icon: Fingerprint,
     title: "On-Chain Identity",
     description:
-      "Your coach lives on the blockchain via ERC-8004. A persistent identity with personality, reputation, and memory that belongs to you.",
+      "Your coach lives on the blockchain via ERC-8004. A persistent identity with personality, reputation, and memory — it knows you, and grows with you. Chat via XMTP or Telegram, wherever you are.",
   },
   {
     icon: Zap,
     title: "Move to Earn",
     description:
-      "Track workouts, earn $FIT tokens. Stake for enhanced coaching features. Your effort has real value.",
+      "Track workouts, earn $FIT tokens. Stake for enhanced coaching features. Connect your wearable, upload a screenshot, or log manually — your effort, your proof, your reward.",
   },
   {
     icon: Sparkles,
     title: "Personalized Coaching",
     description:
-      "AI that adapts to your style, goals, and rhythm. Not a generic chatbot — a coach that knows you.",
+      "AI that adapts to your style, goals, rhythm, and life. Not a generic chatbot — a coach that knows and grows with you.",
   },
 ] as const;
 
@@ -78,25 +78,25 @@ export default function LandingPage() {
           />
         </div>
 
-        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#8A63D2]/20 bg-[#8A63D2]/10 px-4 py-1.5 text-sm text-[#8A63D2]">
-          <FarcasterIcon className="size-3.5" />
+        <div className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-[#8A63D2]/20 bg-[#8A63D2]/10 px-3 py-1 text-xs text-[#8A63D2]">
+          <FarcasterIcon className="size-3" />
           Forged on Farcaster
-        </div>
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm text-primary">
-          <Zap className="size-3.5" />
-          Built on Base with ERC-8004
         </div>
         <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
           Your AI Coach.
           <br />
           <span className="text-primary">On-Chain.</span>
         </h1>
-        <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-          A personalized coaching agent that lives on the blockchain. Track
-          workouts, earn $FIT rewards, and own a coach that actually knows
-          you — starting with fitness, expanding everywhere.
+        <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
+          <Zap className="size-3" />
+          Built on Base with ERC-8004
+        </div>
+        <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+          Your personalized coaching agent that lives on the blockchain. Track
+          workouts, earn $FIT rewards, and own a coach that knows and grows
+          with you — starting with fitness, expanding everywhere.
         </p>
-        <div className="mt-10 flex items-center justify-center gap-4">
+        <div className="mt-12 flex items-center justify-center gap-4">
           <Button variant="outline" size="lg" className="rounded-full text-base">
             I AM HUMAN
           </Button>
@@ -104,7 +104,7 @@ export default function LandingPage() {
             I AM NOT
           </Button>
         </div>
-        <div className="mt-6 flex items-center justify-center gap-4">
+        <div className="mt-8 flex items-center justify-center gap-4">
           <ConnectWallet size="lg" />
           <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
             <Link href="/staking">Start Staking</Link>
@@ -155,6 +155,24 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Comms */}
+      <section className="mx-auto max-w-4xl px-6 py-16 text-center sm:py-20">
+        <h2 className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
+          Talk to your coach on{" "}
+          <span className="text-primary">your terms</span>
+        </h2>
+        <div className="flex items-center justify-center gap-5">
+          <Button variant="outline" size="lg" className="rounded-full text-base">
+            <MessageCircle className="size-4" />
+            XMTP
+          </Button>
+          <Button variant="outline" size="lg" className="rounded-full text-base">
+            <Send className="size-4" />
+            Telegram
+          </Button>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -162,7 +180,7 @@ export default function LandingPage() {
           <span className="text-primary">moltcoach</span>?
         </h2>
         <p className="mt-4 text-muted-foreground">
-          Connect a Coinbase Smart Wallet on Base to get started.
+          A coach that knows and grows with you — connect your wallet to get started.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <ConnectWallet size="lg" />

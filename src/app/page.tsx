@@ -124,8 +124,15 @@ export default function LandingPage() {
           <h2 className="mb-4 text-center text-3xl font-bold tracking-tight sm:text-4xl">
             How it works
           </h2>
-          <p className="mx-auto mb-16 max-w-2xl text-center text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-center text-muted-foreground">
             Connect your wallet. Mint your coach. Start earning.
+          </p>
+          <p className="mx-auto mb-16 mt-2 max-w-2xl text-center text-sm text-muted-foreground/70">
+            Don&apos;t have a wallet?{" "}
+            <button type="button" className="text-primary underline underline-offset-2 hover:text-primary/80">
+              Sign up with your email
+            </button>{" "}
+            and we&apos;ll create one for you.
           </p>
           <div className="grid gap-8 sm:grid-cols-3">
             {FEATURES.map((feature) => (

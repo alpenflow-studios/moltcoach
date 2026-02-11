@@ -19,7 +19,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title ProtocolFeeCollector
-/// @notice Central fee collection and distribution for MoltCoach protocol
+/// @notice Central fee collection and distribution for ClawCoach protocol
 /// @dev All protocol fees route through this contract before treasury distribution
 contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
 
@@ -36,7 +36,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     event FeeUpdated(string feeType, uint256 oldFee, uint256 newFee);
 
     // --- State ---
-    IERC20 public immutable fitToken;
+    IERC20 public immutable clawcToken;
     IERC20 public immutable usdcToken;
 
     // Treasury allocation (basis points, must sum to 10000)
@@ -54,18 +54,18 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     // Fee rates (basis points)
     uint256 public transactionFeeBps = 50;    // 0.5%
     uint256 public spawnFeeUsdc = 10e6;       // 10 USDC (6 decimals)
-    uint256 public spawnFeeFit = 50e18;       // 50 $FIT (18 decimals)
-    uint256 public validationFeeTier1 = 1e16; // 0.01 $FIT
-    uint256 public validationFeeTier2 = 5e16; // 0.05 $FIT
-    uint256 public evolutionFee = 5e18;       // 5 $FIT
-    uint256 public modeSwitchFee = 2e18;      // 2 $FIT
-    uint256 public resetFee = 15e18;          // 15 $FIT
+    uint256 public spawnFeeClawc = 50e18;       // 50 $CLAWC (18 decimals)
+    uint256 public validationFeeTier1 = 1e16; // 0.01 $CLAWC
+    uint256 public validationFeeTier2 = 5e16; // 0.05 $CLAWC
+    uint256 public evolutionFee = 5e18;       // 5 $CLAWC
+    uint256 public modeSwitchFee = 2e18;      // 2 $CLAWC
+    uint256 public resetFee = 15e18;          // 15 $CLAWC
 
     // Tracking
     mapping(string => uint256) public totalCollected;
 
     constructor(
-        address _fitToken,
+        address _clawcToken,
         address _usdcToken,
         address _owner,
         address _developmentWallet,
@@ -73,8 +73,8 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
         address _communityWallet,
         address _insuranceWallet
     ) Ownable(_owner) {
-        if (_fitToken == address(0) || _usdcToken == address(0)) revert ZeroAddress();
-        fitToken = IERC20(_fitToken);
+        if (_clawcToken == address(0) || _usdcToken == address(0)) revert ZeroAddress();
+        clawcToken = IERC20(_clawcToken);
         usdcToken = IERC20(_usdcToken);
         developmentWallet = _developmentWallet;
         buybackWallet = _buybackWallet;
@@ -82,20 +82,20 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
         insuranceWallet = _insuranceWallet;
     }
 
-    /// @notice Collect a fee in $FIT
+    /// @notice Collect a fee in $CLAWC
     /// @param from Address paying the fee
-    /// @param amount Amount of $FIT
+    /// @param amount Amount of $CLAWC
     /// @param feeType Description for tracking (e.g., "spawn", "validation", "evolution")
-    function collectFitFee(
+    function collectClawcFee(
         address from,
         uint256 amount,
         string calldata feeType
     ) external nonReentrant {
         if (amount == 0) revert InvalidFee();
-        bool success = fitToken.transferFrom(from, address(this), amount);
+        bool success = clawcToken.transferFrom(from, address(this), amount);
         if (!success) revert TransferFailed();
         totalCollected[feeType] += amount;
-        emit FeeCollected(from, address(fitToken), amount, feeType);
+        emit FeeCollected(from, address(clawcToken), amount, feeType);
     }
 
     /// @notice Collect a fee in USDC
@@ -123,7 +123,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
 
     /// @notice Get validation fee for a given tier
     /// @param tier Validation tier (1 = wearable, 2 = image, 3 = manual)
-    /// @return fee The validation fee in $FIT
+    /// @return fee The validation fee in $CLAWC
     function getValidationFee(uint8 tier) external view returns (uint256 fee) {
         if (tier == 1) return validationFeeTier1;
         if (tier == 2) return validationFeeTier2;
@@ -131,7 +131,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     }
 
     /// @notice Distribute accumulated fees to treasury wallets
-    /// @param token Which token to distribute (FIT or USDC)
+    /// @param token Which token to distribute (CLAWC or USDC)
     function distribute(address token) external nonReentrant onlyOwner {
         uint256 balance = IERC20(token).balanceOf(address(this));
         if (balance == 0) revert InvalidFee();
@@ -173,8 +173,8 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     }
 
     function updateSpawnFeeFit(uint256 newFee) external onlyOwner {
-        emit FeeUpdated("spawnFit", spawnFeeFit, newFee);
-        spawnFeeFit = newFee;
+        emit FeeUpdated("spawnFit", spawnFeeClawc, newFee);
+        spawnFeeClawc = newFee;
     }
 
     function updateTransactionFeeBps(uint256 newBps) external onlyOwner {
@@ -197,12 +197,12 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
 
 ---
 
-## Patch 2: MoltCoachRegistry — Add Spawn Fee
+## Patch 2: ClawCoachRegistry — Add Spawn Fee
 
 Add fee collection to the existing `spawnAgent` function:
 
 ```solidity
-// Add to MoltCoachRegistry.sol
+// Add to ClawCoachRegistry.sol
 
 IProtocolFeeCollector public feeCollector;
 
@@ -214,8 +214,8 @@ function spawnAgent(
     uint8 mode
 ) external returns (uint256 agentId) {
     // Collect spawn fee
-    uint256 fee = feeCollector.spawnFeeFit();
-    feeCollector.collectFitFee(msg.sender, fee, "spawn");
+    uint256 fee = feeCollector.spawnFeeClawc();
+    feeCollector.collectClawcFee(msg.sender, fee, "spawn");
 
     // Existing spawn logic...
     agentId = _mint(msg.sender);
@@ -233,7 +233,7 @@ function spawnAgent(
 /// @notice Evolve agent to next level (with fee)
 function evolveAgent(uint256 agentId) external onlyAgentOwner(agentId) {
     uint256 fee = feeCollector.evolutionFee();
-    feeCollector.collectFitFee(msg.sender, fee, "evolution");
+    feeCollector.collectClawcFee(msg.sender, fee, "evolution");
 
     agents[agentId].level++;
     emit AgentEvolved(agentId, agents[agentId].level);
@@ -242,7 +242,7 @@ function evolveAgent(uint256 agentId) external onlyAgentOwner(agentId) {
 /// @notice Switch coaching mode (with fee)
 function switchMode(uint256 agentId, uint8 newMode) external onlyAgentOwner(agentId) {
     uint256 fee = feeCollector.modeSwitchFee();
-    feeCollector.collectFitFee(msg.sender, fee, "modeSwitch");
+    feeCollector.collectClawcFee(msg.sender, fee, "modeSwitch");
 
     agents[agentId].mode = newMode;
     emit ModeSwitched(agentId, newMode);
@@ -272,7 +272,7 @@ function validateWorkout(
     // Collect validation fee (Tier 3 / manual is free)
     uint256 fee = feeCollector.getValidationFee(tier);
     if (fee > 0) {
-        feeCollector.collectFitFee(msg.sender, fee, "validation");
+        feeCollector.collectClawcFee(msg.sender, fee, "validation");
     }
 
     // Existing validation logic...
@@ -290,7 +290,7 @@ uint256 public constant MIN_STAKE_DURATION = 30 days;
 uint256 public earlyUnstakePenaltyBps = 500; // 5%
 IProtocolFeeCollector public feeCollector;
 
-/// @notice Unstake $FIT (penalty if before minimum duration)
+/// @notice Unstake $CLAWC (penalty if before minimum duration)
 function unstake(uint256 amount) external nonReentrant {
     StakeInfo storage info = stakes[msg.sender];
     require(info.amount >= amount, "Insufficient stake");
@@ -302,11 +302,11 @@ function unstake(uint256 amount) external nonReentrant {
         uint256 penalty = (amount * earlyUnstakePenaltyBps) / 10000;
         payout = amount - penalty;
         // Penalty goes to treasury, NOT burned
-        feeCollector.collectFitFee(address(this), penalty, "earlyUnstake");
+        feeCollector.collectClawcFee(address(this), penalty, "earlyUnstake");
     }
 
     info.amount -= amount;
-    fitToken.transfer(msg.sender, payout);
+    clawcToken.transfer(msg.sender, payout);
 
     emit Unstaked(msg.sender, amount, payout);
 }
@@ -322,7 +322,7 @@ function unstake(uint256 amount) external nonReentrant {
 IProtocolFeeCollector public feeCollector;
 uint256 public claimFeeBps = 25; // 0.25%
 
-/// @notice Claim earned $FIT rewards (with micro-fee)
+/// @notice Claim earned $CLAWC rewards (with micro-fee)
 function claimReward(uint256 agentId) external nonReentrant {
     uint256 reward = pendingRewards[agentId];
     require(reward > 0, "No rewards");
@@ -333,9 +333,9 @@ function claimReward(uint256 agentId) external nonReentrant {
     pendingRewards[agentId] = 0;
 
     if (fee > 0) {
-        fitToken.transfer(address(feeCollector), fee);
+        clawcToken.transfer(address(feeCollector), fee);
     }
-    fitToken.transfer(msg.sender, payout);
+    clawcToken.transfer(msg.sender, payout);
 
     emit RewardClaimed(agentId, msg.sender, payout, fee);
 }
@@ -359,9 +359,9 @@ function claimReward(uint256 agentId) external nonReentrant {
 ## Deployment Order (Updated)
 
 ```
-1. FITToken                    ← TASK-001 (no changes)
+1. CLAWCToken                  ← TASK-001 (no changes)
 2. ProtocolFeeCollector  [NEW] ← Add as TASK-001B
-3. MoltCoachRegistry           ← TASK-002 (+ fee integration)
+3. ClawCoachRegistry           ← TASK-002 (+ fee integration)
 4. WorkoutValidator            ← TASK-003 (+ fee integration)
 5. RewardDistributor           ← TASK-004 (+ fee integration)
 6. StakingVault                ← TASK-005 (+ fee integration)

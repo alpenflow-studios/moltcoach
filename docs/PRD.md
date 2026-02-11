@@ -9,17 +9,17 @@
 ## 1. Overview
 
 ### What Is This?
-ClawCoach is an AI coaching agent that lives on-chain via ERC-8004. Each user gets a personalized coaching agent when they connect a Coinbase Smart Wallet. The agent provides fitness, health, and wellness coaching with workout tracking, wearable integration, and move-to-earn $FIT token rewards. Built to expand into any coaching category.
+ClawCoach is an AI coaching agent that lives on-chain via ERC-8004. Each user gets a personalized coaching agent when they connect a Coinbase Smart Wallet. The agent provides fitness, health, and wellness coaching with workout tracking, wearable integration, and move-to-earn $CLAWC token rewards. Built to expand into any coaching category.
 
 ### One-Liner
-AI coaching agent with on-chain identity and $FIT rewards.
+AI coaching agent with on-chain identity and $CLAWC rewards.
 
 ### Target Chain
 Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 
 ### Core Value Proposition
 1. Personalized AI coach with persistent on-chain identity (ERC-8004)
-2. Move-to-earn rewards ($FIT) for tracked workouts and activity
+2. Move-to-earn rewards ($CLAWC) for tracked workouts and activity
 3. Expandable from FHW to any coaching category
 
 ---
@@ -34,7 +34,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 
 ### Secondary Persona
 - **Who**: Web3-native user interested in AI agents and move-to-earn
-- **Goal**: Own an on-chain coaching agent, earn and stake $FIT
+- **Goal**: Own an on-chain coaching agent, earn and stake $CLAWC
 
 ---
 
@@ -49,7 +49,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 | Contracts | Solidity ^0.8.20, Foundry, OpenZeppelin 5.x, ERC-8004 |
 | Backend | Next.js Route Handlers, Prisma, Supabase Postgres |
 | AI | Claude Agent SDK (coaching agent runtime) |
-| Token | $FIT (ERC-20), staking contract |
+| Token | $CLAWC (ERC-20), staking contract |
 | Comms | XMTP, Telegram |
 | Chain | Base (8453) mainnet + Base Sepolia (84532) testnet |
 
@@ -98,21 +98,21 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] Workout history viewable in dashboard
 - [ ] `pnpm typecheck` passes
 
-### 4.5 $FIT Rewards (Move-to-Earn)
-**User Story**: As a user, I want to earn $FIT tokens for completing workouts.
+### 4.5 $CLAWC Rewards (Move-to-Earn)
+**User Story**: As a user, I want to earn $CLAWC tokens for completing workouts.
 
 **Acceptance Criteria**:
-- [ ] $FIT minted to user wallet after verified workout
+- [ ] $CLAWC minted to user wallet after verified workout
 - [ ] Reward amount based on workout type/duration/consistency
-- [ ] $FIT balance displayed in dashboard
+- [ ] $CLAWC balance displayed in dashboard
 - [ ] Transaction viewable on block explorer
 - [ ] `pnpm typecheck` passes
 
-### 4.6 $FIT Staking
-**User Story**: As a $FIT holder, I want to stake my tokens for enhanced features.
+### 4.6 $CLAWC Staking
+**User Story**: As a $CLAWC holder, I want to stake my tokens for enhanced features.
 
 **Acceptance Criteria**:
-- [ ] Stake/unstake $FIT via UI
+- [ ] Stake/unstake $CLAWC via UI
 - [ ] Staking unlocks enhanced coaching features (TBD)
 - [ ] Staked balance and rewards displayed
 - [ ] `pnpm typecheck` passes
@@ -132,7 +132,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 ## 5. Milestones
 
 ### Stage 1: Foundation (MVP)
-**Goal**: Core app works. Users can connect wallet, create agent, log workouts, earn $FIT.
+**Goal**: Core app works. Users can connect wallet, create agent, log workouts, earn $CLAWC.
 
 **Exit Criteria**:
 - [ ] All P0 features pass acceptance criteria
@@ -140,7 +140,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 - [ ] 5 internal testers complete full flow without help
 
 ### Stage 2: Launch & Growth
-**Goal**: Mainnet. Real users. $FIT rewards live. Wearable integrations.
+**Goal**: Mainnet. Real users. $CLAWC rewards live. Wearable integrations.
 
 **Exit Criteria**:
 - [ ] Mainnet contracts verified on Basescan
@@ -180,7 +180,7 @@ Base (chainId 8453) — Ethereum L2, low gas, Coinbase ecosystem.
 
 ## 8. Open Questions
 
-- [ ] $FIT tokenomics: total supply, distribution, earn rates
+- [ ] $CLAWC tokenomics: total supply, distribution, earn rates
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] XMTP vs Telegram: which is primary for MVP?
 - [ ] Agent-to-agent protocol at clawcoach.ai — what does this look like?

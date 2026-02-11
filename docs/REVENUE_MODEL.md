@@ -25,7 +25,7 @@ Every transaction through a user's Coinbase Smart Wallet routes a micro-fee to t
 | Collection | Automatic via Smart Wallet spending policy |
 | Revenue Share | 100% to Protocol Treasury |
 
-**Implementation**: Modify `MoltCoachWalletPolicy` to deduct fee before execution.
+**Implementation**: Modify `ClawCoachWalletPolicy` to deduct fee before execution.
 
 ```solidity
 uint256 public constant PROTOCOL_FEE_BPS = 50; // 0.5% (basis points)
@@ -46,15 +46,15 @@ Fees charged at key moments in a coach agent's lifecycle.
 
 | Action | Fee | Token | Frequency |
 |--------|-----|-------|-----------|
-| **Spawn** (mint agent NFT) | 5–25 USDC or equivalent $FIT | USDC / $FIT | Once per agent |
-| **Evolution** (level up / unlock tier) | 2–10 $FIT | $FIT | Per evolution event |
-| **Mode Switch** (Coach → Friend → Mentor) | 1–5 $FIT | $FIT | Per switch |
-| **Reset / Re-spec** (change personality/focus) | 10–25 $FIT | $FIT | Per reset |
-| **Archive Revival** (reactivate archived agent) | 5–15 $FIT | $FIT | Per revival |
+| **Spawn** (mint agent NFT) | 5–25 USDC or equivalent $CLAWC | USDC / $CLAWC | Once per agent |
+| **Evolution** (level up / unlock tier) | 2–10 $CLAWC | $CLAWC | Per evolution event |
+| **Mode Switch** (Coach → Friend → Mentor) | 1–5 $CLAWC | $CLAWC | Per switch |
+| **Reset / Re-spec** (change personality/focus) | 10–25 $CLAWC | $CLAWC | Per reset |
+| **Archive Revival** (reactivate archived agent) | 5–15 $CLAWC | $CLAWC | Per revival |
 
 **Why it works**: Users invest emotionally in their coach. These fees are low enough to feel like a natural part of progression, not a paywall.
 
-**Implementation**: Add fee collection to `MoltCoachRegistry.sol` spawn and evolution functions.
+**Implementation**: Add fee collection to `ClawCoachRegistry.sol` spawn and evolution functions.
 
 ---
 
@@ -64,9 +64,9 @@ Charged per workout verification request. Covers oracle compute costs + protocol
 
 | Validation Tier | Fee | Method | Confidence |
 |----------------|-----|--------|------------|
-| **Tier 1**: Wearable API | 0.01–0.05 $FIT | Automatic API verification | 1.0x multiplier |
-| **Tier 2**: Image Upload | 0.05–0.15 $FIT | Vision model inference | 0.85x multiplier |
-| **Tier 3**: Manual Entry | 0.00 $FIT | Self-reported (lowest rewards) | 0.5x multiplier |
+| **Tier 1**: Wearable API | 0.01–0.05 $CLAWC | Automatic API verification | 1.0x multiplier |
+| **Tier 2**: Image Upload | 0.05–0.15 $CLAWC | Vision model inference | 0.85x multiplier |
+| **Tier 3**: Manual Entry | 0.00 $CLAWC | Self-reported (lowest rewards) | 0.5x multiplier |
 | **Expedited Verification** | 2x standard fee | Skip queue, instant validation | Same as tier |
 
 **Volume projection**: At 2,000 active users × 4 workouts/week = 32,000 validations/month.
@@ -80,7 +80,7 @@ function validateWorkout(
     uint8 tier
 ) external payable {
     uint256 fee = validationFees[tier];
-    require(msg.value >= fee || fitToken.transferFrom(msg.sender, treasury, fee));
+    require(msg.value >= fee || clawcToken.transferFrom(msg.sender, treasury, fee));
     // ... validation logic
 }
 ```
@@ -107,7 +107,7 @@ Revenue from user-generated content and services traded on the platform.
 | Action | Fee | Notes |
 |--------|-----|-------|
 | **Early Unstake Penalty** | 5–10% of staked amount | Goes to treasury, not burned |
-| **$FIT Swap Spread** | 0.3% | If protocol-owned DEX pool |
+| **$CLAWC Swap Spread** | 0.3% | If protocol-owned DEX pool |
 | **Liquidity Provision** | Standard LP fees | Protocol-owned liquidity earns fees |
 
 **Implementation**: `StakingVault.sol` early withdrawal penalty + Uniswap V3 position management.
@@ -119,8 +119,8 @@ Revenue from user-generated content and services traded on the platform.
 | Tier | Price | Features |
 |------|-------|----------|
 | **Free** | $0 | Basic coaching, manual entry, 3 workouts/week tracking |
-| **Pro** | 10–20 USDC/mo or equivalent $FIT | Unlimited workouts, advanced analytics, wearable sync, priority validation, AI periodization |
-| **Coach** | 25–50 USDC/mo or equivalent $FIT | Everything in Pro + template marketplace access, client management, branded agent, revenue sharing |
+| **Pro** | 10–20 USDC/mo or equivalent $CLAWC | Unlimited workouts, advanced analytics, wearable sync, priority validation, AI periodization |
+| **Coach** | 25–50 USDC/mo or equivalent $CLAWC | Everything in Pro + template marketplace access, client management, branded agent, revenue sharing |
 
 **Payment**: Monthly subscription via x402 protocol or direct USDC transfer.
 
@@ -139,7 +139,7 @@ Revenue from user-generated content and services traded on the platform.
 
 **Why this matters**: B2B is where the real margin lives. Your fitness industry background is the moat. Independent coaches paying 30-40% to platforms today would jump at 5-10% with AI augmentation.
 
-**Implementation**: Multi-tenant agent spawning with custom branding via `MoltCoachRegistry`.
+**Implementation**: Multi-tenant agent spawning with custom branding via `ClawCoachRegistry`.
 
 ---
 
@@ -205,8 +205,8 @@ User Actions
     │
     ├── Wallet Tx ──────────── 0.5% ──→ Protocol Treasury
     ├── Spawn Agent ─────────── 5-25 USDC ──→ Protocol Treasury
-    ├── Log Workout ─────────── 0.01-0.15 $FIT ──→ Protocol Treasury
-    ├── Evolve Agent ─────────── 2-10 $FIT ──→ Protocol Treasury
+    ├── Log Workout ─────────── 0.01-0.15 $CLAWC ──→ Protocol Treasury
+    ├── Evolve Agent ─────────── 2-10 $CLAWC ──→ Protocol Treasury
     ├── Buy Template ─────────── 10-15% cut ──→ Protocol Treasury
     ├── Join Challenge ──────── 5% of pool ──→ Protocol Treasury
     ├── Subscribe Pro ──────── 10-20 USDC/mo ──→ Protocol Treasury
@@ -215,7 +215,7 @@ User Actions
 Protocol Treasury
     │
     ├── 40% → Development Fund (team, infra, compute)
-    ├── 30% → $FIT Buyback & Burn (deflationary pressure)
+    ├── 30% → $CLAWC Buyback & Burn (deflationary pressure)
     ├── 20% → Community Rewards Pool (grants, bounties)
     └── 10% → Insurance Reserve (smart contract risk)
 ```
@@ -226,8 +226,8 @@ Protocol Treasury
 
 | Contract | Revenue Function | Fee Type |
 |----------|-----------------|----------|
-| `MoltCoachWalletPolicy` | `executeWithFee()` | Transaction % |
-| `MoltCoachRegistry` | `spawnAgent()`, `evolveAgent()` | Flat fee |
+| `ClawCoachWalletPolicy` | `executeWithFee()` | Transaction % |
+| `ClawCoachRegistry` | `spawnAgent()`, `evolveAgent()` | Flat fee |
 | `WorkoutValidator` | `validateWorkout()` | Per-validation |
 | `StakingVault` | `unstake()` | Early penalty |
 | `RewardDistributor` | `claimReward()` | Claim fee |
@@ -238,8 +238,8 @@ Protocol Treasury
 
 ## Anti-Patterns to Avoid
 
-- **No yield on staking** — we're not a Ponzi. Staking locks $FIT for governance weight + fee discounts only
-- **No inflationary rewards** — emission is demand-driven, never exceeds 100K $FIT/day cap
+- **No yield on staking** — we're not a Ponzi. Staking locks $CLAWC for governance weight + fee discounts only
+- **No inflationary rewards** — emission is demand-driven, never exceeds 100K $CLAWC/day cap
 - **No hidden fees** — all fees visible in UI before confirmation
 - **No data selling without consent** — privacy-first, opt-in only
 - **No platform lock-in** — users can export data and migrate agents (ERC-8004 portability)
@@ -264,7 +264,7 @@ Protocol Treasury
 | Allocation | % | Purpose |
 |-----------|---|---------|
 | Development | 40% | Team compensation, infrastructure, compute costs |
-| Buyback & Burn | 30% | Purchase $FIT from market and burn → deflationary |
+| Buyback & Burn | 30% | Purchase $CLAWC from market and burn → deflationary |
 | Community | 20% | Grants, bounties, partnership incentives |
 | Insurance | 10% | Smart contract exploit coverage, emergency fund |
 

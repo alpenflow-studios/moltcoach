@@ -77,8 +77,8 @@ POST /api/agent/create
     │  - Upload to IPFS → get agentURI
     │
     ▼
-Smart Contract: MoltcoachIdentity.createAgent(agentURI)
-    │  - NOTE: MoltcoachIdentity will be renamed to ClawcoachIdentity for mainnet
+Smart Contract: ClawcoachIdentity.createAgent(agentURI)
+    │  - ClawcoachIdentity is the ERC-8004 identity contract on Base
     │  - Mints ERC-721 to user wallet
     │  - Registers in ERC-8004 Identity Registry
     │
@@ -131,7 +131,7 @@ CREATE TABLE workouts (
     intensity TEXT,
     source TEXT,  -- 'manual', 'strava', 'apple_health', 'garmin'
     raw_data JSONB,
-    fit_reward NUMERIC,
+    clawc_reward NUMERIC,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -153,7 +153,7 @@ CREATE TABLE wearable_connections (
 | Data | Store | TTL |
 |------|-------|-----|
 | User session | Redis | 24h |
-| $FIT balance | Client (wagmi) | 15s |
+| $CLAWC balance | Client (wagmi) | 15s |
 | Agent profile | TanStack Query | 5min |
 | Workout history | TanStack Query | 30s |
 

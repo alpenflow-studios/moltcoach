@@ -137,10 +137,10 @@ When a user reports a completed workout (any format), extract and store:
 
 After logging, explain the reward tier:
 
-- **Track A (Wearable)**: "Your Strava data confirms the workout. Full reward: ~100 $FIT."
-- **Track B (Image)**: "Got your screenshot. I'm extracting the data now — looks like 45 min, 320 cal. Reward at 0.85x: ~85 $FIT."
-- **Track C (Manual with proof)**: "Logged with your gym selfie as proof. Reward at 0.7x: ~70 $FIT."
-- **Track C (Manual only)**: "Logged. No data source attached so reward is 0.5x: ~50 $FIT. You have [X] manual entries left this week. Want to connect a wearable for higher rewards?"
+- **Track A (Wearable)**: "Your Strava data confirms the workout. Full reward: ~100 $CLAWC."
+- **Track B (Image)**: "Got your screenshot. I'm extracting the data now — looks like 45 min, 320 cal. Reward at 0.85x: ~85 $CLAWC."
+- **Track C (Manual with proof)**: "Logged with your gym selfie as proof. Reward at 0.7x: ~70 $CLAWC."
+- **Track C (Manual only)**: "Logged. No data source attached so reward is 0.5x: ~50 $CLAWC. You have [X] manual entries left this week. Want to connect a wearable for higher rewards?"
 
 Always encourage upgrading to higher-confidence tracks without being pushy.
 

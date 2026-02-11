@@ -30,25 +30,25 @@
 
 | Contract | Address | Network |
 |----------|---------|---------|
-| MoltcoachIdentity (ERC-8004) | `0x949488bD2F10884a0E2eB89e4947837b48814c9a` | Base Sepolia (84532) |
-| $FIT Token | `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138` | Base Sepolia (84532) |
+| ClawcoachIdentity (ERC-8004) | `0x949488bD2F10884a0E2eB89e4947837b48814c9a` | Base Sepolia (84532) |
+| $CLAWC Token | `0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138` | Base Sepolia (84532) |
 | ProtocolFeeCollector | `0xBd21945e92BEC4bf23B730987A8eE7f45C4E2cD2` | Base Sepolia (84532) |
-| FIT Staking | `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737` | Base Sepolia (84532) |
+| CLAWC Staking | `0x57B6C63fFc4Aac5654C70dFc61469AFEe72c0737` | Base Sepolia (84532) |
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | Base Sepolia (84532) |
 
 **Admin Wallet**: Deployer (MetaMask dev wallet)
 
-> **Note**: Contract names (MoltcoachIdentity, etc.) will be renamed to ClawcoachIdentity at mainnet deployment. See `docs/CONTRACTS.md` for the mainnet prep checklist.
+> **Note**: Addresses above are from the pre-rebrand deployment ($FIT era). Phase 7 will redeploy with $CLAWC branding and update all addresses.
 
 ---
 
 ## Contract Deployment Order
 
 ```
-1. FitToken ($FIT)           ← TASK-004
-2. ProtocolFeeCollector      ← TASK-005 (needs FIT + USDC addresses)
-3. FitStaking                ← TASK-006 (needs FIT + FeeCollector)
-4. MoltcoachIdentity         ← Already built (TASK-003), deploy anytime
+1. ClawcToken ($CLAWC)       ← TASK-004
+2. ProtocolFeeCollector      ← TASK-005 (needs CLAWC + USDC addresses)
+3. ClawcStaking              ← TASK-006 (needs CLAWC + FeeCollector)
+4. ClawcoachIdentity         ← Already built (TASK-003), deploy anytime
 ```
 
 ---
@@ -63,8 +63,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 # Chain / Contracts
 NEXT_PUBLIC_CHAIN_ID=84532
 NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS=
-NEXT_PUBLIC_FIT_TOKEN_ADDRESS=
-NEXT_PUBLIC_FIT_STAKING_ADDRESS=
+NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS=
+NEXT_PUBLIC_CLAWC_STAKING_ADDRESS=
 
 # Coinbase
 NEXT_PUBLIC_COINBASE_WALLET_PROJECT_ID=
@@ -85,8 +85,8 @@ ANTHROPIC_API_KEY=
 | Agent Framework | Claude Agent SDK (coaching agent runtime) |
 | Agent Identity | ERC-8004 (Trustless Agents) on Base |
 | Agent Comms | XMTP, Telegram |
-| Token | $FIT (ERC-20, move-to-earn rewards) |
-| Staking | $FIT staking contract |
+| Token | $CLAWC (ERC-20, platform staking & governance) |
+| Staking | $CLAWC staking contract |
 | Wearables | Strava, Apple Health, Garmin integrations |
 | Database | Supabase (project ID: TBD) |
 | Chain | Base Sepolia (84532) for dev, Base mainnet (8453) for prod |
@@ -103,8 +103,8 @@ A **ClawCoach** is an AI coaching agent that lives on-chain via ERC-8004. Each u
 USER CONNECTS WALLET → VERIFICATION → AGENT CREATION (ERC-8004)
     → ONBOARDING (personality, heartbeat, persona via questions + metrics)
     → ACTIVE COACHING (workouts, tracking, motivation)
-    → REWARDS ($FIT earned via move-to-earn)
-    → STAKING ($FIT staked for benefits)
+    → REWARDS ($CLAWC earned via move-to-earn)
+    → STAKING ($CLAWC staked for benefits)
 ```
 
 ### ERC-8004 Integration
@@ -119,11 +119,11 @@ When a new ClawCoach is created, it goes through an onboarding flow:
 - **Heartbeat**: Activity cadence, check-in frequency, response patterns
 - **Persona**: Coaching specialization (FHW initially, expandable to any category)
 
-### $FIT Token
+### $CLAWC Token
 - **Type**: ERC-20 on Base
 - **Earn**: Move-to-earn rewards from tracked workouts and class attendance
-- **Stake**: Stake $FIT for enhanced coaching features, community access
-- **Purpose**: Incentive alignment between agent and human
+- **Stake**: Stake $CLAWC for enhanced coaching features, community access
+- **Purpose**: Platform staking, governance, and incentive alignment between agent and human
 
 ### Communication Channels
 - **XMTP** — Decentralized messaging (primary)
@@ -148,8 +148,8 @@ Core tables (planned):
 - `agent_personas` — Personality, heartbeat, persona config per agent
 - `workouts` — Tracked workout data
 - `wearable_connections` — Strava, Apple Health, Garmin links
-- `fit_rewards` — $FIT earning history
-- `fit_stakes` — $FIT staking positions
+- `clawc_rewards` — $CLAWC earning history
+- `clawc_stakes` — $CLAWC staking positions
 - `messages` — Agent-human conversation history
 - `coaching_sessions` — Structured coaching session records
 

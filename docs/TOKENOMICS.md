@@ -1,8 +1,8 @@
-# TOKENOMICS.md — $FIT Token Economics
+# TOKENOMICS.md — $CLAWC Token Economics
 
 > **Version**: 1.0.0
 > **Project**: ClawCoach
-> **Token**: $FIT (ClawCoach FIT)
+> **Token**: $CLAWC (ClawCoach CLAWC)
 > **Chain**: Base (chainId 8453)
 > **Standard**: ERC-20 (OpenZeppelin 5.x)
 > **Last Updated**: February 7, 2026
@@ -11,12 +11,12 @@
 
 ## 1. Token Overview
 
-$FIT is ClawCoach's move-to-earn utility token on Base. It incentivizes consistent, verified workout completion and gates premium platform features via staking.
+$CLAWC is ClawCoach's move-to-earn utility token on Base. It incentivizes consistent, verified workout completion and gates premium platform features via staking.
 
 | Property | Value |
 |----------|-------|
-| Name | ClawCoach FIT |
-| Symbol | FIT |
+| Name | ClawCoach CLAWC |
+| Symbol | CLAWC |
 | Decimals | 18 |
 | Max Supply | 1,000,000,000 (1B) |
 | Initial Supply | 0 (no pre-mine, no public sale) |
@@ -24,7 +24,7 @@ $FIT is ClawCoach's move-to-earn utility token on Base. It incentivizes consiste
 | Burning | ERC20Burnable — anyone can burn their own tokens |
 | Permit | ERC20Permit — gasless approvals via EIP-2612 |
 
-**Core Principle**: $FIT is earned, never bought. There is no token sale, no pre-mine, and no team allocation at launch. Every $FIT in circulation was minted because someone completed a verified workout. This keeps the token's value tightly coupled to real physical activity.
+**Core Principle**: $CLAWC is earned, never bought. There is no token sale, no pre-mine, and no team allocation at launch. Every $CLAWC in circulation was minted because someone completed a verified workout. This keeps the token's value tightly coupled to real physical activity.
 
 ---
 
@@ -32,11 +32,11 @@ $FIT is ClawCoach's move-to-earn utility token on Base. It incentivizes consiste
 
 ### Daily Emission Cap
 
-**100,000 $FIT per day** across all users, enforced on-chain by `FITToken.sol`.
+**100,000 $CLAWC per day** across all users, enforced on-chain by `CLAWCToken.sol`.
 
 ```
-Day 1:     Up to 100K $FIT minted
-Day 2:     Up to 100K $FIT minted
+Day 1:     Up to 100K $CLAWC minted
+Day 2:     Up to 100K $CLAWC minted
 ...
 Day 10000: Cap reached at 1B total supply → no more minting
 ```
@@ -47,10 +47,10 @@ At maximum emission (unlikely in early months), the full supply would be distrib
 
 | Phase | Timeline | Est. Daily Emission | Notes |
 |-------|----------|-------------------|-------|
-| **Bootstrap** | Months 1-3 | 5K-20K $FIT/day | Small beta user base, low volume |
-| **Growth** | Months 4-12 | 20K-60K $FIT/day | User growth, more validated workouts |
-| **Maturity** | Year 2+ | 60K-100K $FIT/day | Approaching cap, sustainability mechanisms kick in |
-| **Post-Cap** | When 1B reached | 0 new $FIT | All rewards from recycled/burned tokens or secondary mechanics |
+| **Bootstrap** | Months 1-3 | 5K-20K $CLAWC/day | Small beta user base, low volume |
+| **Growth** | Months 4-12 | 20K-60K $CLAWC/day | User growth, more validated workouts |
+| **Maturity** | Year 2+ | 60K-100K $CLAWC/day | Approaching cap, sustainability mechanisms kick in |
+| **Post-Cap** | When 1B reached | 0 new $CLAWC | All rewards from recycled/burned tokens or secondary mechanics |
 
 ### Why a Hard Cap?
 
@@ -66,7 +66,7 @@ Uncapped emission creates death spirals (see StepN collapse). The 100K/day cap e
 
 ### Base Reward
 
-**100 $FIT per validated workout** (base amount before multipliers).
+**100 $CLAWC per validated workout** (base amount before multipliers).
 
 Enforced in `RewardDistributor.sol` as a configurable parameter (`baseReward`), adjustable by admin if economics require rebalancing.
 
@@ -76,10 +76,10 @@ Applied based on the data source used for workout validation:
 
 | Tier | Data Source | Multiplier | Effective Reward |
 |------|------------|-----------|-----------------|
-| 1 | Direct Wearable API (OAuth) | 1.0x | 100 $FIT |
-| 2 | Image Upload (vision-parsed) | 0.85x | 85 $FIT |
-| 3 | Manual + Photo/Video Proof | 0.7x | 70 $FIT |
-| 4 | Manual (no proof) | 0.5x | 50 $FIT |
+| 1 | Direct Wearable API (OAuth) | 1.0x | 100 $CLAWC |
+| 2 | Image Upload (vision-parsed) | 0.85x | 85 $CLAWC |
+| 3 | Manual + Photo/Video Proof | 0.7x | 70 $CLAWC |
+| 4 | Manual (no proof) | 0.5x | 50 $CLAWC |
 
 Tier 4 is rate-limited to **max 3 per week** per user (enforced by `WorkoutValidator.sol`).
 
@@ -89,10 +89,10 @@ Consecutive validated workout days trigger bonus multipliers. Applied AFTER tier
 
 | Streak Length | Bonus Multiplier | Example (Tier 1) |
 |--------------|-----------------|-----------------|
-| < 7 days | 1.0x (none) | 100 $FIT |
-| 7+ consecutive days | 1.5x | 150 $FIT |
-| 30+ consecutive days | 2.0x | 200 $FIT |
-| 90+ consecutive days | 2.5x | 250 $FIT |
+| < 7 days | 1.0x (none) | 100 $CLAWC |
+| 7+ consecutive days | 1.5x | 150 $CLAWC |
+| 30+ consecutive days | 2.0x | 200 $CLAWC |
+| 90+ consecutive days | 2.5x | 250 $CLAWC |
 
 **Streak rules**:
 - One validated workout per calendar day qualifies
@@ -111,11 +111,11 @@ Final Reward = baseReward × tierMultiplier × streakBonus
 
 | Scenario | Base | × Tier | × Streak | = Final |
 |----------|------|--------|----------|---------|
-| Tier 1, no streak | 100 | × 1.0 | × 1.0 | **100 $FIT** |
-| Tier 2, 7-day streak | 100 | × 0.85 | × 1.5 | **127.5 $FIT** |
-| Tier 1, 30-day streak | 100 | × 1.0 | × 2.0 | **200 $FIT** |
-| Tier 4, 90-day streak | 100 | × 0.5 | × 2.5 | **125 $FIT** |
-| Tier 1, 90-day streak | 100 | × 1.0 | × 2.5 | **250 $FIT** |
+| Tier 1, no streak | 100 | × 1.0 | × 1.0 | **100 $CLAWC** |
+| Tier 2, 7-day streak | 100 | × 0.85 | × 1.5 | **127.5 $CLAWC** |
+| Tier 1, 30-day streak | 100 | × 1.0 | × 2.0 | **200 $CLAWC** |
+| Tier 4, 90-day streak | 100 | × 0.5 | × 2.5 | **125 $CLAWC** |
+| Tier 1, 90-day streak | 100 | × 1.0 | × 2.5 | **250 $CLAWC** |
 
 ### Daily Cap Distribution
 
@@ -139,7 +139,7 @@ Burns reduce circulating supply, creating deflationary pressure to counterbalanc
 
 | Burn Event | Amount | Trigger |
 |-----------|--------|---------|
-| Agent Spawn Fee | Variable (initially 10 $FIT) | User spawns a new agent |
+| Agent Spawn Fee | Variable (initially 10 $CLAWC) | User spawns a new agent |
 | Hard Reset Fee | 50% of spawn fee | User hard-resets agent (burns some accumulated value) |
 | Premium Feature Unlock | Variable | One-time burns for permanent feature access (future) |
 
@@ -166,14 +166,14 @@ Burns reduce circulating supply, creating deflationary pressure to counterbalanc
 
 ### Premium Tiers
 
-Staking $FIT unlocks premium platform features. Staked tokens remain in `StakingVault.sol` and are NOT burned.
+Staking $CLAWC unlocks premium platform features. Staked tokens remain in `StakingVault.sol` and are NOT burned.
 
 | Tier | Required Stake | Features Unlocked |
 |------|---------------|-------------------|
-| **Free** | 0 $FIT | Basic coaching, manual entry, web chat |
-| **Basic** | 100 $FIT | + Wearable API integration (OAuth setup) |
-| **Pro** | 1,000 $FIT | + Advanced analytics, nutrition guidance, priority responses |
-| **Elite** | 10,000 $FIT | + Early access to new features, custom agent skills |
+| **Free** | 0 $CLAWC | Basic coaching, manual entry, web chat |
+| **Basic** | 100 $CLAWC | + Wearable API integration (OAuth setup) |
+| **Pro** | 1,000 $CLAWC | + Advanced analytics, nutrition guidance, priority responses |
+| **Elite** | 10,000 $CLAWC | + Early access to new features, custom agent skills |
 
 ### Staking Rules
 
@@ -188,9 +188,9 @@ Staking $FIT unlocks premium platform features. Staked tokens remain in `Staking
 Many move-to-earn tokens fail because staking rewards create circular incentives (stake to earn more tokens to stake to earn more tokens). ClawCoach breaks this by:
 - Staking = access to features (real utility, not yield)
 - Earning = completing workouts (real activity, not capital)
-- No compounding: you can't earn $FIT by holding $FIT
+- No compounding: you can't earn $CLAWC by holding $CLAWC
 
-This means the only way to accumulate $FIT is to work out. Period.
+This means the only way to accumulate $CLAWC is to work out. Period.
 
 ---
 
@@ -215,7 +215,7 @@ When DAO governance is established, the community may vote to:
 - Adjust emission parameters
 - Introduce new burn/reward mechanisms
 
-**Until governance is live**, all $FIT goes directly to users who work out. No admin allocation, no treasury reserve, no insider distribution.
+**Until governance is live**, all $CLAWC goes directly to users who work out. No admin allocation, no treasury reserve, no insider distribution.
 
 ---
 
@@ -225,7 +225,7 @@ When DAO governance is established, the community may vote to:
 
 | Mechanism | What It Prevents |
 |-----------|-----------------|
-| Spawn fee ($FIT) | Free agent farming (must earn/acquire $FIT to spawn additional agents) |
+| Spawn fee ($CLAWC) | Free agent farming (must earn/acquire $CLAWC to spawn additional agents) |
 | One active agent per wallet | Multi-agent reward farming |
 | Tier 4 rate limit (3/week) | Spam manual entries for easy rewards |
 | Validation scoring (≥80 to earn) | Low-quality workout submissions |
@@ -256,21 +256,21 @@ When DAO governance is established, the community may vote to:
 ### Scenario A: Healthy Growth
 
 ```
-Month 1:  500 users, 5K $FIT/day emission
-Month 6:  5,000 users, 40K $FIT/day emission
-Month 12: 20,000 users, 80K $FIT/day (approaching cap)
+Month 1:  500 users, 5K $CLAWC/day emission
+Month 6:  5,000 users, 40K $CLAWC/day emission
+Month 12: 20,000 users, 80K $CLAWC/day (approaching cap)
           Burns consuming 20% of daily emission
-          $FIT has real utility (staking tiers, spawn fees)
+          $CLAWC has real utility (staking tiers, spawn fees)
           Secondary market forms naturally
 ```
 
 ### Scenario B: Slow Start
 
 ```
-Month 1:  50 users, 500 $FIT/day
-Month 6:  500 users, 5K $FIT/day
-Month 12: 2,000 users, 15K $FIT/day
-          Low supply means each $FIT has higher utility value
+Month 1:  50 users, 500 $CLAWC/day
+Month 6:  500 users, 5K $CLAWC/day
+Month 12: 2,000 users, 15K $CLAWC/day
+          Low supply means each $CLAWC has higher utility value
           Early adopters well-rewarded
           Burn rate exceeds growth → natural scarcity
 ```
@@ -284,7 +284,7 @@ If user activity drops sharply:
 - Burn mechanisms continue (spawn fees, etc.)
 - Admin can reduce base reward to slow emission further
 
-The key insight: **$FIT emission is demand-driven, not time-driven**. The daily cap is a ceiling, not a floor. If no one works out, no $FIT is minted. This prevents the supply-side death spirals that killed StepN.
+The key insight: **$CLAWC emission is demand-driven, not time-driven**. The daily cap is a ceiling, not a floor. If no one works out, no $CLAWC is minted. This prevents the supply-side death spirals that killed StepN.
 
 ---
 
@@ -294,13 +294,13 @@ All values configurable by admin (multi-sig initially, governance post-Stage 3):
 
 | Parameter | Contract | Default | Range |
 |-----------|----------|---------|-------|
-| `MAX_SUPPLY` | FITToken | 1,000,000,000 | Immutable |
-| `DAILY_EMISSION_CAP` | FITToken | 100,000 | 10K - 500K |
-| `baseReward` | RewardDistributor | 100 $FIT | 10 - 1,000 |
+| `MAX_SUPPLY` | CLAWCToken | 1,000,000,000 | Immutable |
+| `DAILY_EMISSION_CAP` | CLAWCToken | 100,000 | 10K - 500K |
+| `baseReward` | RewardDistributor | 100 $CLAWC | 10 - 1,000 |
 | `streakBonuses[7]` | RewardDistributor | 1.5x (15000 bps) | 1.0x - 3.0x |
 | `streakBonuses[30]` | RewardDistributor | 2.0x (20000 bps) | 1.0x - 5.0x |
 | `streakBonuses[90]` | RewardDistributor | 2.5x (25000 bps) | 1.0x - 5.0x |
-| `spawnFee` | MoltCoachRegistry | 10 $FIT | 0 - 1,000 |
+| `spawnFee` | ClawCoachRegistry | 10 $CLAWC | 0 - 1,000 |
 | Tier thresholds | StakingVault | 100/1K/10K | Adjustable |
 | `MIN_VALIDATION_SCORE` | WorkoutValidator | 80 | 50 - 100 |
 | `MAX_MANUAL_PER_WEEK` | WorkoutValidator | 3 | 0 - 10 |
@@ -309,10 +309,10 @@ All values configurable by admin (multi-sig initially, governance post-Stage 3):
 
 ## 10. Open Questions
 
-- [ ] **Secondary market**: Should ClawCoach facilitate $FIT/USDC trading (DEX pool), or let it emerge organically?
+- [ ] **Secondary market**: Should ClawCoach facilitate $CLAWC/USDC trading (DEX pool), or let it emerge organically?
 - [ ] **Treasury allocation**: When governance launches, what % of daily emission should feed a treasury?
 - [ ] **Dynamic base reward**: Should base reward auto-adjust based on daily claim volume (algorithmic)?
-- [ ] **Cross-project utility**: Could $FIT be used in other projects (SMASH stakes, for example)?
+- [ ] **Cross-project utility**: Could $CLAWC be used in other projects (SMASH stakes, for example)?
 - [ ] **Token legal classification**: Utility token analysis needed before mainnet launch.
 - [ ] **Emergency circuit breaker**: Should admin be able to pause all minting in case of exploit?
 
@@ -322,12 +322,12 @@ All values configurable by admin (multi-sig initially, governance post-Stage 3):
 
 | Metric | Frequency | Alert Threshold |
 |--------|-----------|----------------|
-| Daily $FIT minted | Daily | > 90K (approaching cap) |
+| Daily $CLAWC minted | Daily | > 90K (approaching cap) |
 | Daily burn amount | Daily | < 5% of emissions (low burn) |
 | Circulating supply | Daily | Dashboard metric |
 | Staked supply (% of circulating) | Weekly | < 10% (low staking) |
 | Unique claimants per day | Daily | Trending indicator |
-| Avg reward per user per day | Daily | > 500 $FIT (potential gaming) |
+| Avg reward per user per day | Daily | > 500 $CLAWC (potential gaming) |
 | Tier 4 claims per user per week | Real-time | > 3 (enforcement check) |
 | Streak distribution (7/30/90) | Weekly | Health of engagement |
 

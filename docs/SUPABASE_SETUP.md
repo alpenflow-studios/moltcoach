@@ -108,7 +108,7 @@ CREATE TABLE workouts (
   workout_type TEXT NOT NULL,
   duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
   calories_burned INTEGER,
-  fit_earned TEXT NOT NULL DEFAULT '0',
+  clawc_earned TEXT NOT NULL DEFAULT '0',
   source TEXT NOT NULL CHECK (source IN ('manual', 'strava', 'apple_health', 'garmin', 'agent_api')),
   verified BOOLEAN NOT NULL DEFAULT FALSE,
   completed_at TIMESTAMPTZ NOT NULL,
@@ -141,7 +141,7 @@ CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   tier INTEGER NOT NULL CHECK (tier BETWEEN 0 AND 3),
-  payment_token TEXT NOT NULL CHECK (payment_token IN ('FIT', 'USDC', 'ETH')),
+  payment_token TEXT NOT NULL CHECK (payment_token IN ('CLAWC', 'USDC', 'ETH')),
   amount TEXT NOT NULL,
   tx_hash TEXT,
   starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -276,8 +276,8 @@ After running the SQL:
 
 ClawCoach uses on-chain data as the source of truth:
 - **Agent identity**: ERC-8004 contract on Base Sepolia (not Supabase)
-- **Staking/tiers**: FitStaking contract on Base Sepolia (not Supabase)
-- **Token balances**: FitToken contract on Base Sepolia (not Supabase)
+- **Staking/tiers**: ClawcStaking contract on Base Sepolia (not Supabase)
+- **Token balances**: ClawcToken contract on Base Sepolia (not Supabase)
 
 Supabase stores **supplementary data** that doesn't belong on-chain:
 - Chat messages (too much data for on-chain)

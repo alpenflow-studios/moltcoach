@@ -13,15 +13,19 @@
 ```
 contracts/
 ├── src/
-│   ├── MoltcoachIdentity.sol    # ERC-8004 agent identity (ERC-721)
-│   ├── FitToken.sol              # $FIT ERC-20 token
-│   └── FitStaking.sol            # $FIT staking contract
+│   ├── ClawcoachIdentity.sol    # ERC-8004 agent identity (ERC-721)
+│   ├── ClawcToken.sol            # $CLAWC ERC-20 token
+│   ├── ClawcStaking.sol          # $CLAWC staking contract
+│   └── fees/
+│       └── ProtocolFeeCollector.sol
 ├── test/
-│   ├── MoltcoachIdentity.t.sol
-│   ├── FitToken.t.sol
-│   └── FitStaking.t.sol
+│   ├── ClawcoachIdentity.t.sol
+│   ├── ClawcToken.t.sol
+│   ├── ClawcStaking.t.sol
+│   └── ProtocolFeeCollector.t.sol
 ├── script/
-│   └── Deploy.s.sol
+│   ├── Deploy.s.sol
+│   └── MintTestTokens.s.sol
 ├── foundry.toml
 └── remappings.txt
 ```
@@ -30,7 +34,7 @@ contracts/
 
 ## Contract Specs
 
-### MoltcoachIdentity.sol
+### ClawcoachIdentity.sol
 - **Standard**: ERC-8004 Identity Registry (extends ERC-721 + URIStorage)
 - **Purpose**: On-chain identity for each ClawCoach agent
 - **Key functions**:
@@ -40,19 +44,19 @@ contracts/
 - **Access control**: Only token owner can update their agent's URI
 - **Events**: `AgentCreated(address owner, uint256 agentId, string agentURI)`
 
-### FitToken.sol
+### ClawcToken.sol
 - **Standard**: ERC-20 (OpenZeppelin)
-- **Purpose**: Move-to-earn reward token
+- **Purpose**: Platform staking & governance token
 - **Key functions**:
   - `mint(address to, uint256 amount)` — Owner-only minting for rewards
   - `burn(uint256 amount)` — Token holders can burn
 - **Access control**: Ownable (reward minting restricted)
 - **Supply**: TBD (tokenomics not finalized)
 
-### FitStaking.sol
-- **Purpose**: Stake $FIT for enhanced coaching features
+### ClawcStaking.sol
+- **Purpose**: Stake $CLAWC for enhanced coaching features
 - **Key functions**:
-  - `stake(uint256 amount)` — Stake $FIT tokens
+  - `stake(uint256 amount)` — Stake $CLAWC tokens
   - `unstake(uint256 amount)` — Withdraw staked tokens
   - `getStake(address user)` — View staked balance
 - **Security**: ReentrancyGuard on stake/unstake

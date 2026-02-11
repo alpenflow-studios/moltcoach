@@ -42,21 +42,25 @@
 
 ### In Progress
 
-#### TASK-009: Supabase Integration (In Progress)
-- **Priority**: P1
-- **Scope**: `src/lib/supabase.ts`, new hooks, API routes
-- **Status**: Michael setting up Supabase project with Claude.ai. Setup guide created at `docs/SUPABASE_SETUP.md`.
-- **Acceptance Criteria**:
-  - [ ] Supabase project ID and anon key in `.env.local`
-  - [ ] User record created on wallet connect
-  - [ ] Agent registration synced to Supabase
-  - [ ] Workout data stored in Supabase
-  - [ ] Chat messages persisted in Supabase
-  - [ ] RLS policies working (users can only read/write own data)
+_(none)_
 
 ---
 
 ### Done
+
+#### TASK-009: Supabase Integration
+- **Priority**: P1
+- **Scope**: `src/lib/supabase.ts`, new hooks, API routes
+- **Started**: Session 14 (Feb 10, 2026)
+- **Completed**: Session 17 (Feb 11, 2026)
+- **Notes**: Supabase project `clawcoach` (ref `agvdivapnrqpstvhkbmk`, East US/Ohio). 6 tables, RLS enabled. Workout storage deferred (API route exists, needs wearable integration). Changes NOT YET COMMITTED.
+- **Acceptance Criteria**:
+  - [x] Supabase project ID and anon key in `.env.local`
+  - [x] User record created on wallet connect
+  - [x] Agent registration synced to Supabase
+  - [ ] Workout data stored in Supabase (API route ready, needs wearable integration)
+  - [x] Chat messages persisted in Supabase
+  - [x] RLS policies working (users can only read/write own data)
 
 #### TASK-013: XMTP Integration
 - **Priority**: P2

@@ -1,4 +1,4 @@
-/** Supabase database types — update when tables are created */
+/** Supabase database types — matches schema from docs/SUPABASE_SETUP.md */
 export type Database = {
   public: {
     Tables: {
@@ -19,6 +19,7 @@ export type Database = {
           wallet_address?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       agents: {
         Row: {
@@ -47,64 +48,15 @@ export type Database = {
           agent_uri?: string;
           updated_at?: string;
         };
-      };
-      workouts: {
-        Row: {
-          id: string;
-          user_id: string;
-          agent_id: string;
-          workout_type: string;
-          duration_minutes: number;
-          calories_burned: number | null;
-          fit_earned: string;
-          source: string;
-          completed_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          agent_id: string;
-          workout_type: string;
-          duration_minutes: number;
-          calories_burned?: number | null;
-          fit_earned: string;
-          source: string;
-          completed_at: string;
-          created_at?: string;
-        };
-        Update: {
-          workout_type?: string;
-          duration_minutes?: number;
-          calories_burned?: number | null;
-          fit_earned?: string;
-        };
-      };
-      coaching_sessions: {
-        Row: {
-          id: string;
-          user_id: string;
-          agent_id: string;
-          session_type: string;
-          summary: string | null;
-          started_at: string;
-          ended_at: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          agent_id: string;
-          session_type: string;
-          summary?: string | null;
-          started_at: string;
-          ended_at?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          summary?: string | null;
-          ended_at?: string | null;
-        };
+        Relationships: [
+          {
+            foreignKeyName: "agents_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       messages: {
         Row: {
@@ -126,6 +78,115 @@ export type Database = {
         Update: {
           content?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      workouts: {
+        Row: {
+          id: string;
+          user_id: string;
+          agent_id: string | null;
+          workout_type: string;
+          duration_minutes: number;
+          calories_burned: number | null;
+          fit_earned: string;
+          source: string;
+          verified: boolean;
+          completed_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          agent_id?: string | null;
+          workout_type: string;
+          duration_minutes: number;
+          calories_burned?: number | null;
+          fit_earned?: string;
+          source: string;
+          verified?: boolean;
+          completed_at: string;
+          created_at?: string;
+        };
+        Update: {
+          workout_type?: string;
+          duration_minutes?: number;
+          calories_burned?: number | null;
+          fit_earned?: string;
+          verified?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workouts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workouts_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      coaching_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          agent_id: string;
+          session_type: string;
+          summary: string | null;
+          started_at: string;
+          ended_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          agent_id: string;
+          session_type?: string;
+          summary?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          summary?: string | null;
+          ended_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "coaching_sessions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "coaching_sessions_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       subscriptions: {
         Row: {
@@ -157,10 +218,20 @@ export type Database = {
           expires_at?: string | null;
           auto_renew?: boolean;
         };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };

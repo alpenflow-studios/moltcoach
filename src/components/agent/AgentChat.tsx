@@ -15,6 +15,9 @@ type AgentChatProps = {
   agentName: string;
   coachingStyle: string;
   walletAddress?: string;
+  // Supabase chat persistence
+  chatHistory?: ChatMessageType[];
+  onSaveMessages?: (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => void;
   // XMTP (all optional — undefined means XMTP not active)
   xmtpStatus?: XmtpClientStatus;
   xmtpError?: string | null;
@@ -39,6 +42,8 @@ export function AgentChat({
   agentName,
   coachingStyle,
   walletAddress,
+  chatHistory,
+  onSaveMessages,
   xmtpStatus,
   xmtpError,
   xmtpHistory,
@@ -46,22 +51,29 @@ export function AgentChat({
   onXmtpDisconnect,
   onXmtpSendMessage,
 }: AgentChatProps) {
-  // Mirror completed message pairs to XMTP
+  // Handle completed message pairs — save to Supabase + mirror to XMTP
   const handleMessageComplete = useCallback(
     (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => {
-      if (!onXmtpSendMessage) return;
-      void onXmtpSendMessage(userMsg.content, "user");
-      void onXmtpSendMessage(assistantMsg.content, "assistant");
+      // Persist to Supabase
+      onSaveMessages?.(userMsg, assistantMsg);
+      // Mirror to XMTP
+      if (onXmtpSendMessage) {
+        void onXmtpSendMessage(userMsg.content, "user");
+        void onXmtpSendMessage(assistantMsg.content, "assistant");
+      }
     },
-    [onXmtpSendMessage],
+    [onSaveMessages, onXmtpSendMessage],
   );
+
+  // Supabase history takes priority, XMTP history as fallback
+  const initialMessages = chatHistory && chatHistory.length > 0 ? chatHistory : xmtpHistory;
 
   const { messages, isStreaming, error, sendMessage } = useChat({
     agentName,
     coachingStyle,
     walletAddress,
-    initialMessages: xmtpHistory,
-    onMessageComplete: onXmtpSendMessage ? handleMessageComplete : undefined,
+    initialMessages,
+    onMessageComplete: handleMessageComplete,
   });
   const scrollRef = useRef<HTMLDivElement>(null);
 

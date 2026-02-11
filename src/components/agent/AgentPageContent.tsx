@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgentReads } from "@/hooks/useAgentReads";
+import { useChatHistory } from "@/hooks/useChatHistory";
 import { useXmtpClient } from "@/hooks/useXmtpClient";
 import { useXmtpConversation } from "@/hooks/useXmtpConversation";
 import { parseAgentURI } from "@/lib/agentURI";
@@ -18,6 +19,13 @@ export function AgentPageContent() {
   const data = useAgentReads(address);
   const searchParams = useSearchParams();
 
+  // Supabase chat history (loads on mount, provides save function)
+  const agentIdNum = data.agentId ? Number(data.agentId) : undefined;
+  const chatHistory = useChatHistory({
+    walletAddress: address,
+    agentIdOnchain: agentIdNum,
+  });
+
   // XMTP lifecycle (hooks called unconditionally per React rules)
   const {
     client: xmtpClient,
@@ -27,6 +35,28 @@ export function AgentPageContent() {
     disconnect: xmtpDisconnect,
   } = useXmtpClient();
   const xmtpConvo = useXmtpConversation(xmtpClient);
+
+  // Sync agent to Supabase when loaded (idempotent — runs once per agent)
+  const agentSyncedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!data.hasAgent || !address || !data.agentURI) return;
+    const key = `${address}-${data.agentId}`;
+    if (agentSyncedRef.current === key) return;
+    agentSyncedRef.current = key;
+
+    const parsed = parseAgentURI(data.agentURI);
+    void fetch("/api/agents/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: address,
+        agentIdOnchain: Number(data.agentId),
+        name: parsed?.name ?? "Coach",
+        coachingStyle: parsed?.style ?? "motivator",
+        agentUri: data.agentURI,
+      }),
+    });
+  }, [data.hasAgent, data.agentId, data.agentURI, address]);
 
   // Auto-connect XMTP when arriving from landing page (?xmtp=1)
   const autoConnectXmtp = searchParams.get("xmtp") === "1";
@@ -90,6 +120,8 @@ export function AgentPageContent() {
                 agentName={name}
                 coachingStyle={style}
                 walletAddress={address}
+                chatHistory={chatHistory.history}
+                onSaveMessages={chatHistory.saveMessages}
                 xmtpStatus={xmtpStatus}
                 xmtpError={xmtpError}
                 xmtpHistory={xmtpConvo.history}

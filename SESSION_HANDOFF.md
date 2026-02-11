@@ -6,8 +6,8 @@
 
 ## Last Session
 
-- **Date**: 2026-02-10
-- **Duration**: Session 16
+- **Date**: 2026-02-11
+- **Duration**: Session 17
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,69 +15,106 @@
 
 ## What Was Done
 
-### Session 16 (This Session)
+### Session 17 (This Session)
 
-1. **XMTP V2 → V3 Migration (TASK-013)**
-   - XMTP V2 (`@xmtp/xmtp-js`) is fully deprecated (May 2025). Registration returned: "publishing to XMTP V2 is no longer available"
-   - Replaced `@xmtp/xmtp-js` with `@xmtp/browser-sdk` v6.3.0 (XMTP V3/MLS)
-   - Rewrote 3 core files for V3 API:
-     - `src/lib/xmtpSigner.ts` — V3 signer: `getIdentifier()` + `Uint8Array` returns + `type: "EOA"`
-     - `src/hooks/useXmtpClient.ts` — V3 client types (`inboxId` instead of `address`, `XmtpDmRef`)
-     - `src/hooks/useXmtpConversation.ts` — V3 DMs: `createDmWithIdentifier()`, `sendText()`, `sync()` before `messages()`
+1. **XMTP Persistence Confirmed**
+   - Michael tested full loop: send → refresh → reconnect → history loads with context
+   - TASK-013 fully complete (all acceptance criteria met)
 
-2. **Agent Registered on XMTP V3**
-   - Used `@xmtp/cli` (works on Node v25) to register the agent identity
-   - Command: `npx @xmtp/cli client info --wallet-key ... --env dev --db-encryption-key ...`
-   - Agent is confirmed reachable: `npx @xmtp/cli can-message 0xC7F8... --env dev` → `true`
-   - **Inbox ID**: `b9e2011e0f68256545dc1ee6d06e6de0b38c6721b5dbd424e31503b619a17964`
+2. **Supabase Integration (TASK-009) — COMPLETE**
+   - Created fresh Supabase project `clawcoach` (East US/Ohio, ref: `agvdivapnrqpstvhkbmk`)
+   - 3 env vars configured in `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - Created 6 database tables via Supabase Management API: `users`, `agents`, `messages`, `workouts`, `coaching_sessions`, `subscriptions`
+   - RLS enabled on all 6 tables (SELECT for anon key, service_role bypasses all)
+   - Updated `src/types/database.ts` with `Relationships` + `CompositeTypes` (required by `@supabase/supabase-js` v2.95)
 
-3. **Fixed Turbopack/WASM Blocker**
-   - `@xmtp/browser-sdk` uses Web Workers + WASM internally
-   - Turbopack serves workers as blob URLs → WASM `fetch()` fails inside blob context (vercel/next.js#84782)
-   - Fix: switched `pnpm dev` from `--turbopack` to `--webpack`
-   - Added `next.config.ts`: `asyncWebAssembly`, `.wasm` asset rule, server externals for XMTP packages, `turbopack: {}` to keep build working
+3. **New Files Created**
+   - `src/lib/supabase.ts` — added `createServerClient()` using `SUPABASE_SERVICE_ROLE_KEY`
+   - `src/app/api/users/route.ts` — POST upserts user by wallet address
+   - `src/app/api/messages/route.ts` — GET loads chat history, POST saves message pairs
+   - `src/app/api/agents/sync/route.ts` — POST upserts agent from on-chain data
+   - `src/hooks/useChatHistory.ts` — loads Supabase history on mount, provides `saveMessages` callback
+   - `src/hooks/useUserSync.ts` — auto-upserts user to Supabase on wallet connect
 
-4. **Cleaned Up**
-   - Deleted broken temp files: `scripts/register-xmtp-agent.mjs`, `src/app/api/xmtp-register/route.ts`
-   - Deleted one-time `src/app/admin/xmtp-register/page.tsx` (agent already registered via CLI)
-   - Fixed `.env.local` — removed duplicate Upstash entries, fixed malformed `UPSTASH_REDIS_REST_URL=UPSTASH_REDIS_REST_URL="..."` value
+4. **Modified Files**
+   - `src/components/providers/WalletProvider.tsx` — added `WalletSyncProvider` wrapper with `useUserSync`
+   - `src/components/agent/AgentPageContent.tsx` — added Supabase chat history loading + agent sync effect
+   - `src/components/agent/AgentChat.tsx` — saves messages to Supabase after each exchange, loads Supabase history (priority over XMTP)
+   - `src/types/database.ts` — full rewrite with Relationships for Supabase JS v2.95 compat
 
-5. **E2E Test — XMTP Connect Works**
-   - Michael tested: Connect wallet → agent page → "Connect XMTP" → badge turns green → chat functional
-   - Persistence test (load history on reconnect) deferred to next morning
+5. **Supabase Connection Notes**
+   - Project region: East US (Ohio) — NOT us-west-1 as initially assumed
+   - Direct DB connection (`db.[ref].supabase.co`) is disabled on this project
+   - Pooler connection also failed ("Tenant not found" across all regions)
+   - Used Supabase Management API (`POST /v1/projects/{ref}/database/query`) for all DDL
+   - Access token required: `sbp_...` (generated from dashboard/account/tokens)
 
-### Session 15 (Previous)
+### Session 16 (Previous)
 
-- XMTP V2 code written (5 new files, 5 modified), agent wallet generated, all checks passing
-- XMTP agent registration blocked by WASM/ESM issues (resolved in Session 16)
+- XMTP V3 migration complete, agent registered, dev server switched to webpack, temp files cleaned up
 
-### Sessions 1-14
+### Sessions 1-15
 
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat, ERC-8128 agent auth, Agent Hub, multi-token pricing, Supabase setup guide
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat, ERC-8128 agent auth, Agent Hub, multi-token pricing, Supabase setup guide, XMTP V2 code (blocked), XMTP V3 migration
 
 ---
 
 ## What's In Progress
 
-### XMTP Persistence Test (Manual)
-
-Michael will test the full persistence loop in the morning:
-1. Send messages with XMTP connected
-2. Refresh page → reconnect XMTP
-3. Verify history loads and Claude has context from prior messages
-
-If it works: TASK-013 core acceptance criteria are met.
-If history doesn't load: debug `useXmtpConversation` init flow.
+Nothing in progress — Session 17 completed cleanly. Changes NOT yet committed.
 
 ---
 
 ## What's Next
 
-1. **Verify XMTP persistence** — morning test (see above)
-2. **Supabase Integration (TASK-009)** — Michael setting up project, guide at `docs/SUPABASE_SETUP.md`
+1. **Commit Session 17 changes** — Supabase integration (TASK-009)
+2. **Test Supabase end-to-end** — connect wallet → verify user upserted → chat → verify messages saved → refresh → verify history loads
 3. **Telegram Integration (TASK-014)** — not started
 4. **Vercel password protection** — dashboard toggle
 5. **Privy integration** — email/social onboarding
+6. **Multi-token pricing (TASK-012)** — not started
+
+---
+
+## Supabase Architecture (Implemented)
+
+### How It Works
+```
+User connects wallet
+  → useUserSync fires → POST /api/users → upserts user in Supabase
+
+User visits /agent with existing agent
+  → AgentPageContent effect → POST /api/agents/sync → upserts agent in Supabase
+  → useChatHistory → GET /api/messages → loads prior chat history
+  → useChat seeds with Supabase history (priority) or XMTP history (fallback)
+
+User sends message
+  → POST /api/chat → Claude streams response
+  → onMessageComplete fires:
+    ├─ POST /api/messages → saves user + assistant messages to Supabase
+    └─ XMTP mirror (if connected) → writes to XMTP DM
+```
+
+### Key Files
+| File | Purpose |
+|------|---------|
+| `src/lib/supabase.ts` | Anon client (reads) + `createServerClient()` (writes) |
+| `src/app/api/users/route.ts` | Upsert user by wallet address |
+| `src/app/api/messages/route.ts` | Load + save chat messages |
+| `src/app/api/agents/sync/route.ts` | Upsert agent from on-chain data |
+| `src/hooks/useUserSync.ts` | Auto-sync wallet to Supabase |
+| `src/hooks/useChatHistory.ts` | Load history + save callback |
+| `src/types/database.ts` | Full typed schema (6 tables) |
+
+### Supabase Project Details
+| Field | Value |
+|-------|-------|
+| Project name | `clawcoach` |
+| Reference ID | `agvdivapnrqpstvhkbmk` |
+| Region | East US (Ohio) |
+| URL | `https://agvdivapnrqpstvhkbmk.supabase.co` |
+| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions |
+| RLS | Enabled on all tables, SELECT-only for anon key |
 
 ---
 
@@ -97,21 +134,6 @@ On page reload with XMTP connected:
   → Load DM history from XMTP → seed useChat with initialMessages
 ```
 
-### V3 Key Differences from V2
-- Package: `@xmtp/browser-sdk` (not `@xmtp/xmtp-js`)
-- Identity: `inboxId` (not Ethereum address)
-- Conversations: `createDmWithIdentifier()` (not `newConversation(address)`)
-- Send: `dm.sendText()` (not `conversation.send()`)
-- History: `dm.sync()` then `dm.messages()` (not just `conversation.messages()`)
-- Signer: `getIdentifier()` + `Uint8Array` returns (not `getAddress()` + hex string)
-- DB: OPFS (Origin Private File System) — no COOP/COEP headers needed (uses SyncAccessHandle Pool VFS)
-- Bundler: Requires webpack for dev (Turbopack can't handle Workers + WASM)
-
-### Message Role Convention
-- User messages: sent as-is to XMTP
-- AI responses: sent with `[assistant] ` prefix (parsed back on reload)
-- Phase 2: Agent has own XMTP client, prefix no longer needed
-
 ### Key Files
 | File | Purpose |
 |------|---------|
@@ -120,15 +142,15 @@ On page reload with XMTP connected:
 | `src/hooks/useXmtpClient.ts` | V3 client lifecycle + structural types |
 | `src/hooks/useXmtpConversation.ts` | DM creation, sync, history, send |
 | `src/components/agent/XmtpStatus.tsx` | Status badge component |
-| `src/hooks/useChat.ts` | Extended with `initialMessages` + `onMessageComplete` |
-| `src/components/agent/AgentChat.tsx` | Integrates XMTP status + mirroring |
-| `src/components/agent/AgentPageContent.tsx` | Wires hooks, auto-connect from `?xmtp=1` |
-| `next.config.ts` | Webpack WASM config + server externals for XMTP |
 
 ---
 
 ## Decisions Made
 
+- **Supabase project**: `clawcoach`, East US (Ohio), ref `agvdivapnrqpstvhkbmk` (Session 17)
+- **Supabase auth model**: Wallet-based (not Supabase Auth). Anon key for reads, service_role for writes via API routes (Session 17)
+- **Chat persistence priority**: Supabase history > XMTP history > empty (Session 17)
+- **Agent sync**: Idempotent upsert on every agent page load (Session 17)
 - **XMTP V3 SDK**: `@xmtp/browser-sdk` v6.3.0 (V2 deprecated, forced migration) (Session 16)
 - **XMTP agent inbox ID**: `b9e2011e0f68256545dc1ee6d06e6de0b38c6721b5dbd424e31503b619a17964` (Session 16)
 - **Dev bundler**: webpack (not Turbopack) — XMTP WASM workers incompatible with Turbopack (Session 16)
@@ -138,8 +160,6 @@ On page reload with XMTP connected:
 - **Pricing model**: DUAL — Stake $FIT OR Subscribe USDC/ETH (Session 14)
 - **Subscription pricing**: Free / $10 / $50 / $200 per month
 - **Billing discounts**: Quarterly 10%, Annual 20%
-- **XMTP architecture**: Browser-side + HTTP AI for MVP
-- **Agent XMTP wallet**: New dedicated wallet (not deployer)
 - **Theme**: Dark mode, lime primary on zinc
 - **wagmi**: v3.4.2
 - **Wallets**: Multi-wallet (MetaMask + Coinbase Smart Wallet + WalletConnect)
@@ -159,7 +179,7 @@ On page reload with XMTP connected:
 - `forge test`: **216 tests pass**
 - `pnpm typecheck`: **PASSES**
 - `pnpm lint`: **PASSES** (0 errors, 0 warnings)
-- `pnpm build`: **PASSES** (14 routes)
+- `pnpm build`: **PASSES** (17 routes — 3 new API routes)
 
 ---
 
@@ -178,9 +198,9 @@ On page reload with XMTP connected:
 - **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: v25.6.0
 - **Project**: `~/Projects/moltcoach`
 - **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
-- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent address + registered on V3
-- **NOT configured**: Supabase (guide ready), Coinbase Wallet project ID
+- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project)
+- **NOT configured**: Coinbase Wallet project ID
 
 ---
 
-*Last updated: Feb 10, 2026 — Session 16*
+*Last updated: Feb 11, 2026 — Session 17*

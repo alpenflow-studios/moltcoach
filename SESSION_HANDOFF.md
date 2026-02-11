@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-10
-- **Duration**: Session 13
+- **Duration**: Session 14
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,222 +15,166 @@
 
 ## What Was Done
 
-### Session 13 (This Session)
+### Session 14 (This Session)
 
-1. **ERC-8128 agent auth infrastructure** — `cf10ca9 feat(hub): add ERC-8128 agent auth infrastructure + Agent Hub + wire landing page buttons`
-   - Installed `@slicekit/erc8128` ^0.1.0
-   - Created `src/lib/nonce-store.ts` — Upstash Redis NonceStore (erc8128:nonce: prefix, graceful degradation)
-   - Created `src/lib/verify-agent.ts` — Server-side ERC-8128 verifier (lazy init, baseSepolia, clawcoach label)
-   - Created `src/lib/agent-auth.ts` — Agent-side signing client (SDK reference for developers)
-   - Created `src/middleware/agent-auth.ts` — `verifyAgentRequest()` middleware (ERC-8128 sig → ERC-8004 on-chain check)
+1. **Multi-token pricing model** — `0398f91 feat(pricing): add multi-token pricing model + Supabase setup guide`
+   - Reworked pricing page: Stake $FIT OR Subscribe with USDC/ETH
+   - Created `src/config/pricing.ts` — tier definitions, price helpers, billing periods
+   - Created `src/components/pricing/PricingPageContent.tsx` — interactive client component with Stake/Subscribe toggle, USDC/ETH token selector, Monthly/Quarterly/Annual billing (10% / 20% discounts)
+   - Pricing tiers: Free / $10 / $50 / $200 per month (or equivalent FIT staking)
+   - Cross-sell on each card ("or stake X FIT" / "or $X/mo subscription")
+   - Context-aware FAQ section (staking info vs subscription info)
+   - Created `/subscribe` placeholder page ("Coming soon" + CTA to stake)
 
-2. **Agent Hub page at `/hub`** — 8 new files
-   - `src/types/agent-hub.ts` — HubAgent type
-   - `src/hooks/useHubAgents.ts` — Fetches all Registered events from ERC-8004 contract, resolves tokenURI per agent
-   - `src/components/hub/HubHeader.tsx` — Terminal-inspired header with `>_` prompt, ERC-8128 badge
-   - `src/components/hub/HubStatsBar.tsx` — Total Agents / ERC-8128 Verified / Network stats row
-   - `src/components/hub/HubAgentCard.tsx` — Agent card (name, ID, style, owner, BaseScan link)
-   - `src/components/hub/HubRegisterCTA.tsx` — Developer registration section with code examples + spec links
-   - `src/components/hub/HubPageContent.tsx` — Client orchestrator (loading/error/empty/grid states)
-   - `src/app/hub/page.tsx` + `loading.tsx` + `error.tsx`
+2. **Supabase setup guide** — `docs/SUPABASE_SETUP.md`
+   - Complete SQL schema (6 tables: users, agents, messages, workouts, coaching_sessions, subscriptions)
+   - RLS policies, indexes, triggers
+   - Verification checklist
+   - Pushed to GitHub for Claude.ai consumption
 
-3. **Protected API routes** — 3 new endpoints
-   - `GET /api/v1/agents` — Public agent listing from chain events (no auth)
-   - `POST /api/v1/agents/verify` — ERC-8128 authenticated agent identity verification
-   - `POST /api/v1/workouts` — ERC-8128 authenticated workout logging (storage pending TASK-009)
+3. **Database types updated** — `src/types/database.ts`
+   - Added `messages` table type (for chat persistence)
+   - Added `subscriptions` table type (for multi-token subscriptions)
 
-4. **TASK-011: Landing page buttons wired**
-   - "I AM HUMAN" → `/agent` (human onboarding path)
-   - "I AM NOT" → `/hub` (agent hub, ERC-8128 pathway)
-   - "Purchase $FIT" → `/staking`
+4. **Sprint tracking updated** — `tasks/CURRENT_SPRINT.md`
+   - TASK-010 (Agent Coaching Chat) → Done
+   - TASK-011 (Landing Page Wiring) → Done (partial — Privy + ETH pricing deferred)
+   - Added TASK-012 (Multi-token pricing), TASK-013 (XMTP), TASK-014 (Telegram)
+   - TASK-009 (Supabase) moved to In Progress
 
-5. **Navigation updated** — Hub link added to Navbar (between Agent and Pricing) and Footer
+5. **XMTP integration research** — NOT YET IMPLEMENTED, research complete
+   - Explored `@xmtp/browser-sdk` v5.2.0 and `@xmtp/xmtp-js` v13.0.4
+   - Decision: MVP approach = Browser XMTP + HTTP AI
+   - Decision: Generate new dedicated wallet for agent's XMTP identity (not deployer)
+   - Key finding: `@xmtp/browser-sdk` requires COOP/COEP headers that break WalletConnect popups
+   - Recommendation: Use `@xmtp/xmtp-js` (V2) for MVP — no special headers needed
+   - Plan was being designed when session hit 78% context
 
-6. **Upstash Redis credentials configured** — Michael added `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` to `.env.local`. Rate limiting and nonce store now live.
+6. **All checks pass**: typecheck, lint, build (14 routes including /subscribe)
 
-7. **All checks pass**: typecheck, lint, build (22 files changed, 814 insertions)
+### Session 13 (Previous)
 
-### Session 12 (Previous)
+- ERC-8128 agent auth infrastructure + Agent Hub at `/hub` + 3 protected API routes + TASK-011 buttons wired + Upstash Redis configured
 
-- Rebrand moltcoach → ClawCoach complete
-- Per-wallet rate limiting shipped (Upstash Redis, 50/hr + 200/day)
-- Navbar/Footer logo text fixed
-- ERC-8128 doc reviewed (docs/ERC-8128.md)
+### Sessions 1-12
 
-### Session 11
-
-- TASK-010 completed (AgentChat container, streaming chat end-to-end)
-- Rebrand started, Anthropic API key configured
-
-### Sessions 1-10
-
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications, 10K FIT minted, multi-wallet support, landing page, pricing page, staking flows verified
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat
 
 ---
 
 ## What's In Progress
 
-- Nothing actively in progress. Session ended clean.
+- **XMTP Integration (TASK-013)** — Research complete, implementation not started. See "XMTP Research Summary" below.
+- **Supabase Setup (TASK-009)** — Michael setting up project with Claude.ai. Guide at `docs/SUPABASE_SETUP.md`.
+
+---
+
+## XMTP Research Summary (For Next Session)
+
+### Architecture Decision
+- **MVP Approach**: Browser XMTP + HTTP AI
+  - User connects wallet → initializes XMTP client in browser
+  - AI coaching chat continues via existing HTTP/Claude flow (`/api/chat`)
+  - Messages persist on XMTP network (user-side)
+  - Phase 2: Full XMTP agent service
+
+### SDK Choice
+- **Use `@xmtp/xmtp-js` (V2, v13.0.4)** — NOT `@xmtp/browser-sdk`
+- Reason: Browser SDK (V3) requires COOP/COEP headers that break WalletConnect popups
+- V2 works without special headers, compatible with wagmi/viem via signer adapter
+
+### Agent XMTP Wallet
+- Generate NEW dedicated wallet (not deployer — deployer changes at mainnet)
+- `NEXT_PUBLIC_CLAWCOACH_AGENT_XMTP_ADDRESS` (public)
+- `CLAWCOACH_AGENT_XMTP_KEY` (server-only, Phase 2)
+
+### Implementation Steps
+1. `pnpm add @xmtp/xmtp-js`
+2. Create viem-to-XMTP signer adapter
+3. Create `src/hooks/useXmtpClient.ts`
+4. Create `src/components/agent/XmtpStatus.tsx`
+5. Update `AgentChat` with optional XMTP mode
+6. Wire landing page XMTP button → `/agent`
+7. Generate agent wallet, add env vars
+
+### XMTP V2 API Reference
+```typescript
+import { Client } from '@xmtp/xmtp-js';
+const xmtp = await Client.create(signer, { env: 'dev' });
+const convo = await xmtp.conversations.newConversation(peerAddress);
+await convo.send('Hello');
+for await (const msg of await convo.streamMessages()) { ... }
+```
+
+### Key Files for Integration
+- `src/hooks/useChat.ts` — existing chat hook
+- `src/components/agent/AgentChat.tsx` — chat container
+- `src/components/agent/AgentPageContent.tsx` — agent page wrapper
+- `src/config/wagmi.ts` — wallet config
+- `src/app/page.tsx:158-174` — XMTP button stub
 
 ---
 
 ## What's Next
 
-1. **TASK-009: Supabase integration** — Michael setting up project. Wire user records + chat persistence + workout storage.
-2. **Chat persistence** — Store conversation history in Supabase (after TASK-009). Currently React state only.
-3. **Workout storage** — `/api/v1/workouts` route returns success but doesn't persist yet. Wire to Supabase `workouts` table.
-4. **Vercel password protection** — Dashboard toggle for beta gate (not code).
-5. **Pricing page — ETH/USDC pricing** — Michael flagged this.
-6. **Privy integration** — Email/social onboarding. "Sign up with your email" button is non-functional.
-7. **XMTP + Telegram buttons** — Landing page comms section buttons are non-functional stubs.
-8. **Wearable integration** — Strava OAuth flow (likely first wearable).
-9. **ERC-8128 Phase 2** — Agent runtime that actually signs requests. Current infra is server-side verification only. Need agent runtime + Coinbase Smart Wallet signing.
-10. **Agent-to-agent communication** — ERC-8128 is auth layer, comms layer TBD.
+1. **XMTP Integration (TASK-013)** — implement steps above
+2. **Supabase Integration (TASK-009)** — when Michael has credentials
+3. **Telegram Integration (TASK-014)**
+4. **Vercel password protection** — dashboard toggle
+5. **Privy integration** — email/social onboarding
+6. **Wearable integration** — Strava OAuth
+7. **ERC-8128 Phase 2** — agent runtime
 
 ---
 
 ## Decisions Made
 
-- **Theme**: Dark mode default, lime primary accent on zinc base
-- **wagmi version**: v3.4.2 (latest)
-- **Wallet strategy**: Multi-wallet — injected (MetaMask) + Coinbase Smart Wallet + WalletConnect. Privy planned for production.
-- **ERC-8004**: Custom non-upgradeable implementation (not reference UUPS)
-- **ERC-8128**: Launched at launch (not Phase 2). Infrastructure built in Session 13. Uses `@slicekit/erc8128` ^0.1.0, Upstash Redis nonce store. See `docs/ERC-8128.md`.
-- **Agent Hub**: `/hub` route — reads agents from ERC-8004 contract events (no Supabase dependency)
-- **Agent Hub UX**: Terminal-inspired header, agent card grid, developer registration CTA with code examples
-- **API versioning**: `/api/v1/` prefix for agent-facing endpoints (separate from `/api/chat` human-facing)
-- **Agent verification flow**: ERC-8128 signature → ERC-8004 on-chain registry check → authenticated
-- **Graceful degradation**: All ERC-8128 infra follows same pattern as rateLimit.ts — lazy init, env check, permissive fallback
-- **Agent IDs**: Start at 1, 0 = sentinel for "no agent"
-- **Revenue model**: 9 streams, Stage 1 MVP focuses on 3 (tx fees, spawn fee, validation fees)
-- **Treasury split**: 40/30/20/10 (dev/buyback/community/insurance)
-- **Contract deploy order**: FIT → FeeCollector → Staking → Identity
-- **$FIT daily cap**: Adjustable between 10K-500K by owner (default 100K)
-- **Staking penalty**: 5% constant (not adjustable), routed to FeeCollector (not burned)
-- **stakedAt timer**: Not reset on top-up, only on full unstake + restake
-- **Penalty routing**: forceApprove + collectFitFee pattern (preserves FeeCollector tracking)
-- **Deploy wallet**: MetaMask for development, Coinbase Wallet for funds
-- **Staking UI ABI strategy**: Minimal `as const` ABIs in TypeScript (not Foundry JSON artifacts)
-- **Approve flow**: Auto-chained approve→stake (fixed in Session 9)
-- **Staking route**: Dedicated `/staking` (not `/dashboard`)
-- **tsconfig target**: ES2020 (for BigInt literals)
-- **Layout**: Shared Navbar + Footer in root layout, pages render content only
-- **Agent URI**: `data:application/json,` encoded URI with name, style, version, category
-- **Coaching styles**: 4 options — Motivator, Drill Sergeant, Scientist, Friend
-- **Toaster**: sonner with hardcoded dark theme (no next-themes dep)
-- **Supabase types**: Manual types in `src/types/database.ts` (will replace with generated types later)
-- **Farcaster**: "Forged on Farcaster" badge on landing page hero
-- **ConnectWallet**: Single button with shadcn DropdownMenu, connectors deduplicated by name
-- **Pricing tiers**: Free/Basic(100)/Pro(1000)/Elite(10000) — may change to ETH/USDC pricing later
-- **Landing page CTAs**: "I AM HUMAN" → `/agent`, "I AM NOT" → `/hub`, "Purchase $FIT" → `/staking`
-- **Chat model**: claude-sonnet-4-5-20250929 for coaching responses (fast + capable)
-- **Chat architecture**: No external chat library — native fetch + ReadableStream for streaming
-- **Chat persistence**: React state only for now (no Supabase yet — TASK-009)
-- **Chat location**: Below AgentProfileCard on `/agent` page (not separate route)
-- **System prompt**: Built from FITNESS_COACHING_SKILL.md content, customized per coaching style
-- **Brand name**: ClawCoach (rebranded from moltcoach in Session 11)
-- **Primary domain**: clawcoach.ai (also owns clawcoach.dev, clawcoach.xyz, klawcoach)
-- **Contract rename**: Deferred to mainnet prep (testnet contracts keep "Moltcoach" names)
-- **Beta strategy**: Vercel password protection + per-wallet rate limiting (50/hr, 200/day)
-- **Rate limiting**: Upstash Redis sliding window, graceful fallback when unconfigured
-
----
-
-## Open Questions
-
-- [x] Upstash Redis credentials — configured in .env.local (Session 13)
-- [ ] Supabase project — Michael setting up with Claude.ai
-- [x] WalletConnect project ID — obtained from cloud.walletconnect.com
-- [ ] Coinbase Wallet project ID — needs to be obtained from developer portal
-- [x] "I AM NOT HUMAN" agent hub — built at `/hub` with ERC-8128 infrastructure (Session 13)
-- [ ] Agent-to-agent protocol at clawcoach.ai (ERC-8128 is auth layer, comms layer TBD)
-- [ ] Which wearable integration first? (Strava likely easiest)
-- [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
-- [ ] Privy free tier limits for production auth
-- [ ] Pricing in ETH/Base ETH/USDC — Michael flagged this for tiers
-- [ ] Purchase $FIT mechanism — DEX pool, in-app swap, or external link?
-- [ ] Beta invite distribution — how to find 100 testers?
-- [ ] ERC-8128 `keyid` format may change (draft ERC) — monitor Ethereum Magicians thread
+- **Pricing model**: DUAL — Stake $FIT OR Subscribe USDC/ETH (Session 14)
+- **Subscription pricing**: Free / $10 / $50 / $200 per month
+- **Billing discounts**: Quarterly 10%, Annual 20%
+- **XMTP SDK**: `@xmtp/xmtp-js` V2 for MVP (avoids COOP/COEP issues)
+- **XMTP architecture**: Browser-side + HTTP AI for MVP
+- **Agent XMTP wallet**: New dedicated wallet (not deployer)
+- **Theme**: Dark mode, lime primary on zinc
+- **wagmi**: v3.4.2
+- **Wallets**: Multi-wallet (MetaMask + Coinbase Smart Wallet + WalletConnect)
+- **ERC-8004**: Custom non-upgradeable
+- **ERC-8128**: `@slicekit/erc8128`, Upstash Redis nonce store
+- **Agent Hub**: `/hub` — chain events, no Supabase dependency
+- **API versioning**: `/api/v1/` for agent endpoints
+- **Revenue**: 9 streams, MVP focuses on 3. Treasury 40/30/20/10
+- **Chat model**: claude-sonnet-4-5-20250929
+- **Brand**: ClawCoach (clawcoach.ai)
+- **Beta**: Vercel password + rate limiting (50/hr, 200/day)
 
 ---
 
 ## State of Tests
 
-- `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
-- `forge build`: Compiles (pre-existing notes/warnings only, no errors)
-- `pnpm typecheck`: **PASSES** (verified Session 13)
-- `pnpm lint`: **PASSES** (verified Session 13)
-- `pnpm build`: **PASSES** (verified Session 13, 11 routes including 4 new)
+- `forge test`: **216 tests pass**
+- `pnpm typecheck`: **PASSES**
+- `pnpm lint`: **PASSES**
+- `pnpm build`: **PASSES** (14 routes)
 
 ---
 
 ## On-Chain State (Base Sepolia)
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
-- **FIT total supply**: 10,000 FIT (minted in Session 8)
-- **FIT daily mint remaining**: 90,000 FIT
-- **Agent #1 registered**: owner=deployer, name="daddy", style="motivator"
-- **FIT wallet balance**: 475 FIT (unstaked 500, got 475 after 5% penalty)
-- **Staked amount**: 9,500 FIT
-- **Staking tier**: Pro (2)
-- **FeeCollector balance**: 25 FIT (from early unstake penalty)
-- **Protocol total staked**: 9,500 FIT
+- **FIT supply**: 10,000 FIT | **Wallet**: 475 FIT | **Staked**: 9,500 FIT
+- **Tier**: Pro (2) | **FeeCollector**: 25 FIT
+- **Agent #1**: "daddy", motivator
 
 ---
 
 ## Environment Notes
 
-- **Foundry**: v1.5.1 at `~/.foundry/bin/` — add to PATH: `export PATH="/Users/openclaw/.foundry/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"`
-- **pnpm**: `/opt/homebrew/bin/pnpm` (v10.29.1)
-- **forge commands**: Must run from `contracts/` directory (or use `cd contracts &&`)
-- **forge .env loading**: Use `export $(grep -v '^#' .env | xargs)` before forge commands (source .env fails on macOS)
-- **ESLint**: `contracts/**` excluded in `eslint.config.mjs` (OZ JS files caused 1000+ errors)
-- **Git**: Remote gets "Add files via upload" commits from GitHub web UI — always `git fetch` + rebase before push
-- **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
-- **Project path**: `~/Projects/moltcoach` (repo name unchanged, brand is ClawCoach)
-- **ANTHROPIC_API_KEY**: Set in `.env.local` — working as of Session 11
-- **Upstash Redis**: Fully configured in `.env.local` as of Session 13. Rate limiting + nonce store both live.
+- **Foundry**: v1.5.1 at `~/.foundry/bin/`
+- **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: LTS
+- **Project**: `~/Projects/moltcoach`
+- **Configured**: ANTHROPIC_API_KEY, Upstash Redis
+- **NOT configured**: Supabase (guide ready), Coinbase Wallet project ID
 
 ---
 
-## Installed Tools & Packages
-
-| Tool/Package | Version | Location |
-|-------------|---------|----------|
-| forge | 1.5.1 | `~/.foundry/bin/forge` |
-| cast | 1.5.1 | `~/.foundry/bin/cast` |
-| anvil | 1.5.1 | `~/.foundry/bin/anvil` |
-| OpenZeppelin | 5.2.0 | `contracts/lib/openzeppelin-contracts/` |
-| forge-std | latest | `contracts/lib/forge-std/` |
-| next | 16.1.6 | node_modules |
-| wagmi | 3.4.2 | node_modules |
-| viem | 2.45.1 | node_modules |
-| @supabase/supabase-js | 2.95.3 | node_modules |
-| @anthropic-ai/sdk | ^0.74.0 | node_modules |
-| @upstash/redis | ^1.36.2 | node_modules |
-| @upstash/ratelimit | ^2.0.8 | node_modules |
-| @slicekit/erc8128 | ^0.1.0 | node_modules |
-| sonner | latest | node_modules |
-| @radix-ui/react-dropdown-menu | latest | node_modules (via shadcn) |
-
----
-
-## Key Files Added in Session 13
-
-| File | Purpose |
-|------|---------|
-| `src/lib/nonce-store.ts` | Upstash Redis NonceStore for ERC-8128 replay protection |
-| `src/lib/verify-agent.ts` | Server-side ERC-8128 verifier (lazy init) |
-| `src/lib/agent-auth.ts` | Agent-side signing client (SDK/docs) |
-| `src/middleware/agent-auth.ts` | `verifyAgentRequest()` — ERC-8128 sig + ERC-8004 check |
-| `src/types/agent-hub.ts` | HubAgent type |
-| `src/hooks/useHubAgents.ts` | Fetch agents from chain via Registered events |
-| `src/components/hub/*.tsx` | 5 Hub UI components |
-| `src/app/hub/*.tsx` | Hub route (page + loading + error) |
-| `src/app/api/v1/agents/route.ts` | Public agent listing API |
-| `src/app/api/v1/agents/verify/route.ts` | ERC-8128 agent verification API |
-| `src/app/api/v1/workouts/route.ts` | ERC-8128 workout logging API |
-
----
-
-*Last updated: Feb 10, 2026 — Session 13*
+*Last updated: Feb 10, 2026 — Session 14*

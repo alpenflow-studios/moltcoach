@@ -162,9 +162,11 @@ export default function LandingPage() {
           <span className="text-primary">your terms</span>
         </h2>
         <div className="flex items-center justify-center gap-5">
-          <Button variant="outline" size="lg" className="rounded-full text-base">
-            <MessageCircle className="size-4" />
-            XMTP
+          <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+            <Link href="/agent?xmtp=1">
+              <MessageCircle className="size-4" />
+              XMTP
+            </Link>
           </Button>
           <Button variant="outline" size="lg" className="rounded-full text-base">
             <Send className="size-4" />

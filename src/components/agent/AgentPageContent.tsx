@@ -1,9 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAccount } from "wagmi";
+import { useSearchParams } from "next/navigation";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgentReads } from "@/hooks/useAgentReads";
+import { useXmtpClient } from "@/hooks/useXmtpClient";
+import { useXmtpConversation } from "@/hooks/useXmtpConversation";
 import { parseAgentURI } from "@/lib/agentURI";
 import { RegisterAgentForm } from "./RegisterAgentForm";
 import { AgentProfileCard } from "./AgentProfileCard";
@@ -12,6 +16,25 @@ import { AgentChat } from "./AgentChat";
 export function AgentPageContent() {
   const { address, isConnected } = useAccount();
   const data = useAgentReads(address);
+  const searchParams = useSearchParams();
+
+  // XMTP lifecycle (hooks called unconditionally per React rules)
+  const {
+    client: xmtpClient,
+    status: xmtpStatus,
+    error: xmtpError,
+    connect: xmtpConnect,
+    disconnect: xmtpDisconnect,
+  } = useXmtpClient();
+  const xmtpConvo = useXmtpConversation(xmtpClient);
+
+  // Auto-connect XMTP when arriving from landing page (?xmtp=1)
+  const autoConnectXmtp = searchParams.get("xmtp") === "1";
+  useEffect(() => {
+    if (autoConnectXmtp && data.hasAgent && xmtpStatus === "disconnected") {
+      void xmtpConnect();
+    }
+  }, [autoConnectXmtp, data.hasAgent, xmtpStatus, xmtpConnect]);
 
   if (!isConnected) {
     return (
@@ -62,7 +85,19 @@ export function AgentPageContent() {
             const parsed = parseAgentURI(data.agentURI);
             const name = parsed?.name ?? "Coach";
             const style = parsed?.style ?? "motivator";
-            return <AgentChat agentName={name} coachingStyle={style} walletAddress={address} />;
+            return (
+              <AgentChat
+                agentName={name}
+                coachingStyle={style}
+                walletAddress={address}
+                xmtpStatus={xmtpStatus}
+                xmtpError={xmtpError}
+                xmtpHistory={xmtpConvo.history}
+                onXmtpConnect={xmtpConnect}
+                onXmtpDisconnect={xmtpDisconnect}
+                onXmtpSendMessage={xmtpConvo.sendMessage}
+              />
+            );
           })()}
         </>
       ) : (

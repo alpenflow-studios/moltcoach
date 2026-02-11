@@ -1,17 +1,27 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
+import type { ChatMessage as ChatMessageType } from "@/types/chat";
+import type { XmtpClientStatus } from "@/hooks/useXmtpClient";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
+import { XmtpStatus } from "./XmtpStatus";
 
 type AgentChatProps = {
   agentName: string;
   coachingStyle: string;
   walletAddress?: string;
+  // XMTP (all optional — undefined means XMTP not active)
+  xmtpStatus?: XmtpClientStatus;
+  xmtpError?: string | null;
+  xmtpHistory?: ChatMessageType[];
+  onXmtpConnect?: () => void;
+  onXmtpDisconnect?: () => void;
+  onXmtpSendMessage?: (content: string, role: "user" | "assistant") => Promise<void>;
 };
 
 const STYLE_GREETINGS: Record<string, string> = {
@@ -25,11 +35,33 @@ const STYLE_GREETINGS: Record<string, string> = {
     "Hey there! So glad you're here. I'd love to help you with your fitness journey — no pressure, just good vibes. What are you hoping to work on?",
 };
 
-export function AgentChat({ agentName, coachingStyle, walletAddress }: AgentChatProps) {
+export function AgentChat({
+  agentName,
+  coachingStyle,
+  walletAddress,
+  xmtpStatus,
+  xmtpError,
+  xmtpHistory,
+  onXmtpConnect,
+  onXmtpDisconnect,
+  onXmtpSendMessage,
+}: AgentChatProps) {
+  // Mirror completed message pairs to XMTP
+  const handleMessageComplete = useCallback(
+    (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => {
+      if (!onXmtpSendMessage) return;
+      void onXmtpSendMessage(userMsg.content, "user");
+      void onXmtpSendMessage(assistantMsg.content, "assistant");
+    },
+    [onXmtpSendMessage],
+  );
+
   const { messages, isStreaming, error, sendMessage } = useChat({
     agentName,
     coachingStyle,
     walletAddress,
+    initialMessages: xmtpHistory,
+    onMessageComplete: onXmtpSendMessage ? handleMessageComplete : undefined,
   });
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +80,7 @@ export function AgentChat({ agentName, coachingStyle, walletAddress }: AgentChat
   const greeting =
     STYLE_GREETINGS[coachingStyle] ?? STYLE_GREETINGS["motivator"]!;
   const hasMessages = messages.length > 0;
+  const showXmtp = xmtpStatus !== undefined;
 
   return (
     <Card className="flex max-h-[600px] flex-col">
@@ -55,6 +88,14 @@ export function AgentChat({ agentName, coachingStyle, walletAddress }: AgentChat
         <CardTitle className="flex items-center gap-2 text-lg">
           <MessageSquare className="size-5 text-primary" />
           Chat with {agentName}
+          {showXmtp && (
+            <XmtpStatus
+              status={xmtpStatus}
+              error={xmtpError ?? null}
+              onConnect={onXmtpConnect ?? (() => {})}
+              onDisconnect={onXmtpDisconnect ?? (() => {})}
+            />
+          )}
         </CardTitle>
       </CardHeader>
 

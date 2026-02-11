@@ -1,19 +1,36 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import type { ChatMessage } from "@/types/chat";
 
 type UseChatOptions = {
   agentName: string;
   coachingStyle: string;
   walletAddress?: string;
+  /** Seed messages from XMTP history (loaded after mount) */
+  initialMessages?: ChatMessage[];
+  /** Called when a message pair (user + assistant) completes successfully */
+  onMessageComplete?: (userMsg: ChatMessage, assistantMsg: ChatMessage) => void;
 };
 
-export function useChat({ agentName, coachingStyle, walletAddress }: UseChatOptions) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export function useChat({
+  agentName,
+  coachingStyle,
+  walletAddress,
+  initialMessages,
+  onMessageComplete,
+}: UseChatOptions) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Seed from XMTP history when it loads (only if chat is empty)
+  useEffect(() => {
+    if (initialMessages && initialMessages.length > 0) {
+      setMessages((prev) => (prev.length === 0 ? initialMessages : prev));
+    }
+  }, [initialMessages]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -72,6 +89,11 @@ export function useChat({ agentName, coachingStyle, walletAddress }: UseChatOpti
             return updated;
           });
         }
+
+        // Notify caller of completed message pair (for XMTP persistence)
+        if (onMessageComplete && accumulated) {
+          onMessageComplete(userMessage, { role: "assistant", content: accumulated });
+        }
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         const message = err instanceof Error ? err.message : "Failed to send message";
@@ -89,7 +111,7 @@ export function useChat({ agentName, coachingStyle, walletAddress }: UseChatOpti
         abortRef.current = null;
       }
     },
-    [messages, isStreaming, agentName, coachingStyle, walletAddress],
+    [messages, isStreaming, agentName, coachingStyle, walletAddress, onMessageComplete],
   );
 
   const reset = useCallback(() => {

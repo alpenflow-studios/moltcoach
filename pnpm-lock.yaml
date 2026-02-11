@@ -26,6 +26,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.36.2
         version: 1.36.2
+      '@xmtp/browser-sdk':
+        specifier: ^6.3.0
+        version: 6.3.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2344,6 +2347,21 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  '@xmtp/browser-sdk@6.3.0':
+    resolution: {integrity: sha512-MjGf49DfRijJbq0Pov+DoB3SmM2qE5uMJ/P7qFLzrx5h6C20JkJq0dew/kz7FkCOVxVaFfBrmE8GB8/mRxi65g==}
+    engines: {node: '>=22'}
+
+  '@xmtp/content-type-primitives@3.0.0':
+    resolution: {integrity: sha512-gxK6+k0ywOz39LFJjrUF3fOXWXR3aAmIkF7e0rFz7c27izDimZC5E2oja9iz/CYyzDS6lf9Pm31qRcGTMSYaHg==}
+
+  '@xmtp/node-bindings@1.8.0':
+    resolution: {integrity: sha512-dyppg1pQNsEdGH13RfsbkbXdnUdjufak6ea1YahjCROgmaJClDpMHcMcSfMzoJzASanU58MwEdCgYUF638NKgw==}
+    engines: {node: '>=22'}
+
+  '@xmtp/wasm-bindings@1.9.1':
+    resolution: {integrity: sha512-xc6TA7ExjBgrfVLFwdN0UZz9TW4S4v8oxpOmuzOqb/Rbd6QPmqEfbD8FVO2ssUPSKG5r32Plpg/YGam+pkresg==}
+    engines: {node: '>=22'}
 
   abbrev@1.0.9:
     resolution: {integrity: sha512-LEyx4aLEC3x6T0UguF6YILf+ntvmOaWsVfENmIW0E9H09vKlLDGelMjjSm0jkDHALj8A8quZ/HapKNigzwge+Q==}
@@ -8338,6 +8356,19 @@ snapshots:
       - immer
       - react
       - use-sync-external-store
+
+  '@xmtp/browser-sdk@6.3.0':
+    dependencies:
+      '@xmtp/content-type-primitives': 3.0.0
+      '@xmtp/wasm-bindings': 1.9.1
+
+  '@xmtp/content-type-primitives@3.0.0':
+    dependencies:
+      '@xmtp/node-bindings': 1.8.0
+
+  '@xmtp/node-bindings@1.8.0': {}
+
+  '@xmtp/wasm-bindings@1.9.1': {}
 
   abbrev@1.0.9: {}
 

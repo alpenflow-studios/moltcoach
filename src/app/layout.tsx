@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description:
     "AI coaching agent with on-chain identity, move-to-earn $FIT rewards, and personalized coaching powered by ERC-8004 on Base.",
   keywords: ["AI coach", "fitness", "Web3", "ERC-8004", "Base", "move-to-earn"],
+  other: {
+    "base:app_id": "698cc32e289e9e19f580444f",
+  },
 };
 
 export default function RootLayout({

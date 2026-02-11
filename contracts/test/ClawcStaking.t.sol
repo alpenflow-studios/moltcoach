@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {FitToken} from "../src/FitToken.sol";
+import {ClawcToken} from "../src/ClawcToken.sol";
 import {ProtocolFeeCollector} from "../src/fees/ProtocolFeeCollector.sol";
-import {FitStaking} from "../src/FitStaking.sol";
+import {ClawcStaking} from "../src/ClawcStaking.sol";
 
-contract FitStakingTest is Test {
-    FitToken public fit;
+contract ClawcStakingTest is Test {
+    ClawcToken public clawc;
     ProtocolFeeCollector public feeCollector;
-    FitStaking public staking;
+    ClawcStaking public staking;
 
     address internal owner;
     address internal alice;
@@ -25,7 +25,7 @@ contract FitStakingTest is Test {
     // Re-declare events for expectEmit
     event Staked(address indexed user, uint256 amount, uint256 totalUserStake);
     event Unstaked(address indexed user, uint256 requested, uint256 penalty, uint256 payout);
-    event TierChanged(address indexed user, FitStaking.Tier oldTier, FitStaking.Tier newTier);
+    event TierChanged(address indexed user, ClawcStaking.Tier oldTier, ClawcStaking.Tier newTier);
     event ThresholdsUpdated(uint256 basic, uint256 pro, uint256 elite);
     event FeeCollected(address indexed source, address indexed token, uint256 amount, string feeType);
 
@@ -39,13 +39,13 @@ contract FitStakingTest is Test {
         communityWallet = makeAddr("communityWallet");
         insuranceWallet = makeAddr("insuranceWallet");
 
-        // Deploy FitToken
-        fit = new FitToken(owner);
+        // Deploy ClawcToken
+        clawc = new ClawcToken(owner);
 
         // Deploy ProtocolFeeCollector (needs a USDC mock — use a dummy address)
         address mockUsdc = makeAddr("mockUsdc");
         feeCollector = new ProtocolFeeCollector(
-            address(fit),
+            address(clawc),
             mockUsdc,
             owner,
             devWallet,
@@ -54,26 +54,26 @@ contract FitStakingTest is Test {
             insuranceWallet
         );
 
-        // Deploy FitStaking
-        staking = new FitStaking(address(fit), address(feeCollector), owner);
+        // Deploy ClawcStaking
+        staking = new ClawcStaking(address(clawc), address(feeCollector), owner);
 
-        // Mint FIT to users for testing (spread across days to respect daily cap)
+        // Mint CLAWC to users for testing (spread across days to respect daily cap)
         vm.startPrank(owner);
-        fit.mint(alice, 50_000e18);
-        fit.mint(bob, 50_000e18);
+        clawc.mint(alice, 50_000e18);
+        clawc.mint(bob, 50_000e18);
         vm.warp(block.timestamp + 1 days);
-        fit.mint(carol, 10_000e18);
+        clawc.mint(carol, 10_000e18);
         vm.stopPrank();
 
         // Approve staking contract
         vm.prank(alice);
-        fit.approve(address(staking), type(uint256).max);
+        clawc.approve(address(staking), type(uint256).max);
 
         vm.prank(bob);
-        fit.approve(address(staking), type(uint256).max);
+        clawc.approve(address(staking), type(uint256).max);
 
         vm.prank(carol);
-        fit.approve(address(staking), type(uint256).max);
+        clawc.approve(address(staking), type(uint256).max);
     }
 
     // ═══════════════════════════════════════════════
@@ -84,8 +84,8 @@ contract FitStakingTest is Test {
         assertEq(staking.owner(), owner);
     }
 
-    function test_deployment_fitToken() public view {
-        assertEq(address(staking.fitToken()), address(fit));
+    function test_deployment_clawcToken() public view {
+        assertEq(address(staking.clawcToken()), address(clawc));
     }
 
     function test_deployment_feeCollector() public view {
@@ -108,14 +108,14 @@ contract FitStakingTest is Test {
         assertEq(staking.BPS_DENOMINATOR(), 10_000);
     }
 
-    function test_deployment_revertZeroFitToken() public {
-        vm.expectRevert(FitStaking.ZeroAddress.selector);
-        new FitStaking(address(0), address(feeCollector), owner);
+    function test_deployment_revertZeroClawcToken() public {
+        vm.expectRevert(ClawcStaking.ZeroAddress.selector);
+        new ClawcStaking(address(0), address(feeCollector), owner);
     }
 
     function test_deployment_revertZeroFeeCollector() public {
-        vm.expectRevert(FitStaking.ZeroAddress.selector);
-        new FitStaking(address(fit), address(0), owner);
+        vm.expectRevert(ClawcStaking.ZeroAddress.selector);
+        new ClawcStaking(address(clawc), address(0), owner);
     }
 
     // ═══════════════════════════════════════════════
@@ -133,13 +133,13 @@ contract FitStakingTest is Test {
     }
 
     function test_stake_transfersTokens() public {
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.stake(500e18);
 
-        assertEq(fit.balanceOf(alice), balanceBefore - 500e18);
-        assertEq(fit.balanceOf(address(staking)), 500e18);
+        assertEq(clawc.balanceOf(alice), balanceBefore - 500e18);
+        assertEq(clawc.balanceOf(address(staking)), 500e18);
     }
 
     function test_stake_multipleStakes_sameUser() public {
@@ -176,7 +176,7 @@ contract FitStakingTest is Test {
 
     function test_stake_revertZeroAmount() public {
         vm.prank(alice);
-        vm.expectRevert(FitStaking.ZeroAmount.selector);
+        vm.expectRevert(ClawcStaking.ZeroAmount.selector);
         staking.stake(0);
     }
 
@@ -200,7 +200,7 @@ contract FitStakingTest is Test {
     }
 
     function test_stake_revertInsufficientBalance() public {
-        // Carol has 10K FIT, try to stake 20K
+        // Carol has 10K CLAWC, try to stake 20K
         vm.prank(carol);
         vm.expectRevert();
         staking.stake(20_000e18);
@@ -211,47 +211,47 @@ contract FitStakingTest is Test {
     // ═══════════════════════════════════════════════
 
     function test_tier_freeByDefault() public view {
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Free));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Free));
     }
 
     function test_tier_basic() public {
         vm.prank(alice);
         staking.stake(100e18);
 
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
     }
 
     function test_tier_pro() public {
         vm.prank(alice);
         staking.stake(1_000e18);
 
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Pro));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Pro));
     }
 
     function test_tier_elite() public {
         vm.prank(alice);
         staking.stake(10_000e18);
 
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Elite));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Elite));
     }
 
     function test_tier_exactBoundary_basic() public {
         // Exactly at basic threshold
         vm.prank(alice);
         staking.stake(100e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
     }
 
     function test_tier_belowBoundary_basic() public {
         // Just below basic threshold
         vm.prank(alice);
         staking.stake(99e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Free));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Free));
     }
 
     function test_tier_emitsTierChanged_onStake() public {
         vm.expectEmit(true, false, false, true);
-        emit TierChanged(alice, FitStaking.Tier.Free, FitStaking.Tier.Basic);
+        emit TierChanged(alice, ClawcStaking.Tier.Free, ClawcStaking.Tier.Basic);
 
         vm.prank(alice);
         staking.stake(100e18);
@@ -260,12 +260,12 @@ contract FitStakingTest is Test {
     function test_tier_staysBasicOnTopUp() public {
         vm.prank(alice);
         staking.stake(100e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
 
         // Staking more within same tier should remain Basic
         vm.prank(alice);
         staking.stake(50e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
     }
 
     function test_tier_progressionFreeToElite() public {
@@ -273,15 +273,15 @@ contract FitStakingTest is Test {
 
         // Free → Basic
         staking.stake(100e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
 
         // Basic → Pro
         staking.stake(900e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Pro));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Pro));
 
         // Pro → Elite
         staking.stake(9_000e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Elite));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Elite));
 
         vm.stopPrank();
     }
@@ -297,12 +297,12 @@ contract FitStakingTest is Test {
         // Warp past 30 days
         vm.warp(block.timestamp + 30 days);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
-        assertEq(fit.balanceOf(alice), balanceBefore + 1_000e18);
+        assertEq(clawc.balanceOf(alice), balanceBefore + 1_000e18);
         (uint256 amount,) = staking.getStake(alice);
         assertEq(amount, 0);
         assertEq(staking.totalStaked(), 0);
@@ -314,12 +314,12 @@ contract FitStakingTest is Test {
 
         vm.warp(block.timestamp + 30 days);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(400e18);
 
-        assertEq(fit.balanceOf(alice), balanceBefore + 400e18);
+        assertEq(clawc.balanceOf(alice), balanceBefore + 400e18);
         (uint256 amount,) = staking.getStake(alice);
         assertEq(amount, 600e18);
     }
@@ -355,7 +355,7 @@ contract FitStakingTest is Test {
         staking.stake(100e18);
 
         vm.prank(alice);
-        vm.expectRevert(FitStaking.ZeroAmount.selector);
+        vm.expectRevert(ClawcStaking.ZeroAmount.selector);
         staking.unstake(0);
     }
 
@@ -364,13 +364,13 @@ contract FitStakingTest is Test {
         staking.stake(100e18);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(FitStaking.InsufficientStake.selector, 200e18, 100e18));
+        vm.expectRevert(abi.encodeWithSelector(ClawcStaking.InsufficientStake.selector, 200e18, 100e18));
         staking.unstake(200e18);
     }
 
     function test_unstake_revertNothingStaked() public {
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(FitStaking.InsufficientStake.selector, 100e18, 0));
+        vm.expectRevert(abi.encodeWithSelector(ClawcStaking.InsufficientStake.selector, 100e18, 0));
         staking.unstake(100e18);
     }
 
@@ -383,13 +383,13 @@ contract FitStakingTest is Test {
         staking.stake(1_000e18);
 
         // Unstake same day (early)
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
-        // 5% penalty = 50 FIT, payout = 950 FIT
-        assertEq(fit.balanceOf(alice), balanceBefore + 950e18);
+        // 5% penalty = 50 CLAWC, payout = 950 CLAWC
+        assertEq(clawc.balanceOf(alice), balanceBefore + 950e18);
     }
 
     function test_unstakeEarly_penaltyRoutedToFeeCollector() public {
@@ -397,13 +397,13 @@ contract FitStakingTest is Test {
         staking.stake(1_000e18);
 
         // Check FeeCollector balance before
-        uint256 feeCollectorBalance = fit.balanceOf(address(feeCollector));
+        uint256 feeCollectorBalance = clawc.balanceOf(address(feeCollector));
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
-        // Penalty (50 FIT) should be in FeeCollector
-        assertEq(fit.balanceOf(address(feeCollector)), feeCollectorBalance + 50e18);
+        // Penalty (50 CLAWC) should be in FeeCollector
+        assertEq(clawc.balanceOf(address(feeCollector)), feeCollectorBalance + 50e18);
     }
 
     function test_unstakeEarly_feeCollectedEventEmitted() public {
@@ -412,7 +412,7 @@ contract FitStakingTest is Test {
 
         // Expect the FeeCollected event from ProtocolFeeCollector
         vm.expectEmit(true, true, false, true, address(feeCollector));
-        emit FeeCollected(address(staking), address(fit), 50e18, "earlyUnstake");
+        emit FeeCollected(address(staking), address(clawc), 50e18, "earlyUnstake");
 
         vm.prank(alice);
         staking.unstake(1_000e18);
@@ -433,13 +433,13 @@ contract FitStakingTest is Test {
         vm.prank(alice);
         staking.stake(1_000e18);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(200e18);
 
-        // 5% of 200 = 10 FIT penalty, payout = 190 FIT
-        assertEq(fit.balanceOf(alice), balanceBefore + 190e18);
+        // 5% of 200 = 10 CLAWC penalty, payout = 190 CLAWC
+        assertEq(clawc.balanceOf(alice), balanceBefore + 190e18);
         (uint256 amount,) = staking.getStake(alice);
         assertEq(amount, 800e18);
     }
@@ -451,14 +451,14 @@ contract FitStakingTest is Test {
         // Warp to exactly 30 days
         vm.warp(block.timestamp + 30 days);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
         // Exactly at boundary: block.timestamp == stakedAt + 30 days
         // Condition is `<`, so exactly at 30 days = NO penalty
-        assertEq(fit.balanceOf(alice), balanceBefore + 1_000e18);
+        assertEq(clawc.balanceOf(alice), balanceBefore + 1_000e18);
     }
 
     function test_unstakeEarly_oneDayBefore_hasPenalty() public {
@@ -468,27 +468,27 @@ contract FitStakingTest is Test {
         // Warp to 29 days (1 day before boundary)
         vm.warp(block.timestamp + 29 days);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
         // Still early: 5% penalty
-        assertEq(fit.balanceOf(alice), balanceBefore + 950e18);
+        assertEq(clawc.balanceOf(alice), balanceBefore + 950e18);
     }
 
     function test_unstakeEarly_tierDowngrade() public {
         vm.prank(alice);
         staking.stake(1_000e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Pro));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Pro));
 
         vm.expectEmit(true, false, false, true);
-        emit TierChanged(alice, FitStaking.Tier.Pro, FitStaking.Tier.Free);
+        emit TierChanged(alice, ClawcStaking.Tier.Pro, ClawcStaking.Tier.Free);
 
         vm.prank(alice);
         staking.unstake(1_000e18);
 
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Free));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Free));
     }
 
     // ═══════════════════════════════════════════════
@@ -555,14 +555,14 @@ contract FitStakingTest is Test {
     function test_updateThresholds_affectsTiers() public {
         vm.prank(alice);
         staking.stake(500e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
 
         // Raise basic threshold above alice's stake
         vm.prank(owner);
         staking.updateThresholds(1_000e18, 5_000e18, 50_000e18);
 
         // Alice should now be Free tier
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Free));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Free));
     }
 
     function test_updateThresholds_revertIfNotOwner() public {
@@ -573,19 +573,19 @@ contract FitStakingTest is Test {
 
     function test_updateThresholds_revertIfBasicZero() public {
         vm.prank(owner);
-        vm.expectRevert(FitStaking.InvalidThresholds.selector);
+        vm.expectRevert(ClawcStaking.InvalidThresholds.selector);
         staking.updateThresholds(0, 1_000e18, 10_000e18);
     }
 
     function test_updateThresholds_revertIfProNotGreaterThanBasic() public {
         vm.prank(owner);
-        vm.expectRevert(FitStaking.InvalidThresholds.selector);
+        vm.expectRevert(ClawcStaking.InvalidThresholds.selector);
         staking.updateThresholds(1_000e18, 1_000e18, 10_000e18);
     }
 
     function test_updateThresholds_revertIfEliteNotGreaterThanPro() public {
         vm.prank(owner);
-        vm.expectRevert(FitStaking.InvalidThresholds.selector);
+        vm.expectRevert(ClawcStaking.InvalidThresholds.selector);
         staking.updateThresholds(100e18, 10_000e18, 10_000e18);
     }
 
@@ -628,23 +628,23 @@ contract FitStakingTest is Test {
         vm.warp(block.timestamp + 16 days); // alice: 31 days, bob: 16 days
 
         // Alice unstakes — no penalty (31 days)
-        uint256 aliceBefore = fit.balanceOf(alice);
+        uint256 aliceBefore = clawc.balanceOf(alice);
         vm.prank(alice);
         staking.unstake(1_000e18);
-        assertEq(fit.balanceOf(alice), aliceBefore + 1_000e18);
+        assertEq(clawc.balanceOf(alice), aliceBefore + 1_000e18);
 
         // Bob unstakes — penalty (16 days)
-        uint256 bobBefore = fit.balanceOf(bob);
+        uint256 bobBefore = clawc.balanceOf(bob);
         vm.prank(bob);
         staking.unstake(500e18);
         // 5% of 500 = 25 penalty, payout = 475
-        assertEq(fit.balanceOf(bob), bobBefore + 475e18);
+        assertEq(clawc.balanceOf(bob), bobBefore + 475e18);
     }
 
     function test_edge_unstakeToExactTierBoundary() public {
         vm.prank(alice);
         staking.stake(1_000e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Pro));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Pro));
 
         vm.warp(block.timestamp + 30 days);
 
@@ -654,7 +654,7 @@ contract FitStakingTest is Test {
 
         (uint256 amount,) = staking.getStake(alice);
         assertEq(amount, 100e18);
-        assertEq(uint256(staking.getTier(alice)), uint256(FitStaking.Tier.Basic));
+        assertEq(uint256(staking.getTier(alice)), uint256(ClawcStaking.Tier.Basic));
     }
 
     function test_edge_unstakeAllUpdatesTotal() public {
@@ -678,17 +678,17 @@ contract FitStakingTest is Test {
 
     function test_edge_earlyUnstakePenaltyMath_smallAmount() public {
         vm.prank(alice);
-        staking.stake(1e18); // 1 FIT
+        staking.stake(1e18); // 1 CLAWC
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(1e18);
 
-        // 5% of 1e18 = 0.05 FIT = 5e16
+        // 5% of 1e18 = 0.05 CLAWC = 5e16
         uint256 penalty = (1e18 * 500) / 10_000;
         assertEq(penalty, 5e16);
-        assertEq(fit.balanceOf(alice), balanceBefore + 1e18 - penalty);
+        assertEq(clawc.balanceOf(alice), balanceBefore + 1e18 - penalty);
     }
 
     // ═══════════════════════════════════════════════
@@ -715,13 +715,13 @@ contract FitStakingTest is Test {
         uint256 expectedPenalty = (amount * 500) / 10_000;
         uint256 expectedPayout = amount - expectedPenalty;
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(amount);
 
-        assertEq(fit.balanceOf(alice), balanceBefore + expectedPayout);
-        assertEq(fit.balanceOf(address(feeCollector)), expectedPenalty);
+        assertEq(clawc.balanceOf(alice), balanceBefore + expectedPayout);
+        assertEq(clawc.balanceOf(address(feeCollector)), expectedPenalty);
     }
 
     function testFuzz_unstakeNormal_noPenalty(uint256 amount, uint256 daysWarp) public {
@@ -733,13 +733,13 @@ contract FitStakingTest is Test {
 
         vm.warp(block.timestamp + daysWarp * 1 days);
 
-        uint256 balanceBefore = fit.balanceOf(alice);
+        uint256 balanceBefore = clawc.balanceOf(alice);
 
         vm.prank(alice);
         staking.unstake(amount);
 
         // Full amount returned, no penalty
-        assertEq(fit.balanceOf(alice), balanceBefore + amount);
+        assertEq(clawc.balanceOf(alice), balanceBefore + amount);
     }
 
     function testFuzz_tierBoundaries(uint256 amount) public {
@@ -750,16 +750,16 @@ contract FitStakingTest is Test {
             staking.stake(amount);
         }
 
-        FitStaking.Tier tier = staking.getTier(alice);
+        ClawcStaking.Tier tier = staking.getTier(alice);
 
         if (amount >= 10_000e18) {
-            assertEq(uint256(tier), uint256(FitStaking.Tier.Elite));
+            assertEq(uint256(tier), uint256(ClawcStaking.Tier.Elite));
         } else if (amount >= 1_000e18) {
-            assertEq(uint256(tier), uint256(FitStaking.Tier.Pro));
+            assertEq(uint256(tier), uint256(ClawcStaking.Tier.Pro));
         } else if (amount >= 100e18) {
-            assertEq(uint256(tier), uint256(FitStaking.Tier.Basic));
+            assertEq(uint256(tier), uint256(ClawcStaking.Tier.Basic));
         } else {
-            assertEq(uint256(tier), uint256(FitStaking.Tier.Free));
+            assertEq(uint256(tier), uint256(ClawcStaking.Tier.Free));
         }
     }
 

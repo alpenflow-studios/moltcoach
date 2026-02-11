@@ -5,12 +5,12 @@ import {ERC721URIStorage, ERC721} from "@openzeppelin/contracts/token/ERC721/ext
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-/// @title MoltcoachIdentity
-/// @notice ERC-8004 compliant Identity Registry for moltcoach AI coaching agents
+/// @title ClawcoachIdentity
+/// @notice ERC-8004 compliant Identity Registry for ClawCoach AI coaching agents
 /// @dev Extends ERC-721 with on-chain metadata, EIP-712 wallet verification, and
 ///      one-agent-per-wallet constraint. Each agent is an NFT with a URI pointing
 ///      to its registration file (personality, capabilities, services).
-contract MoltcoachIdentity is ERC721URIStorage, EIP712 {
+contract ClawcoachIdentity is ERC721URIStorage, EIP712 {
     // ──────────────────────────────────────────────
     // Structs
     // ──────────────────────────────────────────────
@@ -95,7 +95,7 @@ contract MoltcoachIdentity is ERC721URIStorage, EIP712 {
     // Constructor
     // ──────────────────────────────────────────────
 
-    constructor() ERC721("Moltcoach Agent", "MOLTCOACH") EIP712("MoltcoachIdentity", "1") {
+    constructor() ERC721("ClawCoach Agent", "CLAWCOACH") EIP712("ClawcoachIdentity", "1") {
         _nextAgentId = 1;
     }
 
@@ -249,7 +249,7 @@ contract MoltcoachIdentity is ERC721URIStorage, EIP712 {
     }
 
     // ──────────────────────────────────────────────
-    // Moltcoach Convenience Functions
+    // ClawCoach Convenience Functions
     // ──────────────────────────────────────────────
 
     /// @notice Get agent ID for a wallet address

@@ -7,9 +7,9 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title ProtocolFeeCollector
-/// @notice Central fee collection and distribution for the MoltCoach protocol
+/// @notice Central fee collection and distribution for the ClawCoach protocol
 /// @dev All protocol fees route through this contract before treasury distribution.
-///      Supports $FIT and USDC. Uses SafeERC20 for safe token transfers.
+///      Supports $CLAWC and USDC. Uses SafeERC20 for safe token transfers.
 ///      Treasury allocation: 40% dev / 30% buyback / 20% community / 10% insurance (adjustable).
 contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -28,8 +28,8 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     // Immutables
     // ──────────────────────────────────────────────
 
-    /// @notice $FIT token address
-    IERC20 public immutable fitToken;
+    /// @notice $CLAWC token address
+    IERC20 public immutable clawcToken;
 
     /// @notice USDC token address
     IERC20 public immutable usdcToken;
@@ -62,14 +62,14 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     /// @notice Agent spawn fee in USDC (6 decimals)
     uint256 public spawnFeeUsdc = 10e6;
 
-    /// @notice Agent spawn fee in $FIT (18 decimals)
-    uint256 public spawnFeeFit = 50e18;
+    /// @notice Agent spawn fee in $CLAWC (18 decimals)
+    uint256 public spawnFeeClawc = 50e18;
 
     /// @notice Workout validation fee — Tier 1 (wearable API)
-    uint256 public validationFeeTier1 = 1e16; // 0.01 $FIT
+    uint256 public validationFeeTier1 = 1e16; // 0.01 $CLAWC
 
     /// @notice Workout validation fee — Tier 2 (image upload)
-    uint256 public validationFeeTier2 = 5e16; // 0.05 $FIT
+    uint256 public validationFeeTier2 = 5e16; // 0.05 $CLAWC
 
     /// @notice Agent evolution fee
     uint256 public evolutionFee = 5e18;
@@ -129,7 +129,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     // Constructor
     // ──────────────────────────────────────────────
 
-    /// @param _fitToken $FIT token contract address
+    /// @param _clawcToken $CLAWC token contract address
     /// @param _usdcToken USDC token contract address
     /// @param _owner Contract owner (admin)
     /// @param _developmentWallet Treasury: development fund
@@ -137,7 +137,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     /// @param _communityWallet Treasury: community rewards fund
     /// @param _insuranceWallet Treasury: insurance fund
     constructor(
-        address _fitToken,
+        address _clawcToken,
         address _usdcToken,
         address _owner,
         address _developmentWallet,
@@ -145,13 +145,13 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
         address _communityWallet,
         address _insuranceWallet
     ) Ownable(_owner) {
-        if (_fitToken == address(0) || _usdcToken == address(0)) revert ZeroAddress();
+        if (_clawcToken == address(0) || _usdcToken == address(0)) revert ZeroAddress();
         if (
             _developmentWallet == address(0) || _buybackWallet == address(0)
                 || _communityWallet == address(0) || _insuranceWallet == address(0)
         ) revert ZeroAddress();
 
-        fitToken = IERC20(_fitToken);
+        clawcToken = IERC20(_clawcToken);
         usdcToken = IERC20(_usdcToken);
         developmentWallet = _developmentWallet;
         buybackWallet = _buybackWallet;
@@ -163,15 +163,15 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     // Fee Collection
     // ──────────────────────────────────────────────
 
-    /// @notice Collect a fee in $FIT
+    /// @notice Collect a fee in $CLAWC
     /// @param from Address paying the fee (must have approved this contract)
-    /// @param amount Amount of $FIT to collect
+    /// @param amount Amount of $CLAWC to collect
     /// @param feeType Description for tracking (e.g., "spawn", "validation", "evolution")
-    function collectFitFee(address from, uint256 amount, string calldata feeType) external nonReentrant {
+    function collectClawcFee(address from, uint256 amount, string calldata feeType) external nonReentrant {
         if (amount == 0) revert InvalidFee();
-        fitToken.safeTransferFrom(from, address(this), amount);
+        clawcToken.safeTransferFrom(from, address(this), amount);
         totalCollected[feeType] += amount;
-        emit FeeCollected(from, address(fitToken), amount, feeType);
+        emit FeeCollected(from, address(clawcToken), amount, feeType);
     }
 
     /// @notice Collect a fee in USDC
@@ -198,7 +198,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
 
     /// @notice Get validation fee for a given tier
     /// @param tier Validation tier (1 = wearable, 2 = image, 3+ = manual/free)
-    /// @return fee The validation fee in $FIT
+    /// @return fee The validation fee in $CLAWC
     function getValidationFee(uint8 tier) external view returns (uint256 fee) {
         if (tier == 1) return validationFeeTier1;
         if (tier == 2) return validationFeeTier2;
@@ -210,7 +210,7 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
     // ──────────────────────────────────────────────
 
     /// @notice Distribute accumulated fees to treasury wallets
-    /// @param token Token to distribute (FIT or USDC address)
+    /// @param token Token to distribute (CLAWC or USDC address)
     function distribute(address token) external nonReentrant onlyOwner {
         uint256 balance = IERC20(token).balanceOf(address(this));
         if (balance == 0) revert NothingToDistribute();
@@ -270,10 +270,10 @@ contract ProtocolFeeCollector is Ownable, ReentrancyGuard {
         spawnFeeUsdc = newFee;
     }
 
-    /// @notice Update spawn fee in $FIT
-    function updateSpawnFeeFit(uint256 newFee) external onlyOwner {
-        emit FeeUpdated("spawnFit", spawnFeeFit, newFee);
-        spawnFeeFit = newFee;
+    /// @notice Update spawn fee in $CLAWC
+    function updateSpawnFeeClawc(uint256 newFee) external onlyOwner {
+        emit FeeUpdated("spawnClawc", spawnFeeClawc, newFee);
+        spawnFeeClawc = newFee;
     }
 
     /// @notice Update validation fees for tier 1 and tier 2

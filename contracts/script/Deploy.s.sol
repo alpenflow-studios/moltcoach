@@ -2,13 +2,13 @@
 pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
-import {FitToken} from "../src/FitToken.sol";
+import {ClawcToken} from "../src/ClawcToken.sol";
 import {ProtocolFeeCollector} from "../src/fees/ProtocolFeeCollector.sol";
-import {FitStaking} from "../src/FitStaking.sol";
-import {MoltcoachIdentity} from "../src/MoltcoachIdentity.sol";
+import {ClawcStaking} from "../src/ClawcStaking.sol";
+import {ClawcoachIdentity} from "../src/ClawcoachIdentity.sol";
 
-/// @notice Deploy all moltcoach contracts to Base Sepolia or Base Mainnet
-/// @dev Deploy order: FitToken → ProtocolFeeCollector → FitStaking → MoltcoachIdentity
+/// @notice Deploy all ClawCoach contracts to Base Sepolia or Base Mainnet
+/// @dev Deploy order: ClawcToken → ProtocolFeeCollector → ClawcStaking → ClawcoachIdentity
 ///
 /// Required env vars:
 ///   PRIVATE_KEY          — Deployer private key
@@ -30,7 +30,7 @@ contract DeployScript is Script {
 
     function run()
         external
-        returns (FitToken fitToken, ProtocolFeeCollector feeCollector, FitStaking staking, MoltcoachIdentity identity)
+        returns (ClawcToken clawcToken, ProtocolFeeCollector feeCollector, ClawcStaking staking, ClawcoachIdentity identity)
     {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
@@ -44,7 +44,7 @@ contract DeployScript is Script {
         address communityWallet = vm.envOr("COMMUNITY_WALLET", deployer);
         address insuranceWallet = vm.envOr("INSURANCE_WALLET", deployer);
 
-        console.log("=== moltcoach Deploy ===");
+        console.log("=== ClawCoach Deploy ===");
         console.log("Chain ID:", block.chainid);
         console.log("Deployer:", deployer);
         console.log("USDC:", usdc);
@@ -52,23 +52,23 @@ contract DeployScript is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // 1. FitToken — $FIT ERC-20
-        fitToken = new FitToken(deployer);
-        console.log("1. FitToken deployed at:", address(fitToken));
+        // 1. ClawcToken — $CLAWC ERC-20
+        clawcToken = new ClawcToken(deployer);
+        console.log("1. ClawcToken deployed at:", address(clawcToken));
 
         // 2. ProtocolFeeCollector — fee routing + treasury distribution
         feeCollector = new ProtocolFeeCollector(
-            address(fitToken), usdc, deployer, devWallet, buybackWallet, communityWallet, insuranceWallet
+            address(clawcToken), usdc, deployer, devWallet, buybackWallet, communityWallet, insuranceWallet
         );
         console.log("2. ProtocolFeeCollector deployed at:", address(feeCollector));
 
-        // 3. FitStaking — $FIT utility staking with tiers
-        staking = new FitStaking(address(fitToken), address(feeCollector), deployer);
-        console.log("3. FitStaking deployed at:", address(staking));
+        // 3. ClawcStaking — $CLAWC utility staking with tiers
+        staking = new ClawcStaking(address(clawcToken), address(feeCollector), deployer);
+        console.log("3. ClawcStaking deployed at:", address(staking));
 
-        // 4. MoltcoachIdentity — ERC-8004 agent identity
-        identity = new MoltcoachIdentity();
-        console.log("4. MoltcoachIdentity deployed at:", address(identity));
+        // 4. ClawcoachIdentity — ERC-8004 agent identity
+        identity = new ClawcoachIdentity();
+        console.log("4. ClawcoachIdentity deployed at:", address(identity));
 
         vm.stopBroadcast();
 

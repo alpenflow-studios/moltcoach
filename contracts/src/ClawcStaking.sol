@@ -8,15 +8,15 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 /// @notice Minimal interface for ProtocolFeeCollector fee routing
 interface IFeeCollector {
-    function collectFitFee(address from, uint256 amount, string calldata feeType) external;
+    function collectClawcFee(address from, uint256 amount, string calldata feeType) external;
 }
 
-/// @title FitStaking
-/// @notice Stake $FIT to unlock premium coaching tiers
+/// @title ClawcStaking
+/// @notice Stake $CLAWC to unlock premium coaching tiers
 /// @dev Utility-only staking — no yield/rewards. Staking gates feature access.
 ///      Early unstake (< 30 days) incurs 5% penalty routed to ProtocolFeeCollector.
-///      Tiers: Free(0), Basic(100 FIT), Pro(1K FIT), Elite(10K FIT).
-contract FitStaking is Ownable, ReentrancyGuard {
+///      Tiers: Free(0), Basic(100 CLAWC), Pro(1K CLAWC), Elite(10K CLAWC).
+contract ClawcStaking is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ──────────────────────────────────────────────
@@ -36,8 +36,8 @@ contract FitStaking is Ownable, ReentrancyGuard {
     // Immutables
     // ──────────────────────────────────────────────
 
-    /// @notice $FIT token contract
-    IERC20 public immutable fitToken;
+    /// @notice $CLAWC token contract
+    IERC20 public immutable clawcToken;
 
     /// @notice Protocol fee collector for penalty routing
     IFeeCollector public immutable feeCollector;
@@ -48,10 +48,10 @@ contract FitStaking is Ownable, ReentrancyGuard {
 
     /// @notice Premium coaching tiers
     enum Tier {
-        Free,   // 0 FIT
-        Basic,  // 100 FIT
-        Pro,    // 1,000 FIT
-        Elite   // 10,000 FIT
+        Free,   // 0 CLAWC
+        Basic,  // 100 CLAWC
+        Pro,    // 1,000 CLAWC
+        Elite   // 10,000 CLAWC
     }
 
     /// @notice Per-user staking state
@@ -67,26 +67,26 @@ contract FitStaking is Ownable, ReentrancyGuard {
     /// @notice Staking info per user
     mapping(address => StakeInfo) public stakes;
 
-    /// @notice Total $FIT staked across all users
+    /// @notice Total $CLAWC staked across all users
     uint256 public totalStaked;
 
-    /// @notice Tier threshold: Basic (default 100 FIT)
+    /// @notice Tier threshold: Basic (default 100 CLAWC)
     uint256 public basicThreshold = 100e18;
 
-    /// @notice Tier threshold: Pro (default 1,000 FIT)
+    /// @notice Tier threshold: Pro (default 1,000 CLAWC)
     uint256 public proThreshold = 1_000e18;
 
-    /// @notice Tier threshold: Elite (default 10,000 FIT)
+    /// @notice Tier threshold: Elite (default 10,000 CLAWC)
     uint256 public eliteThreshold = 10_000e18;
 
     // ──────────────────────────────────────────────
     // Events
     // ──────────────────────────────────────────────
 
-    /// @notice Emitted when a user stakes $FIT
+    /// @notice Emitted when a user stakes $CLAWC
     event Staked(address indexed user, uint256 amount, uint256 totalUserStake);
 
-    /// @notice Emitted when a user unstakes $FIT
+    /// @notice Emitted when a user unstakes $CLAWC
     event Unstaked(address indexed user, uint256 requested, uint256 penalty, uint256 payout);
 
     /// @notice Emitted when a user's tier changes due to staking/unstaking
@@ -115,12 +115,12 @@ contract FitStaking is Ownable, ReentrancyGuard {
     // Constructor
     // ──────────────────────────────────────────────
 
-    /// @param _fitToken $FIT token contract address
+    /// @param _clawcToken $CLAWC token contract address
     /// @param _feeCollector ProtocolFeeCollector contract address
     /// @param _owner Contract owner (admin)
-    constructor(address _fitToken, address _feeCollector, address _owner) Ownable(_owner) {
-        if (_fitToken == address(0) || _feeCollector == address(0)) revert ZeroAddress();
-        fitToken = IERC20(_fitToken);
+    constructor(address _clawcToken, address _feeCollector, address _owner) Ownable(_owner) {
+        if (_clawcToken == address(0) || _feeCollector == address(0)) revert ZeroAddress();
+        clawcToken = IERC20(_clawcToken);
         feeCollector = IFeeCollector(_feeCollector);
     }
 
@@ -128,8 +128,8 @@ contract FitStaking is Ownable, ReentrancyGuard {
     // Staking
     // ──────────────────────────────────────────────
 
-    /// @notice Stake $FIT tokens to unlock premium features
-    /// @param amount Amount of $FIT to stake (18 decimals)
+    /// @notice Stake $CLAWC tokens to unlock premium features
+    /// @param amount Amount of $CLAWC to stake (18 decimals)
     /// @dev Caller must have approved this contract. stakedAt is set on first stake only.
     function stake(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
@@ -145,7 +145,7 @@ contract FitStaking is Ownable, ReentrancyGuard {
         info.amount += amount;
         totalStaked += amount;
 
-        fitToken.safeTransferFrom(msg.sender, address(this), amount);
+        clawcToken.safeTransferFrom(msg.sender, address(this), amount);
 
         Tier newTier = _getTier(info.amount);
         if (newTier != oldTier) {
@@ -155,8 +155,8 @@ contract FitStaking is Ownable, ReentrancyGuard {
         emit Staked(msg.sender, amount, info.amount);
     }
 
-    /// @notice Unstake $FIT tokens
-    /// @param amount Amount of $FIT to unstake
+    /// @notice Unstake $CLAWC tokens
+    /// @param amount Amount of $CLAWC to unstake
     /// @dev Early unstake (< 30 days) incurs 5% penalty routed to ProtocolFeeCollector.
     ///      Partial unstaking is supported.
     function unstake(uint256 amount) external nonReentrant {
@@ -185,12 +185,12 @@ contract FitStaking is Ownable, ReentrancyGuard {
 
         // Route penalty to FeeCollector
         if (penalty > 0) {
-            fitToken.forceApprove(address(feeCollector), penalty);
-            feeCollector.collectFitFee(address(this), penalty, "earlyUnstake");
+            clawcToken.forceApprove(address(feeCollector), penalty);
+            feeCollector.collectClawcFee(address(this), penalty, "earlyUnstake");
         }
 
         // Pay out remainder to user
-        fitToken.safeTransfer(msg.sender, payout);
+        clawcToken.safeTransfer(msg.sender, payout);
 
         Tier newTier = _getTier(info.amount);
         if (newTier != oldTier) {

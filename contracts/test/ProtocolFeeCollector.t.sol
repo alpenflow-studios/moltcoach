@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {ProtocolFeeCollector} from "../src/fees/ProtocolFeeCollector.sol";
-import {FitToken} from "../src/FitToken.sol";
+import {ClawcToken} from "../src/ClawcToken.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @dev Minimal ERC-20 mock for USDC (6 decimals)
@@ -20,7 +20,7 @@ contract MockUSDC is ERC20 {
 }
 
 contract ProtocolFeeCollectorTest is Test {
-    FitToken public fit;
+    ClawcToken public clawc;
     MockUSDC public usdc;
     ProtocolFeeCollector public collector;
 
@@ -48,11 +48,11 @@ contract ProtocolFeeCollectorTest is Test {
         communityWallet = makeAddr("communityWallet");
         insuranceWallet = makeAddr("insuranceWallet");
 
-        fit = new FitToken(owner);
+        clawc = new ClawcToken(owner);
         usdc = new MockUSDC();
 
         collector = new ProtocolFeeCollector(
-            address(fit),
+            address(clawc),
             address(usdc),
             owner,
             devWallet,
@@ -63,7 +63,7 @@ contract ProtocolFeeCollectorTest is Test {
 
         // Mint tokens to alice for testing
         vm.prank(owner);
-        fit.mint(alice, 10_000e18);
+        clawc.mint(alice, 10_000e18);
 
         usdc.mint(alice, 100_000e6); // 100K USDC
     }
@@ -77,7 +77,7 @@ contract ProtocolFeeCollectorTest is Test {
     }
 
     function test_deployment_tokens() public view {
-        assertEq(address(collector.fitToken()), address(fit));
+        assertEq(address(collector.clawcToken()), address(clawc));
         assertEq(address(collector.usdcToken()), address(usdc));
     }
 
@@ -98,7 +98,7 @@ contract ProtocolFeeCollectorTest is Test {
     function test_deployment_defaultFees() public view {
         assertEq(collector.transactionFeeBps(), 50);
         assertEq(collector.spawnFeeUsdc(), 10e6);
-        assertEq(collector.spawnFeeFit(), 50e18);
+        assertEq(collector.spawnFeeClawc(), 50e18);
         assertEq(collector.validationFeeTier1(), 1e16);
         assertEq(collector.validationFeeTier2(), 5e16);
         assertEq(collector.evolutionFee(), 5e18);
@@ -106,7 +106,7 @@ contract ProtocolFeeCollectorTest is Test {
         assertEq(collector.resetFee(), 15e18);
     }
 
-    function test_deployment_revertIfZeroFitToken() public {
+    function test_deployment_revertIfZeroClawcToken() public {
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
             address(0), address(usdc), owner, devWallet, buybackWallet, communityWallet, insuranceWallet
@@ -116,82 +116,82 @@ contract ProtocolFeeCollectorTest is Test {
     function test_deployment_revertIfZeroUsdcToken() public {
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
-            address(fit), address(0), owner, devWallet, buybackWallet, communityWallet, insuranceWallet
+            address(clawc), address(0), owner, devWallet, buybackWallet, communityWallet, insuranceWallet
         );
     }
 
     function test_deployment_revertIfZeroTreasuryWallet() public {
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
-            address(fit), address(usdc), owner, address(0), buybackWallet, communityWallet, insuranceWallet
+            address(clawc), address(usdc), owner, address(0), buybackWallet, communityWallet, insuranceWallet
         );
 
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
-            address(fit), address(usdc), owner, devWallet, address(0), communityWallet, insuranceWallet
+            address(clawc), address(usdc), owner, devWallet, address(0), communityWallet, insuranceWallet
         );
 
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
-            address(fit), address(usdc), owner, devWallet, buybackWallet, address(0), insuranceWallet
+            address(clawc), address(usdc), owner, devWallet, buybackWallet, address(0), insuranceWallet
         );
 
         vm.expectRevert(ProtocolFeeCollector.ZeroAddress.selector);
         new ProtocolFeeCollector(
-            address(fit), address(usdc), owner, devWallet, buybackWallet, communityWallet, address(0)
+            address(clawc), address(usdc), owner, devWallet, buybackWallet, communityWallet, address(0)
         );
     }
 
     // ═══════════════════════════════════════════════
-    // FIT FEE COLLECTION TESTS
+    // CLAWC FEE COLLECTION TESTS
     // ═══════════════════════════════════════════════
 
-    function test_collectFitFee_success() public {
+    function test_collectClawcFee_success() public {
         vm.prank(alice);
-        fit.approve(address(collector), 100e18);
+        clawc.approve(address(collector), 100e18);
 
         vm.expectEmit(true, true, false, true);
-        emit FeeCollected(alice, address(fit), 50e18, "spawn");
+        emit FeeCollected(alice, address(clawc), 50e18, "spawn");
 
-        collector.collectFitFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 50e18, "spawn");
 
-        assertEq(fit.balanceOf(address(collector)), 50e18);
-        assertEq(fit.balanceOf(alice), 10_000e18 - 50e18);
+        assertEq(clawc.balanceOf(address(collector)), 50e18);
+        assertEq(clawc.balanceOf(alice), 10_000e18 - 50e18);
         assertEq(collector.totalCollected("spawn"), 50e18);
     }
 
-    function test_collectFitFee_multipleFeeTypes() public {
+    function test_collectClawcFee_multipleFeeTypes() public {
         vm.prank(alice);
-        fit.approve(address(collector), 100e18);
+        clawc.approve(address(collector), 100e18);
 
-        collector.collectFitFee(alice, 50e18, "spawn");
-        collector.collectFitFee(alice, 5e18, "evolution");
-        collector.collectFitFee(alice, 2e18, "modeSwitch");
+        collector.collectClawcFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 5e18, "evolution");
+        collector.collectClawcFee(alice, 2e18, "modeSwitch");
 
         assertEq(collector.totalCollected("spawn"), 50e18);
         assertEq(collector.totalCollected("evolution"), 5e18);
         assertEq(collector.totalCollected("modeSwitch"), 2e18);
     }
 
-    function test_collectFitFee_accumulates() public {
+    function test_collectClawcFee_accumulates() public {
         vm.prank(alice);
-        fit.approve(address(collector), 200e18);
+        clawc.approve(address(collector), 200e18);
 
-        collector.collectFitFee(alice, 50e18, "spawn");
-        collector.collectFitFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 50e18, "spawn");
 
         assertEq(collector.totalCollected("spawn"), 100e18);
-        assertEq(fit.balanceOf(address(collector)), 100e18);
+        assertEq(clawc.balanceOf(address(collector)), 100e18);
     }
 
-    function test_collectFitFee_revertIfZeroAmount() public {
+    function test_collectClawcFee_revertIfZeroAmount() public {
         vm.expectRevert(ProtocolFeeCollector.InvalidFee.selector);
-        collector.collectFitFee(alice, 0, "spawn");
+        collector.collectClawcFee(alice, 0, "spawn");
     }
 
-    function test_collectFitFee_revertIfNoApproval() public {
+    function test_collectClawcFee_revertIfNoApproval() public {
         vm.expectRevert();
-        collector.collectFitFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 50e18, "spawn");
     }
 
     // ═══════════════════════════════════════════════
@@ -259,21 +259,21 @@ contract ProtocolFeeCollectorTest is Test {
     // TREASURY DISTRIBUTION TESTS
     // ═══════════════════════════════════════════════
 
-    function test_distribute_fitToken() public {
+    function test_distribute_clawcToken() public {
         // Collect some fees first
         vm.prank(alice);
-        fit.approve(address(collector), 1000e18);
-        collector.collectFitFee(alice, 1000e18, "spawn");
+        clawc.approve(address(collector), 1000e18);
+        collector.collectClawcFee(alice, 1000e18, "spawn");
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
         // 40/30/20/10 split of 1000
-        assertEq(fit.balanceOf(devWallet), 400e18);
-        assertEq(fit.balanceOf(buybackWallet), 300e18);
-        assertEq(fit.balanceOf(communityWallet), 200e18);
-        assertEq(fit.balanceOf(insuranceWallet), 100e18);
-        assertEq(fit.balanceOf(address(collector)), 0);
+        assertEq(clawc.balanceOf(devWallet), 400e18);
+        assertEq(clawc.balanceOf(buybackWallet), 300e18);
+        assertEq(clawc.balanceOf(communityWallet), 200e18);
+        assertEq(clawc.balanceOf(insuranceWallet), 100e18);
+        assertEq(clawc.balanceOf(address(collector)), 0);
     }
 
     function test_distribute_usdcToken() public {
@@ -293,52 +293,52 @@ contract ProtocolFeeCollectorTest is Test {
 
     function test_distribute_emitsEvent() public {
         vm.prank(alice);
-        fit.approve(address(collector), 1000e18);
-        collector.collectFitFee(alice, 1000e18, "spawn");
+        clawc.approve(address(collector), 1000e18);
+        collector.collectClawcFee(alice, 1000e18, "spawn");
 
         vm.expectEmit(true, false, false, true);
-        emit TreasuryDistributed(address(fit), 400e18, 300e18, 200e18, 100e18);
+        emit TreasuryDistributed(address(clawc), 400e18, 300e18, 200e18, 100e18);
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
     }
 
     function test_distribute_insuranceGetsRemainder() public {
         // With an amount that doesn't divide evenly
-        // 333 FIT: dev=133.2, buyback=99.9, community=66.6, insurance=remainder
+        // 333 CLAWC: dev=133.2, buyback=99.9, community=66.6, insurance=remainder
         vm.prank(alice);
-        fit.approve(address(collector), 333e18);
-        collector.collectFitFee(alice, 333e18, "test");
+        clawc.approve(address(collector), 333e18);
+        collector.collectClawcFee(alice, 333e18, "test");
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
         uint256 devAmount = (333e18 * 4000) / 10000; // 133.2e18
         uint256 buybackAmount = (333e18 * 3000) / 10000; // 99.9e18
         uint256 communityAmount = (333e18 * 2000) / 10000; // 66.6e18
         uint256 insuranceAmount = 333e18 - devAmount - buybackAmount - communityAmount;
 
-        assertEq(fit.balanceOf(devWallet), devAmount);
-        assertEq(fit.balanceOf(buybackWallet), buybackAmount);
-        assertEq(fit.balanceOf(communityWallet), communityAmount);
-        assertEq(fit.balanceOf(insuranceWallet), insuranceAmount);
-        assertEq(fit.balanceOf(address(collector)), 0);
+        assertEq(clawc.balanceOf(devWallet), devAmount);
+        assertEq(clawc.balanceOf(buybackWallet), buybackAmount);
+        assertEq(clawc.balanceOf(communityWallet), communityAmount);
+        assertEq(clawc.balanceOf(insuranceWallet), insuranceAmount);
+        assertEq(clawc.balanceOf(address(collector)), 0);
     }
 
     function test_distribute_revertIfNotOwner() public {
         vm.prank(alice);
-        fit.approve(address(collector), 100e18);
-        collector.collectFitFee(alice, 100e18, "spawn");
+        clawc.approve(address(collector), 100e18);
+        collector.collectClawcFee(alice, 100e18, "spawn");
 
         vm.prank(alice);
         vm.expectRevert();
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
     }
 
     function test_distribute_revertIfNoBalance() public {
         vm.prank(owner);
         vm.expectRevert(ProtocolFeeCollector.NothingToDistribute.selector);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
     }
 
     // ═══════════════════════════════════════════════
@@ -392,16 +392,16 @@ contract ProtocolFeeCollectorTest is Test {
         collector.updateAllocation(5000, 2500, 1500, 1000);
 
         vm.prank(alice);
-        fit.approve(address(collector), 1000e18);
-        collector.collectFitFee(alice, 1000e18, "test");
+        clawc.approve(address(collector), 1000e18);
+        collector.collectClawcFee(alice, 1000e18, "test");
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
-        assertEq(fit.balanceOf(devWallet), 500e18);
-        assertEq(fit.balanceOf(buybackWallet), 250e18);
-        assertEq(fit.balanceOf(communityWallet), 150e18);
-        assertEq(fit.balanceOf(insuranceWallet), 100e18);
+        assertEq(clawc.balanceOf(devWallet), 500e18);
+        assertEq(clawc.balanceOf(buybackWallet), 250e18);
+        assertEq(clawc.balanceOf(communityWallet), 150e18);
+        assertEq(clawc.balanceOf(insuranceWallet), 100e18);
     }
 
     // ═══════════════════════════════════════════════
@@ -453,13 +453,13 @@ contract ProtocolFeeCollectorTest is Test {
         assertEq(collector.spawnFeeUsdc(), 20e6);
     }
 
-    function test_updateSpawnFeeFit() public {
+    function test_updateSpawnFeeClawc() public {
         vm.expectEmit(false, false, false, true);
-        emit FeeUpdated("spawnFit", 50e18, 100e18);
+        emit FeeUpdated("spawnClawc", 50e18, 100e18);
 
         vm.prank(owner);
-        collector.updateSpawnFeeFit(100e18);
-        assertEq(collector.spawnFeeFit(), 100e18);
+        collector.updateSpawnFeeClawc(100e18);
+        assertEq(collector.spawnFeeClawc(), 100e18);
     }
 
     function test_updateValidationFees() public {
@@ -514,7 +514,7 @@ contract ProtocolFeeCollectorTest is Test {
         collector.updateSpawnFeeUsdc(20e6);
 
         vm.expectRevert();
-        collector.updateSpawnFeeFit(100e18);
+        collector.updateSpawnFeeClawc(100e18);
 
         vm.expectRevert();
         collector.updateValidationFees(2e16, 10e16);
@@ -612,15 +612,15 @@ contract ProtocolFeeCollectorTest is Test {
 
         // Collect and distribute
         vm.prank(alice);
-        fit.approve(address(collector), 1000e18);
-        collector.collectFitFee(alice, 1000e18, "test");
+        clawc.approve(address(collector), 1000e18);
+        collector.collectClawcFee(alice, 1000e18, "test");
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
         // Funds go to new wallet, not old
-        assertEq(fit.balanceOf(newDev), 400e18);
-        assertEq(fit.balanceOf(devWallet), 0);
+        assertEq(clawc.balanceOf(newDev), 400e18);
+        assertEq(clawc.balanceOf(devWallet), 0);
     }
 
     // ═══════════════════════════════════════════════
@@ -628,23 +628,23 @@ contract ProtocolFeeCollectorTest is Test {
     // ═══════════════════════════════════════════════
 
     function test_e2e_collectAndDistribute() public {
-        // Alice pays spawn fee in FIT + USDC
+        // Alice pays spawn fee in CLAWC + USDC
         vm.startPrank(alice);
-        fit.approve(address(collector), 50e18);
+        clawc.approve(address(collector), 50e18);
         usdc.approve(address(collector), 10e6);
         vm.stopPrank();
 
-        collector.collectFitFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 50e18, "spawn");
         collector.collectUsdcFee(alice, 10e6, "spawn");
 
-        // Distribute FIT
+        // Distribute CLAWC
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
-        assertEq(fit.balanceOf(devWallet), 20e18);      // 40%
-        assertEq(fit.balanceOf(buybackWallet), 15e18);   // 30%
-        assertEq(fit.balanceOf(communityWallet), 10e18);  // 20%
-        assertEq(fit.balanceOf(insuranceWallet), 5e18);   // 10%
+        assertEq(clawc.balanceOf(devWallet), 20e18);      // 40%
+        assertEq(clawc.balanceOf(buybackWallet), 15e18);   // 30%
+        assertEq(clawc.balanceOf(communityWallet), 10e18);  // 20%
+        assertEq(clawc.balanceOf(insuranceWallet), 5e18);   // 10%
 
         // Distribute USDC
         vm.prank(owner);
@@ -658,43 +658,43 @@ contract ProtocolFeeCollectorTest is Test {
 
     function test_e2e_multipleCollectionsThenDistribute() public {
         vm.prank(alice);
-        fit.approve(address(collector), 1000e18);
+        clawc.approve(address(collector), 1000e18);
 
         // Multiple fee types accumulated
-        collector.collectFitFee(alice, 50e18, "spawn");
-        collector.collectFitFee(alice, 5e18, "evolution");
-        collector.collectFitFee(alice, 2e18, "modeSwitch");
-        collector.collectFitFee(alice, 15e18, "reset");
-        // Total: 72 FIT
+        collector.collectClawcFee(alice, 50e18, "spawn");
+        collector.collectClawcFee(alice, 5e18, "evolution");
+        collector.collectClawcFee(alice, 2e18, "modeSwitch");
+        collector.collectClawcFee(alice, 15e18, "reset");
+        // Total: 72 CLAWC
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
         uint256 total = 72e18;
-        assertEq(fit.balanceOf(devWallet), (total * 4000) / 10000);
-        assertEq(fit.balanceOf(buybackWallet), (total * 3000) / 10000);
-        assertEq(fit.balanceOf(communityWallet), (total * 2000) / 10000);
+        assertEq(clawc.balanceOf(devWallet), (total * 4000) / 10000);
+        assertEq(clawc.balanceOf(buybackWallet), (total * 3000) / 10000);
+        assertEq(clawc.balanceOf(communityWallet), (total * 2000) / 10000);
         // Insurance gets remainder
         uint256 insuranceExpected = total
             - (total * 4000) / 10000
             - (total * 3000) / 10000
             - (total * 2000) / 10000;
-        assertEq(fit.balanceOf(insuranceWallet), insuranceExpected);
+        assertEq(clawc.balanceOf(insuranceWallet), insuranceExpected);
     }
 
     // ═══════════════════════════════════════════════
     // FUZZ TESTS
     // ═══════════════════════════════════════════════
 
-    function testFuzz_collectFitFee(uint256 amount) public {
+    function testFuzz_collectClawcFee(uint256 amount) public {
         amount = bound(amount, 1, 10_000e18);
 
         vm.prank(alice);
-        fit.approve(address(collector), amount);
+        clawc.approve(address(collector), amount);
 
-        collector.collectFitFee(alice, amount, "fuzz");
+        collector.collectClawcFee(alice, amount, "fuzz");
 
-        assertEq(fit.balanceOf(address(collector)), amount);
+        assertEq(clawc.balanceOf(address(collector)), amount);
         assertEq(collector.totalCollected("fuzz"), amount);
     }
 
@@ -727,16 +727,16 @@ contract ProtocolFeeCollectorTest is Test {
         amount = bound(amount, 1, 10_000e18);
 
         vm.prank(alice);
-        fit.approve(address(collector), amount);
-        collector.collectFitFee(alice, amount, "fuzz");
+        clawc.approve(address(collector), amount);
+        collector.collectClawcFee(alice, amount, "fuzz");
 
         vm.prank(owner);
-        collector.distribute(address(fit));
+        collector.distribute(address(clawc));
 
-        uint256 total = fit.balanceOf(devWallet) + fit.balanceOf(buybackWallet)
-            + fit.balanceOf(communityWallet) + fit.balanceOf(insuranceWallet);
+        uint256 total = clawc.balanceOf(devWallet) + clawc.balanceOf(buybackWallet)
+            + clawc.balanceOf(communityWallet) + clawc.balanceOf(insuranceWallet);
         assertEq(total, amount);
-        assertEq(fit.balanceOf(address(collector)), 0);
+        assertEq(clawc.balanceOf(address(collector)), 0);
     }
 
     function testFuzz_updateTransactionFeeBps(uint256 bps) public {

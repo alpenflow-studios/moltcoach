@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {MoltcoachIdentity} from "../src/MoltcoachIdentity.sol";
+import {ClawcoachIdentity} from "../src/ClawcoachIdentity.sol";
 
-contract MoltcoachIdentityTest is Test {
-    MoltcoachIdentity public identity;
+contract ClawcoachIdentityTest is Test {
+    ClawcoachIdentity public identity;
 
     // Test accounts (with known private keys for EIP-712 signing)
     uint256 internal constant ALICE_PK = 0xa11ce;
@@ -30,7 +30,7 @@ contract MoltcoachIdentityTest is Test {
         keccak256("SetAgentWallet(uint256 agentId,address newWallet,uint256 deadline)");
 
     function setUp() public {
-        identity = new MoltcoachIdentity();
+        identity = new ClawcoachIdentity();
         alice = vm.addr(ALICE_PK);
         bob = vm.addr(BOB_PK);
         charlie = vm.addr(CHARLIE_PK);
@@ -41,9 +41,9 @@ contract MoltcoachIdentityTest is Test {
     // ═══════════════════════════════════════════════
 
     function test_register_withURIAndMetadata() public {
-        MoltcoachIdentity.MetadataEntry[] memory meta = new MoltcoachIdentity.MetadataEntry[](2);
-        meta[0] = MoltcoachIdentity.MetadataEntry("personality", abi.encode("motivational"));
-        meta[1] = MoltcoachIdentity.MetadataEntry("heartbeat", abi.encode("daily"));
+        ClawcoachIdentity.MetadataEntry[] memory meta = new ClawcoachIdentity.MetadataEntry[](2);
+        meta[0] = ClawcoachIdentity.MetadataEntry("personality", abi.encode("motivational"));
+        meta[1] = ClawcoachIdentity.MetadataEntry("heartbeat", abi.encode("daily"));
 
         vm.expectEmit(true, true, false, true);
         emit Registered(1, "ipfs://QmTest", alice);
@@ -98,12 +98,12 @@ contract MoltcoachIdentityTest is Test {
         identity.register("ipfs://first");
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.WalletAlreadyHasAgent.selector, alice, 1));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.WalletAlreadyHasAgent.selector, alice, 1));
         identity.register("ipfs://second");
     }
 
     function test_register_emptyMetadataArray() public {
-        MoltcoachIdentity.MetadataEntry[] memory empty = new MoltcoachIdentity.MetadataEntry[](0);
+        ClawcoachIdentity.MetadataEntry[] memory empty = new ClawcoachIdentity.MetadataEntry[](0);
 
         vm.prank(alice);
         uint256 agentId = identity.register("ipfs://QmTest", empty);
@@ -134,7 +134,7 @@ contract MoltcoachIdentityTest is Test {
         uint256 agentId = identity.register("ipfs://test");
 
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.NotAuthorized.selector, bob, agentId));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.NotAuthorized.selector, bob, agentId));
         identity.setAgentURI(agentId, "ipfs://hacked");
     }
 
@@ -186,7 +186,7 @@ contract MoltcoachIdentityTest is Test {
         uint256 agentId = identity.register();
 
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.NotAuthorized.selector, bob, agentId));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.NotAuthorized.selector, bob, agentId));
         identity.setMetadata(agentId, "key", "value");
     }
 
@@ -195,7 +195,7 @@ contract MoltcoachIdentityTest is Test {
         uint256 agentId = identity.register();
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.ReservedMetadataKey.selector, "agentWallet"));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.ReservedMetadataKey.selector, "agentWallet"));
         identity.setMetadata(agentId, "agentWallet", abi.encode(bob));
     }
 
@@ -213,7 +213,7 @@ contract MoltcoachIdentityTest is Test {
     }
 
     function test_getMetadata_revertIfAgentNotFound() public {
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.AgentNotFound.selector, 999));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.AgentNotFound.selector, 999));
         identity.getMetadata(999, "key");
     }
 
@@ -245,7 +245,7 @@ contract MoltcoachIdentityTest is Test {
         bytes32 domainSeparator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256("MoltcoachIdentity"),
+                keccak256("ClawcoachIdentity"),
                 keccak256("1"),
                 block.chainid,
                 address(identity)
@@ -275,7 +275,7 @@ contract MoltcoachIdentityTest is Test {
         bytes memory sig = _signSetAgentWallet(BOB_PK, agentId, bob, deadline);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.SignatureExpired.selector, deadline));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.SignatureExpired.selector, deadline));
         identity.setAgentWallet(agentId, bob, deadline, sig);
     }
 
@@ -288,7 +288,7 @@ contract MoltcoachIdentityTest is Test {
         bytes memory sig = _signSetAgentWallet(CHARLIE_PK, agentId, bob, deadline);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.InvalidSignature.selector, bob, charlie));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.InvalidSignature.selector, bob, charlie));
         identity.setAgentWallet(agentId, bob, deadline, sig);
     }
 
@@ -300,7 +300,7 @@ contract MoltcoachIdentityTest is Test {
         bytes memory sig = _signSetAgentWallet(BOB_PK, agentId, bob, deadline);
 
         vm.prank(bob); // bob is not the agent owner
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.NotAuthorized.selector, bob, agentId));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.NotAuthorized.selector, bob, agentId));
         identity.setAgentWallet(agentId, bob, deadline, sig);
     }
 
@@ -333,7 +333,7 @@ contract MoltcoachIdentityTest is Test {
         uint256 agentId = identity.register();
 
         vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(MoltcoachIdentity.NotAuthorized.selector, bob, agentId));
+        vm.expectRevert(abi.encodeWithSelector(ClawcoachIdentity.NotAuthorized.selector, bob, agentId));
         identity.unsetAgentWallet(agentId);
     }
 
@@ -472,11 +472,11 @@ contract MoltcoachIdentityTest is Test {
     // ═══════════════════════════════════════════════
 
     function test_name() public view {
-        assertEq(identity.name(), "Moltcoach Agent");
+        assertEq(identity.name(), "ClawCoach Agent");
     }
 
     function test_symbol() public view {
-        assertEq(identity.symbol(), "MOLTCOACH");
+        assertEq(identity.symbol(), "CLAWCOACH");
     }
 
     function test_supportsInterface_ERC721() public view {

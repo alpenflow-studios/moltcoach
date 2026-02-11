@@ -6,15 +6,15 @@ import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title FitToken ($FIT)
-/// @notice Move-to-earn ERC-20 token for the MoltCoach protocol
+/// @title ClawcToken ($CLAWC)
+/// @notice Native ERC-20 token for the ClawCoach protocol
 /// @dev Earned via validated workouts, never bought. Features:
 ///      - 1B max supply (immutable)
 ///      - 100K/day emission cap (adjustable by owner within bounds)
 ///      - Owner-only minting (for RewardDistributor)
 ///      - ERC20Burnable (anyone can burn their own tokens)
 ///      - ERC20Permit (gasless approvals via EIP-2612)
-contract FitToken is ERC20, ERC20Burnable, ERC20Permit, Ownable {
+contract ClawcToken is ERC20, ERC20Burnable, ERC20Permit, Ownable {
     // ──────────────────────────────────────────────
     // Constants
     // ──────────────────────────────────────────────
@@ -69,8 +69,8 @@ contract FitToken is ERC20, ERC20Burnable, ERC20Permit, Ownable {
 
     /// @param owner Address that will own the contract (can mint and adjust cap)
     constructor(address owner)
-        ERC20("MoltCoach FIT", "FIT")
-        ERC20Permit("MoltCoach FIT")
+        ERC20("ClawCoach", "CLAWC")
+        ERC20Permit("ClawCoach")
         Ownable(owner)
     {
         dailyEmissionCap = 100_000e18;
@@ -81,7 +81,7 @@ contract FitToken is ERC20, ERC20Burnable, ERC20Permit, Ownable {
     // Minting (Owner Only)
     // ──────────────────────────────────────────────
 
-    /// @notice Mint $FIT tokens (for move-to-earn reward distribution)
+    /// @notice Mint $CLAWC tokens (for reward distribution)
     /// @param to Recipient address
     /// @param amount Amount to mint (18 decimals)
     /// @dev Enforces both max supply and daily emission cap

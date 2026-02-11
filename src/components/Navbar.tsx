@@ -25,7 +25,7 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            molt<span className="text-primary">coach</span>
+            Claw<span className="text-primary">Coach</span>
           </Link>
 
           {/* Desktop nav links */}

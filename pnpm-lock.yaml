@@ -11,6 +11,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.74.0
         version: 0.74.0(zod@3.25.76)
+      '@slicekit/erc8128':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@supabase/supabase-js':
         specifier: ^2.95.3
         version: 2.95.3
@@ -1903,6 +1906,9 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@slicekit/erc8128@0.1.0':
+    resolution: {integrity: sha512-App9GeEN2jDtGWKKLn2C9UC3NJCae5kxzZz9EyySMHzIKQAfCbMMbZwFQryUoStAfG92YS8nQlhYtHd4GZq8qw==}
 
   '@solidity-parser/parser@0.20.2':
     resolution: {integrity: sha512-rbu0bzwNvMcwAjH86hiEAcOeRI2EeK8zCkHDrFykh/Al8mvJeFmjy3UrE7GYQjNwOgbGUUtCn5/k8CB8zIu7QA==}
@@ -7933,6 +7939,10 @@ snapshots:
   '@sindresorhus/is@5.6.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@slicekit/erc8128@0.1.0':
+    dependencies:
+      '@noble/hashes': 1.8.0
 
   '@solidity-parser/parser@0.20.2': {}
 

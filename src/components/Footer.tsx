@@ -15,6 +15,9 @@ export function Footer() {
             <Link href="/agent" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
               Agent
             </Link>
+            <Link href="/hub" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
+              Hub
+            </Link>
             <Link href="/dashboard" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
               Dashboard
             </Link>

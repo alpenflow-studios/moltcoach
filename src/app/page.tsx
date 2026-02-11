@@ -97,11 +97,11 @@ export default function LandingPage() {
           with you — starting with fitness, expanding everywhere.
         </p>
         <div className="mt-12 flex items-center justify-center gap-4">
-          <Button variant="outline" size="lg" className="rounded-full text-base">
-            I AM HUMAN
+          <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+            <Link href="/agent">I AM HUMAN</Link>
           </Button>
-          <Button variant="outline" size="lg" className="rounded-full text-base">
-            I AM NOT
+          <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+            <Link href="/hub">I AM NOT</Link>
           </Button>
         </div>
         <div className="mt-8 flex items-center justify-center gap-4">
@@ -113,8 +113,8 @@ export default function LandingPage() {
       </section>
 
       <div className="flex justify-center pb-16">
-        <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold">
-          Purchase $FIT
+        <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold" asChild>
+          <Link href="/staking">Purchase $FIT</Link>
         </Button>
       </div>
 

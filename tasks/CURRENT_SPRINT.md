@@ -29,15 +29,6 @@
   - [ ] `pnpm lint` passes
   - [ ] `pnpm build` passes
 
-#### TASK-013: XMTP Integration
-- **Priority**: P2
-- **Scope**: XMTP SDK, agent messaging, new hooks/components
-- **Acceptance Criteria**:
-  - [ ] XMTP client initialized with wallet
-  - [ ] Agent can send/receive messages via XMTP
-  - [ ] Chat UI supports XMTP channel
-  - [ ] Landing page XMTP button functional
-
 #### TASK-014: Telegram Integration
 - **Priority**: P2
 - **Scope**: Telegram Bot API, webhook handler, new API routes
@@ -66,6 +57,21 @@
 ---
 
 ### Done
+
+#### TASK-013: XMTP Integration
+- **Priority**: P2
+- **Scope**: XMTP SDK, agent messaging, new hooks/components
+- **Started**: Session 15 (Feb 10, 2026)
+- **Completed**: Session 16 (Feb 10, 2026)
+- **Notes**: Migrated from V2 (`@xmtp/xmtp-js`) to V3 (`@xmtp/browser-sdk` v6.3.0) after V2 deprecation. Agent registered via `@xmtp/cli`. Dev server switched from Turbopack to webpack for WASM compatibility.
+- **Acceptance Criteria**:
+  - [x] XMTP client initialized with wallet
+  - [x] Agent can send/receive messages via XMTP
+  - [x] Chat UI supports XMTP channel
+  - [x] Landing page XMTP button functional
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm lint` passes
+  - [x] `pnpm build` passes
 
 #### TASK-011: Wire Landing Page Placeholders (Partial)
 - **Priority**: P1

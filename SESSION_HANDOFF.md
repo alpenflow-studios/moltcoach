@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-10
-- **Duration**: Session 14
+- **Duration**: Session 16
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,124 +15,129 @@
 
 ## What Was Done
 
-### Session 14 (This Session)
+### Session 16 (This Session)
 
-1. **Multi-token pricing model** — `0398f91 feat(pricing): add multi-token pricing model + Supabase setup guide`
-   - Reworked pricing page: Stake $FIT OR Subscribe with USDC/ETH
-   - Created `src/config/pricing.ts` — tier definitions, price helpers, billing periods
-   - Created `src/components/pricing/PricingPageContent.tsx` — interactive client component with Stake/Subscribe toggle, USDC/ETH token selector, Monthly/Quarterly/Annual billing (10% / 20% discounts)
-   - Pricing tiers: Free / $10 / $50 / $200 per month (or equivalent FIT staking)
-   - Cross-sell on each card ("or stake X FIT" / "or $X/mo subscription")
-   - Context-aware FAQ section (staking info vs subscription info)
-   - Created `/subscribe` placeholder page ("Coming soon" + CTA to stake)
+1. **XMTP V2 → V3 Migration (TASK-013)**
+   - XMTP V2 (`@xmtp/xmtp-js`) is fully deprecated (May 2025). Registration returned: "publishing to XMTP V2 is no longer available"
+   - Replaced `@xmtp/xmtp-js` with `@xmtp/browser-sdk` v6.3.0 (XMTP V3/MLS)
+   - Rewrote 3 core files for V3 API:
+     - `src/lib/xmtpSigner.ts` — V3 signer: `getIdentifier()` + `Uint8Array` returns + `type: "EOA"`
+     - `src/hooks/useXmtpClient.ts` — V3 client types (`inboxId` instead of `address`, `XmtpDmRef`)
+     - `src/hooks/useXmtpConversation.ts` — V3 DMs: `createDmWithIdentifier()`, `sendText()`, `sync()` before `messages()`
 
-2. **Supabase setup guide** — `docs/SUPABASE_SETUP.md`
-   - Complete SQL schema (6 tables: users, agents, messages, workouts, coaching_sessions, subscriptions)
-   - RLS policies, indexes, triggers
-   - Verification checklist
-   - Pushed to GitHub for Claude.ai consumption
+2. **Agent Registered on XMTP V3**
+   - Used `@xmtp/cli` (works on Node v25) to register the agent identity
+   - Command: `npx @xmtp/cli client info --wallet-key ... --env dev --db-encryption-key ...`
+   - Agent is confirmed reachable: `npx @xmtp/cli can-message 0xC7F8... --env dev` → `true`
+   - **Inbox ID**: `b9e2011e0f68256545dc1ee6d06e6de0b38c6721b5dbd424e31503b619a17964`
 
-3. **Database types updated** — `src/types/database.ts`
-   - Added `messages` table type (for chat persistence)
-   - Added `subscriptions` table type (for multi-token subscriptions)
+3. **Fixed Turbopack/WASM Blocker**
+   - `@xmtp/browser-sdk` uses Web Workers + WASM internally
+   - Turbopack serves workers as blob URLs → WASM `fetch()` fails inside blob context (vercel/next.js#84782)
+   - Fix: switched `pnpm dev` from `--turbopack` to `--webpack`
+   - Added `next.config.ts`: `asyncWebAssembly`, `.wasm` asset rule, server externals for XMTP packages, `turbopack: {}` to keep build working
 
-4. **Sprint tracking updated** — `tasks/CURRENT_SPRINT.md`
-   - TASK-010 (Agent Coaching Chat) → Done
-   - TASK-011 (Landing Page Wiring) → Done (partial — Privy + ETH pricing deferred)
-   - Added TASK-012 (Multi-token pricing), TASK-013 (XMTP), TASK-014 (Telegram)
-   - TASK-009 (Supabase) moved to In Progress
+4. **Cleaned Up**
+   - Deleted broken temp files: `scripts/register-xmtp-agent.mjs`, `src/app/api/xmtp-register/route.ts`
+   - Deleted one-time `src/app/admin/xmtp-register/page.tsx` (agent already registered via CLI)
+   - Fixed `.env.local` — removed duplicate Upstash entries, fixed malformed `UPSTASH_REDIS_REST_URL=UPSTASH_REDIS_REST_URL="..."` value
 
-5. **XMTP integration research** — NOT YET IMPLEMENTED, research complete
-   - Explored `@xmtp/browser-sdk` v5.2.0 and `@xmtp/xmtp-js` v13.0.4
-   - Decision: MVP approach = Browser XMTP + HTTP AI
-   - Decision: Generate new dedicated wallet for agent's XMTP identity (not deployer)
-   - Key finding: `@xmtp/browser-sdk` requires COOP/COEP headers that break WalletConnect popups
-   - Recommendation: Use `@xmtp/xmtp-js` (V2) for MVP — no special headers needed
-   - Plan was being designed when session hit 78% context
+5. **E2E Test — XMTP Connect Works**
+   - Michael tested: Connect wallet → agent page → "Connect XMTP" → badge turns green → chat functional
+   - Persistence test (load history on reconnect) deferred to next morning
 
-6. **All checks pass**: typecheck, lint, build (14 routes including /subscribe)
+### Session 15 (Previous)
 
-### Session 13 (Previous)
+- XMTP V2 code written (5 new files, 5 modified), agent wallet generated, all checks passing
+- XMTP agent registration blocked by WASM/ESM issues (resolved in Session 16)
 
-- ERC-8128 agent auth infrastructure + Agent Hub at `/hub` + 3 protected API routes + TASK-011 buttons wired + Upstash Redis configured
+### Sessions 1-14
 
-### Sessions 1-12
-
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat, ERC-8128 agent auth, Agent Hub, multi-token pricing, Supabase setup guide
 
 ---
 
 ## What's In Progress
 
-- **XMTP Integration (TASK-013)** — Research complete, implementation not started. See "XMTP Research Summary" below.
-- **Supabase Setup (TASK-009)** — Michael setting up project with Claude.ai. Guide at `docs/SUPABASE_SETUP.md`.
+### XMTP Persistence Test (Manual)
 
----
+Michael will test the full persistence loop in the morning:
+1. Send messages with XMTP connected
+2. Refresh page → reconnect XMTP
+3. Verify history loads and Claude has context from prior messages
 
-## XMTP Research Summary (For Next Session)
-
-### Architecture Decision
-- **MVP Approach**: Browser XMTP + HTTP AI
-  - User connects wallet → initializes XMTP client in browser
-  - AI coaching chat continues via existing HTTP/Claude flow (`/api/chat`)
-  - Messages persist on XMTP network (user-side)
-  - Phase 2: Full XMTP agent service
-
-### SDK Choice
-- **Use `@xmtp/xmtp-js` (V2, v13.0.4)** — NOT `@xmtp/browser-sdk`
-- Reason: Browser SDK (V3) requires COOP/COEP headers that break WalletConnect popups
-- V2 works without special headers, compatible with wagmi/viem via signer adapter
-
-### Agent XMTP Wallet
-- Generate NEW dedicated wallet (not deployer — deployer changes at mainnet)
-- `NEXT_PUBLIC_CLAWCOACH_AGENT_XMTP_ADDRESS` (public)
-- `CLAWCOACH_AGENT_XMTP_KEY` (server-only, Phase 2)
-
-### Implementation Steps
-1. `pnpm add @xmtp/xmtp-js`
-2. Create viem-to-XMTP signer adapter
-3. Create `src/hooks/useXmtpClient.ts`
-4. Create `src/components/agent/XmtpStatus.tsx`
-5. Update `AgentChat` with optional XMTP mode
-6. Wire landing page XMTP button → `/agent`
-7. Generate agent wallet, add env vars
-
-### XMTP V2 API Reference
-```typescript
-import { Client } from '@xmtp/xmtp-js';
-const xmtp = await Client.create(signer, { env: 'dev' });
-const convo = await xmtp.conversations.newConversation(peerAddress);
-await convo.send('Hello');
-for await (const msg of await convo.streamMessages()) { ... }
-```
-
-### Key Files for Integration
-- `src/hooks/useChat.ts` — existing chat hook
-- `src/components/agent/AgentChat.tsx` — chat container
-- `src/components/agent/AgentPageContent.tsx` — agent page wrapper
-- `src/config/wagmi.ts` — wallet config
-- `src/app/page.tsx:158-174` — XMTP button stub
+If it works: TASK-013 core acceptance criteria are met.
+If history doesn't load: debug `useXmtpConversation` init flow.
 
 ---
 
 ## What's Next
 
-1. **XMTP Integration (TASK-013)** — implement steps above
-2. **Supabase Integration (TASK-009)** — when Michael has credentials
-3. **Telegram Integration (TASK-014)**
+1. **Verify XMTP persistence** — morning test (see above)
+2. **Supabase Integration (TASK-009)** — Michael setting up project, guide at `docs/SUPABASE_SETUP.md`
+3. **Telegram Integration (TASK-014)** — not started
 4. **Vercel password protection** — dashboard toggle
 5. **Privy integration** — email/social onboarding
-6. **Wearable integration** — Strava OAuth
-7. **ERC-8128 Phase 2** — agent runtime
+
+---
+
+## XMTP Architecture (Implemented — V3)
+
+### How It Works (MVP)
+```
+User clicks "Connect XMTP" in chat header
+  → useXmtpClient: dynamic import @xmtp/browser-sdk, create V3 client (wallet signature)
+  → useXmtpConversation: createDmWithIdentifier(agent address), sync(), load history
+
+User sends message:
+  ├─ HTTP path (existing): POST /api/chat → Claude → streamed response
+  └─ XMTP path (new): onMessageComplete callback writes both user + AI messages to XMTP DM
+
+On page reload with XMTP connected:
+  → Load DM history from XMTP → seed useChat with initialMessages
+```
+
+### V3 Key Differences from V2
+- Package: `@xmtp/browser-sdk` (not `@xmtp/xmtp-js`)
+- Identity: `inboxId` (not Ethereum address)
+- Conversations: `createDmWithIdentifier()` (not `newConversation(address)`)
+- Send: `dm.sendText()` (not `conversation.send()`)
+- History: `dm.sync()` then `dm.messages()` (not just `conversation.messages()`)
+- Signer: `getIdentifier()` + `Uint8Array` returns (not `getAddress()` + hex string)
+- DB: OPFS (Origin Private File System) — no COOP/COEP headers needed (uses SyncAccessHandle Pool VFS)
+- Bundler: Requires webpack for dev (Turbopack can't handle Workers + WASM)
+
+### Message Role Convention
+- User messages: sent as-is to XMTP
+- AI responses: sent with `[assistant] ` prefix (parsed back on reload)
+- Phase 2: Agent has own XMTP client, prefix no longer needed
+
+### Key Files
+| File | Purpose |
+|------|---------|
+| `src/lib/xmtpSigner.ts` | viem → XMTP V3 signer adapter |
+| `src/config/xmtp.ts` | XMTP env, agent address, prefix constant |
+| `src/hooks/useXmtpClient.ts` | V3 client lifecycle + structural types |
+| `src/hooks/useXmtpConversation.ts` | DM creation, sync, history, send |
+| `src/components/agent/XmtpStatus.tsx` | Status badge component |
+| `src/hooks/useChat.ts` | Extended with `initialMessages` + `onMessageComplete` |
+| `src/components/agent/AgentChat.tsx` | Integrates XMTP status + mirroring |
+| `src/components/agent/AgentPageContent.tsx` | Wires hooks, auto-connect from `?xmtp=1` |
+| `next.config.ts` | Webpack WASM config + server externals for XMTP |
 
 ---
 
 ## Decisions Made
 
+- **XMTP V3 SDK**: `@xmtp/browser-sdk` v6.3.0 (V2 deprecated, forced migration) (Session 16)
+- **XMTP agent inbox ID**: `b9e2011e0f68256545dc1ee6d06e6de0b38c6721b5dbd424e31503b619a17964` (Session 16)
+- **Dev bundler**: webpack (not Turbopack) — XMTP WASM workers incompatible with Turbopack (Session 16)
+- **XMTP agent address**: `0xC7F839B81bc55a400423B7c8A6beF0Ad7c48E4bB` (Session 15)
+- **XMTP message convention**: `[assistant] ` prefix for AI responses from user's client (Session 15)
+- **XMTP dynamic import**: code-split, only loaded on "Connect XMTP" click (Session 15)
 - **Pricing model**: DUAL — Stake $FIT OR Subscribe USDC/ETH (Session 14)
 - **Subscription pricing**: Free / $10 / $50 / $200 per month
 - **Billing discounts**: Quarterly 10%, Annual 20%
-- **XMTP SDK**: `@xmtp/xmtp-js` V2 for MVP (avoids COOP/COEP issues)
 - **XMTP architecture**: Browser-side + HTTP AI for MVP
 - **Agent XMTP wallet**: New dedicated wallet (not deployer)
 - **Theme**: Dark mode, lime primary on zinc
@@ -153,7 +158,7 @@ for await (const msg of await convo.streamMessages()) { ... }
 
 - `forge test`: **216 tests pass**
 - `pnpm typecheck`: **PASSES**
-- `pnpm lint`: **PASSES**
+- `pnpm lint`: **PASSES** (0 errors, 0 warnings)
 - `pnpm build`: **PASSES** (14 routes)
 
 ---
@@ -170,11 +175,12 @@ for await (const msg of await convo.streamMessages()) { ... }
 ## Environment Notes
 
 - **Foundry**: v1.5.1 at `~/.foundry/bin/`
-- **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: LTS
+- **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: v25.6.0
 - **Project**: `~/Projects/moltcoach`
-- **Configured**: ANTHROPIC_API_KEY, Upstash Redis
+- **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
+- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent address + registered on V3
 - **NOT configured**: Supabase (guide ready), Coinbase Wallet project ID
 
 ---
 
-*Last updated: Feb 10, 2026 — Session 14*
+*Last updated: Feb 10, 2026 — Session 16*

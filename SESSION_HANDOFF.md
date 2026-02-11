@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-10
-- **Duration**: Session 11
+- **Duration**: Session 12
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,33 +15,38 @@
 
 ## What Was Done
 
-### Session 11 (This Session)
+### Session 12 (This Session)
 
-1. **TASK-010 completed** — Agent coaching chat fully working:
-   - Built `src/components/agent/AgentChat.tsx` — main chat container with auto-scroll, style-specific greetings, error toasts
-   - Modified `src/components/agent/AgentPageContent.tsx` — parses agentURI, renders AgentChat below profile card
-   - All checks pass: `pnpm typecheck`, `pnpm lint`, `pnpm build`
-   - Manual test: chatted with Agent #1 ("daddy", motivator style), streaming works end-to-end
-   - Committed + pushed: `5dbdd1c feat(chat): add AgentChat container + wire into agent page (TASK-010)`
+1. **Rebrand commit pushed** — `38e384e chore(rebrand): rename moltcoach → ClawCoach`
+   - 26 files changed across src/, docs/, config
+   - Verified: `grep -ri "moltcoach" src/` returns zero hits
+   - Solidity contracts intentionally unchanged (testnet, documented for mainnet)
 
-2. **Rebrand: moltcoach → ClawCoach** — Full frontend + documentation rebrand:
-   - All `src/` files: page titles, UI copy, system prompt, wagmi config, variable names
-   - `MOLTCOACH_IDENTITY_ADDRESS` → `CLAWCOACH_IDENTITY_ADDRESS` (env var + code)
-   - `moltcoachIdentityAbi` → `clawcoachIdentityAbi`
-   - `package.json` name: `moltcoach` → `clawcoach`
-   - `.env.local` + `.env.example` updated
-   - All documentation files rebranded
-   - Primary domain: `clawcoach.ai` (also owns clawcoach.dev, clawcoach.xyz, klawcoach)
-   - Solidity contracts NOT renamed (testnet only — documented for mainnet prep)
-   - GitHub repo name stays `alpenflow-studios/moltcoach`
+2. **Beta prep: per-wallet rate limiting** — `6c455c1 feat(chat): add per-wallet rate limiting for beta prep`
+   - Installed `@upstash/redis` ^1.36.2 + `@upstash/ratelimit` ^2.0.8
+   - Created `src/lib/rateLimit.ts` — dual sliding window (50 msgs/hr + 200 msgs/day per wallet)
+   - Threaded wallet address from `AgentPageContent` → `AgentChat` → `useChat` → `X-Wallet-Address` header → `/api/chat` route
+   - 429 response with `Retry-After` header when limit exceeded
+   - Graceful fallback: if Upstash not configured, rate limiting disabled (local dev works)
+   - All checks pass: typecheck, lint, build
 
-3. **Anthropic API key set up** — `ANTHROPIC_API_KEY` configured in `.env.local`
+3. **ERC-8128 doc reviewed** — `docs/ERC-8128.md` added by Michael via GitHub
+   - Signed HTTP Requests with Ethereum — agents authenticate via wallet signatures
+   - Excellent fit for Phase 2 (autonomous agent actions, agent-to-agent comms)
+   - NOT needed for beta — current agents don't make their own HTTP requests
+   - Nonce store uses same Upstash Redis we just set up for rate limiting
+   - "I AM NOT HUMAN" button concept: agent hub entry point (ERC-8128 authenticated)
 
-### Session 10 (Previous)
+### Session 11 (Previous)
 
-- TASK-008 completed (all staking flows verified end-to-end)
-- TASK-010 ~70% coded (8 new files, 595 lines added)
-- 2 commits pushed to main
+- TASK-010 completed (AgentChat container, streaming chat working end-to-end)
+- Rebrand: moltcoach → ClawCoach (all frontend + docs, Solidity deferred)
+- Anthropic API key configured
+
+### Session 10
+
+- TASK-008 completed (staking flows verified)
+- TASK-010 ~70% coded
 
 ### Sessions 1-9
 
@@ -51,19 +56,23 @@
 
 ## What's In Progress
 
-Nothing currently in progress. TASK-010 is complete.
+- **Upstash Redis setup** — Michael creating database at console.upstash.com. Need `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` in `.env.local`. Code is ready, just needs credentials.
 
 ---
 
 ## What's Next
 
-1. **Beta preparation** — Rate limit `/api/chat` (per-wallet caps, Upstash Redis), Vercel password protection
-2. **TASK-009: Supabase integration** — Michael setting up project, then wire user records + chat persistence
-3. **TASK-011: Wire landing page placeholders** — "I AM HUMAN"/"I AM NOT", "Purchase $FIT", email sign-up
-4. **Chat persistence** — Store conversation history in Supabase (after TASK-009)
-5. **Pricing page — ETH/USDC pricing** — Michael noted tiers will need real currency pricing
-6. **Privy integration** — For email/social onboarding
-7. **Wearable integration** — Strava OAuth flow
+1. **Upstash Redis credentials** → paste into `.env.local` → rate limiting goes live
+2. **Vercel password protection** — Dashboard toggle, not code. Gate beta deployment.
+3. **TASK-009: Supabase integration** — Michael setting up project, then wire user records + chat persistence
+4. **TASK-011: Wire landing page buttons** — Two paths now clarified:
+   - "I AM HUMAN" → Human onboarding (connect wallet → create agent → coaching)
+   - "I AM NOT" → Agent hub (placeholder for beta, ERC-8128 authenticated in Phase 2)
+5. **ERC-8128 integration (Phase 2)** — Agent-side signing, server-side verification, nonce store. See `docs/ERC-8128.md` for full spec. Dependencies: agent runtime, Supabase agents table.
+6. **Chat persistence** — Store conversation history in Supabase (after TASK-009)
+7. **Pricing page — ETH/USDC pricing**
+8. **Privy integration** — For email/social onboarding
+9. **Wearable integration** — Strava OAuth flow
 
 ---
 
@@ -73,6 +82,7 @@ Nothing currently in progress. TASK-010 is complete.
 - **wagmi version**: v3.4.2 (latest)
 - **Wallet strategy**: Multi-wallet — injected (MetaMask) + Coinbase Smart Wallet + WalletConnect. Privy planned for production.
 - **ERC-8004**: Custom non-upgradeable implementation (not reference UUPS)
+- **ERC-8128**: Planned for Phase 2 agent authentication. Uses `@slicekit/erc8128` package, Upstash Redis nonce store. See `docs/ERC-8128.md`.
 - **Agent IDs**: Start at 1, 0 = sentinel for "no agent"
 - **Revenue model**: 9 streams, Stage 1 MVP focuses on 3 (tx fees, spawn fee, validation fees)
 - **Treasury split**: 40/30/20/10 (dev/buyback/community/insurance)
@@ -94,7 +104,7 @@ Nothing currently in progress. TASK-010 is complete.
 - **Farcaster**: "Forged on Farcaster" badge on landing page hero
 - **ConnectWallet**: Single button with shadcn DropdownMenu, connectors deduplicated by name
 - **Pricing tiers**: Free/Basic(100)/Pro(1000)/Elite(10000) — may change to ETH/USDC pricing later
-- **Landing page CTAs**: "I AM HUMAN"/"I AM NOT" pills, "Purchase $FIT" button, email sign-up link (all placeholders)
+- **Landing page CTAs**: "I AM HUMAN" = human onboarding, "I AM NOT" = agent hub (ERC-8128 pathway)
 - **Chat model**: claude-sonnet-4-5-20250929 for coaching responses (fast + capable)
 - **Chat architecture**: No external chat library — native fetch + ReadableStream for streaming
 - **Chat persistence**: React state only for now (no Supabase yet — TASK-009)
@@ -103,24 +113,26 @@ Nothing currently in progress. TASK-010 is complete.
 - **Brand name**: ClawCoach (rebranded from moltcoach in Session 11)
 - **Primary domain**: clawcoach.ai (also owns clawcoach.dev, clawcoach.xyz, klawcoach)
 - **Contract rename**: Deferred to mainnet prep (testnet contracts keep "Moltcoach" names)
-- **Beta strategy**: Vercel password protection first, invite codes after Supabase
+- **Beta strategy**: Vercel password protection + per-wallet rate limiting (50/hr, 200/day)
+- **Rate limiting**: Upstash Redis sliding window, graceful fallback when unconfigured
 
 ---
 
 ## Open Questions
 
+- [ ] Upstash Redis credentials — Michael setting up at console.upstash.com
 - [ ] Supabase project — Michael setting up with Claude.ai
 - [x] WalletConnect project ID — obtained from cloud.walletconnect.com
 - [ ] Coinbase Wallet project ID — needs to be obtained from developer portal
-- [ ] XMTP vs Telegram priority for agent comms
-- [ ] Agent-to-agent protocol at clawcoach.ai
+- [ ] "I AM NOT HUMAN" agent hub — placeholder UX for beta, full ERC-8128 auth in Phase 2
+- [ ] Agent-to-agent protocol at clawcoach.ai (ERC-8128 is the auth layer, what's the comms layer?)
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
 - [ ] Privy free tier limits for production auth
 - [ ] Pricing in ETH/Base ETH/USDC — Michael flagged this for tiers
-- [ ] What do "I AM HUMAN" and "I AM NOT" buttons do? (onboarding paths?)
 - [ ] Purchase $FIT mechanism — DEX pool, in-app swap, or external link?
 - [ ] Beta invite distribution — how to find 100 testers?
+- [ ] ERC-8128 `keyid` format may change (draft ERC) — monitor Ethereum Magicians thread
 
 ---
 
@@ -128,9 +140,9 @@ Nothing currently in progress. TASK-010 is complete.
 
 - `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
 - `forge build`: Compiles (pre-existing notes/warnings only, no errors)
-- `pnpm typecheck`: **PASSES** (verified Session 11)
-- `pnpm lint`: **PASSES** (verified Session 11)
-- `pnpm build`: **PASSES** (verified Session 11)
+- `pnpm typecheck`: **PASSES** (verified Session 12)
+- `pnpm lint`: **PASSES** (verified Session 12)
+- `pnpm build`: **PASSES** (verified Session 12)
 
 ---
 
@@ -159,7 +171,7 @@ Nothing currently in progress. TASK-010 is complete.
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
 - **Project path**: `~/Projects/moltcoach` (repo name unchanged, brand is ClawCoach)
 - **ANTHROPIC_API_KEY**: Set in `.env.local` — working as of Session 11
-- **Duplicate env var**: Cleaned up in Session 11 (was `ANTHROPIC_API_KEY` defined twice)
+- **Upstash Redis**: Packages installed (`@upstash/redis` ^1.36.2, `@upstash/ratelimit` ^2.0.8). Credentials NOT yet in `.env.local` — Michael setting up.
 
 ---
 
@@ -177,9 +189,11 @@ Nothing currently in progress. TASK-010 is complete.
 | viem | 2.45.1 | node_modules |
 | @supabase/supabase-js | 2.95.3 | node_modules |
 | @anthropic-ai/sdk | ^0.74.0 | node_modules |
+| @upstash/redis | ^1.36.2 | node_modules |
+| @upstash/ratelimit | ^2.0.8 | node_modules |
 | sonner | latest | node_modules |
 | @radix-ui/react-dropdown-menu | latest | node_modules (via shadcn) |
 
 ---
 
-*Last updated: Feb 10, 2026 — Session 11*
+*Last updated: Feb 10, 2026 — Session 12*

@@ -3,10 +3,10 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import {
-  FIT_TOKEN_ADDRESS,
-  FIT_STAKING_ADDRESS,
-  fitTokenAbi,
-  fitStakingAbi,
+  CLAWC_TOKEN_ADDRESS,
+  CLAWC_STAKING_ADDRESS,
+  clawcTokenAbi,
+  clawcStakingAbi,
 } from "@/config/contracts";
 
 type StakeState =
@@ -42,8 +42,8 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
       setState("staking");
       stake.writeContract(
         {
-          address: FIT_STAKING_ADDRESS,
-          abi: fitStakingAbi,
+          address: CLAWC_STAKING_ADDRESS,
+          abi: clawcStakingAbi,
           functionName: "stake",
           args: [pendingAmount.current],
         },
@@ -79,10 +79,10 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
       setError(null);
       approve.writeContract(
         {
-          address: FIT_TOKEN_ADDRESS,
-          abi: fitTokenAbi,
+          address: CLAWC_TOKEN_ADDRESS,
+          abi: clawcTokenAbi,
           functionName: "approve",
-          args: [FIT_STAKING_ADDRESS, amount],
+          args: [CLAWC_STAKING_ADDRESS, amount],
         },
         {
           onSuccess: () => setState("waitingApproval"),
@@ -103,8 +103,8 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
       setError(null);
       stake.writeContract(
         {
-          address: FIT_STAKING_ADDRESS,
-          abi: fitStakingAbi,
+          address: CLAWC_STAKING_ADDRESS,
+          abi: clawcStakingAbi,
           functionName: "stake",
           args: [amount],
         },

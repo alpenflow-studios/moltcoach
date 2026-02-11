@@ -20,7 +20,7 @@
 - **Scope**: `src/app/pricing/page.tsx`, new components, `src/config/pricing.ts`
 - **Started**: Session 14 (Feb 10, 2026)
 - **Acceptance Criteria**:
-  - [ ] Pricing page shows prices in FIT, USDC, ETH, and Base ETH
+  - [ ] Pricing page shows prices in CLAWC, USDC, ETH, and Base ETH
   - [ ] Subscription model alongside staking (monthly/quarterly/yearly)
   - [ ] Token selector UI on pricing page
   - [ ] `src/config/pricing.ts` with tier prices per token
@@ -81,10 +81,10 @@ _(none)_
 - **Priority**: P1
 - **Scope**: `src/app/page.tsx`, landing page buttons
 - **Completed**: Session 13 (Feb 10, 2026)
-- **Notes**: Buttons wired ("I AM HUMAN" → /agent, "I AM NOT" → /hub, "Purchase $FIT" → /staking). Privy email signup and ETH/USDC pricing deferred to separate tasks.
+- **Notes**: Buttons wired ("I AM HUMAN" → /agent, "I AM NOT" → /hub, "Purchase $CLAWC" → /staking). Privy email signup and ETH/USDC pricing deferred to separate tasks.
 - **Acceptance Criteria**:
   - [x] "I AM HUMAN" / "I AM NOT" buttons trigger distinct onboarding paths
-  - [x] "Purchase $FIT" links to staking page
+  - [x] "Purchase $CLAWC" links to staking page
   - [ ] "Sign up with your email" opens Privy modal (deferred — needs Privy integration)
   - [ ] Pricing page tiers show ETH/USDC (moved to TASK-012)
 

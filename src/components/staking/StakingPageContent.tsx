@@ -20,7 +20,7 @@ export function StakingPageContent() {
         <h2 className="text-2xl font-bold">Connect your wallet to stake</h2>
         <p className="max-w-md text-muted-foreground">
           Connect a Coinbase Smart Wallet to view your staking position and
-          manage $FIT tokens.
+          manage $CLAWC tokens.
         </p>
         <ConnectWallet size="lg" />
       </div>

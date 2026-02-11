@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { formatFit } from "@/lib/format";
+import { formatClawc } from "@/lib/format";
 import { useUnstakeAction } from "@/hooks/useUnstakeAction";
 import type { StakeInfo } from "@/types/staking";
 
@@ -39,9 +39,9 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
   // Toast + reset on success
   useEffect(() => {
     if (state === "success") {
-      toast.success(`Unstaked ${amountStr} FIT`, {
+      toast.success(`Unstaked ${amountStr} CLAWC`, {
         description: isEarlyUnstake
-          ? `5% penalty applied. You received ${formatFit(payout)} FIT.`
+          ? `5% penalty applied. You received ${formatClawc(payout)} CLAWC.`
           : "Your tokens have been unstaked successfully.",
       });
       const timer = setTimeout(() => {
@@ -68,7 +68,7 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
       case "error":
         return "Try again";
       default:
-        return `Unstake ${amountStr || "0"} FIT`;
+        return `Unstake ${amountStr || "0"} CLAWC`;
     }
   }
 
@@ -81,7 +81,7 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
             type="button"
             className="text-xs text-primary hover:underline"
             onClick={() => {
-              setAmountStr(formatFit(stake.amount, 18, 18).replace(/,/g, ""));
+              setAmountStr(formatClawc(stake.amount, 18, 18).replace(/,/g, ""));
               reset();
             }}
           >
@@ -101,7 +101,7 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
           disabled={isProcessing}
         />
         <p className="text-xs text-muted-foreground">
-          Staked: {formatFit(stake.amount)} FIT
+          Staked: {formatClawc(stake.amount)} CLAWC
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export function UnstakeForm({ stake, isEarlyUnstake, onSuccess }: UnstakeFormPro
           <AlertDescription className="space-y-1">
             <p>5% early unstake penalty applies.</p>
             <p className="text-xs">
-              Penalty: {formatFit(penalty)} FIT &middot; You receive: {formatFit(payout)} FIT
+              Penalty: {formatClawc(penalty)} CLAWC &middot; You receive: {formatClawc(payout)} CLAWC
             </p>
           </AlertDescription>
         </Alert>

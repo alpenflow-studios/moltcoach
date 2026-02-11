@@ -1,6 +1,6 @@
 // Contract addresses from environment variables (Base Sepolia)
-export const FIT_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_FIT_TOKEN_ADDRESS ?? "") as `0x${string}`;
-export const FIT_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_FIT_STAKING_ADDRESS ?? "") as `0x${string}`;
+export const CLAWC_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS ?? "") as `0x${string}`;
+export const CLAWC_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_STAKING_ADDRESS ?? "") as `0x${string}`;
 export const CLAWCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS ?? "") as `0x${string}`;
 
 // Tier metadata
@@ -21,8 +21,8 @@ export const TIER_DESCRIPTIONS: Record<TierIndex, string> = {
   3: "Full suite with exclusive features",
 };
 
-// Minimal FitToken ABI — only functions the frontend calls
-export const fitTokenAbi = [
+// Minimal ClawcToken ABI — only functions the frontend calls
+export const clawcTokenAbi = [
   {
     type: "function",
     name: "balanceOf",
@@ -66,8 +66,8 @@ export const fitTokenAbi = [
   },
 ] as const;
 
-// Minimal FitStaking ABI — only functions the frontend calls
-export const fitStakingAbi = [
+// Minimal ClawcStaking ABI — only functions the frontend calls
+export const clawcStakingAbi = [
   {
     type: "function",
     name: "stake",

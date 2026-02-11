@@ -8,7 +8,7 @@ import {
   TIER_COLORS,
   type TierIndex,
 } from "@/config/contracts";
-import { formatFit } from "@/lib/format";
+import { formatClawc } from "@/lib/format";
 
 type TierCardProps = {
   currentTier: TierIndex;
@@ -77,7 +77,7 @@ export function TierCard({ currentTier, stakedAmount, thresholds }: TierCardProp
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
             <p className="text-xs text-muted-foreground">
-              {formatFit(stakedAmount)} / {formatFit(nextTier.threshold)} FIT to{" "}
+              {formatClawc(stakedAmount)} / {formatClawc(nextTier.threshold)} CLAWC to{" "}
               <span className="font-medium text-foreground">{nextTier.name}</span>
             </p>
           </div>

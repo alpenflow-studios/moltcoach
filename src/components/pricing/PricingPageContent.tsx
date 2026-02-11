@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   TIERS,
-  formatFitStake,
+  formatClawcStake,
   formatUsd,
   getTokenPrice,
   BILLING_LABELS,
@@ -39,10 +39,10 @@ export default function PricingPageContent() {
           Choose your path
         </Badge>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Stake <span className="text-primary">$FIT</span> or subscribe
+          Stake <span className="text-primary">$CLAWC</span> or subscribe
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Unlock premium coaching by staking $FIT tokens or subscribing with
+          Unlock premium coaching by staking $CLAWC tokens or subscribing with
           USDC&nbsp;/&nbsp;ETH. Same tiers, your choice of access model.
         </p>
       </div>
@@ -55,7 +55,7 @@ export default function PricingPageContent() {
           className="w-auto"
         >
           <TabsList className="grid w-[320px] grid-cols-2">
-            <TabsTrigger value="stake">Stake $FIT</TabsTrigger>
+            <TabsTrigger value="stake">Stake $CLAWC</TabsTrigger>
             <TabsTrigger value="subscribe">Subscribe</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -121,13 +121,13 @@ export default function PricingPageContent() {
 
           // Determine the price display
           const priceLabel = isStake
-            ? formatFitStake(tier.fitStake)
+            ? formatClawcStake(tier.clawcStake)
             : tier.subscription[billing] === 0
               ? "Free"
               : getTokenPrice(tier.subscription[billing], token);
 
           const priceSubtext = isStake
-            ? tier.fitStake > 0
+            ? tier.clawcStake > 0
               ? "staked"
               : null
             : tier.subscription[billing] > 0
@@ -136,15 +136,15 @@ export default function PricingPageContent() {
 
           // CTA
           const ctaText = isStake
-            ? tier.fitStake === 0
+            ? tier.clawcStake === 0
               ? "Get Started"
-              : `Stake ${formatFitStake(tier.fitStake)}`
+              : `Stake ${formatClawcStake(tier.clawcStake)}`
             : tier.subscription[billing] === 0
               ? "Get Started"
               : `Subscribe — ${formatUsd(tier.subscription[billing])}/${billing === "monthly" ? "mo" : billing === "quarterly" ? "qtr" : "yr"}`;
 
           const ctaHref = isStake
-            ? tier.fitStake === 0
+            ? tier.clawcStake === 0
               ? "/agent"
               : "/staking"
             : tier.subscription[billing] === 0
@@ -187,9 +187,9 @@ export default function PricingPageContent() {
               </div>
 
               {/* Show alternate model price as subtext */}
-              {!isStake && tier.fitStake > 0 && (
+              {!isStake && tier.clawcStake > 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  or stake {formatFitStake(tier.fitStake)}
+                  or stake {formatClawcStake(tier.clawcStake)}
                 </p>
               )}
               {isStake && tier.subscription.monthly > 0 && (
@@ -236,16 +236,16 @@ export default function PricingPageContent() {
             </h2>
             <div className="grid gap-6 sm:grid-cols-3">
               <div>
-                <h3 className="mb-2 font-semibold">Earn $FIT</h3>
+                <h3 className="mb-2 font-semibold">Earn $CLAWC</h3>
                 <p className="text-sm text-muted-foreground">
-                  Complete verified workouts to earn $FIT tokens. Connect
+                  Complete verified workouts to earn $CLAWC tokens. Connect
                   wearables for the highest reward multiplier.
                 </p>
               </div>
               <div>
                 <h3 className="mb-2 font-semibold">Stake for access</h3>
                 <p className="text-sm text-muted-foreground">
-                  Stake your earned $FIT to unlock premium tiers. No lock-up
+                  Stake your earned $CLAWC to unlock premium tiers. No lock-up
                   period — unstake anytime after 30 days with no penalty.
                 </p>
               </div>
@@ -282,10 +282,10 @@ export default function PricingPageContent() {
                 </p>
               </div>
               <div>
-                <h3 className="mb-2 font-semibold">Still earn $FIT</h3>
+                <h3 className="mb-2 font-semibold">Still earn $CLAWC</h3>
                 <p className="text-sm text-muted-foreground">
-                  Subscribers earn $FIT per workout just like stakers. Stake
-                  your earned $FIT later for additional benefits.
+                  Subscribers earn $CLAWC per workout just like stakers. Stake
+                  your earned $CLAWC later for additional benefits.
                 </p>
               </div>
             </div>

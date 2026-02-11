@@ -103,7 +103,7 @@ export type Database = {
           workout_type: string;
           duration_minutes: number;
           calories_burned: number | null;
-          fit_earned: string;
+          clawc_earned: string;
           source: string;
           verified: boolean;
           completed_at: string;
@@ -116,7 +116,7 @@ export type Database = {
           workout_type: string;
           duration_minutes: number;
           calories_burned?: number | null;
-          fit_earned?: string;
+          clawc_earned?: string;
           source: string;
           verified?: boolean;
           completed_at: string;
@@ -126,7 +126,7 @@ export type Database = {
           workout_type?: string;
           duration_minutes?: number;
           calories_burned?: number | null;
-          fit_earned?: string;
+          clawc_earned?: string;
           verified?: boolean;
         };
         Relationships: [
@@ -193,7 +193,7 @@ export type Database = {
           id: string;
           user_id: string;
           tier: number;
-          payment_token: "FIT" | "USDC" | "ETH";
+          payment_token: "CLAWC" | "USDC" | "ETH";
           amount: string;
           tx_hash: string | null;
           starts_at: string;
@@ -205,7 +205,7 @@ export type Database = {
           id?: string;
           user_id: string;
           tier: number;
-          payment_token: "FIT" | "USDC" | "ETH";
+          payment_token: "CLAWC" | "USDC" | "ETH";
           amount: string;
           tx_hash?: string | null;
           starts_at?: string;

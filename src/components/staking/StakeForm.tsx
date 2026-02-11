@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { formatFit } from "@/lib/format";
+import { formatClawc } from "@/lib/format";
 import { useStakeAction } from "@/hooks/useStakeAction";
 
 type StakeFormProps = {
@@ -34,7 +34,7 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
   // Toast + reset on success
   useEffect(() => {
     if (state === "success") {
-      toast.success(`Staked ${amountStr} FIT`, {
+      toast.success(`Staked ${amountStr} CLAWC`, {
         description: "Your tokens have been staked successfully.",
       });
       const timer = setTimeout(() => {
@@ -72,8 +72,8 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
         return "Try again";
       default:
         return needsApproval
-          ? `Approve & Stake ${amountStr || "0"} FIT`
-          : `Stake ${amountStr || "0"} FIT`;
+          ? `Approve & Stake ${amountStr || "0"} CLAWC`
+          : `Stake ${amountStr || "0"} CLAWC`;
     }
   }
 
@@ -86,7 +86,7 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
             type="button"
             className="text-xs text-primary hover:underline"
             onClick={() => {
-              setAmountStr(formatFit(walletBalance, 18, 18).replace(/,/g, ""));
+              setAmountStr(formatClawc(walletBalance, 18, 18).replace(/,/g, ""));
               reset();
             }}
           >
@@ -106,7 +106,7 @@ export function StakeForm({ walletBalance, allowance, onSuccess }: StakeFormProp
           disabled={isProcessing}
         />
         <p className="text-xs text-muted-foreground">
-          Wallet balance: {formatFit(walletBalance)} FIT
+          Wallet balance: {formatClawc(walletBalance)} CLAWC
         </p>
       </div>
 

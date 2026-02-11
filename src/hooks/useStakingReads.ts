@@ -2,10 +2,10 @@
 
 import { useReadContract } from "wagmi";
 import {
-  FIT_TOKEN_ADDRESS,
-  FIT_STAKING_ADDRESS,
-  fitTokenAbi,
-  fitStakingAbi,
+  CLAWC_TOKEN_ADDRESS,
+  CLAWC_STAKING_ADDRESS,
+  clawcTokenAbi,
+  clawcStakingAbi,
 } from "@/config/contracts";
 import type { TierIndex } from "@/config/contracts";
 import type { StakeInfo } from "@/types/staking";
@@ -13,43 +13,43 @@ import type { StakeInfo } from "@/types/staking";
 export function useStakingReads(userAddress: `0x${string}` | undefined) {
   const enabled = !!userAddress;
 
-  // FitToken reads
+  // ClawcToken reads
   const walletBalance = useReadContract({
-    address: FIT_TOKEN_ADDRESS,
-    abi: fitTokenAbi,
+    address: CLAWC_TOKEN_ADDRESS,
+    abi: clawcTokenAbi,
     functionName: "balanceOf",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled },
   });
 
   const allowance = useReadContract({
-    address: FIT_TOKEN_ADDRESS,
-    abi: fitTokenAbi,
+    address: CLAWC_TOKEN_ADDRESS,
+    abi: clawcTokenAbi,
     functionName: "allowance",
-    args: userAddress ? [userAddress, FIT_STAKING_ADDRESS] : undefined,
+    args: userAddress ? [userAddress, CLAWC_STAKING_ADDRESS] : undefined,
     query: { enabled },
   });
 
-  // FitStaking reads
+  // ClawcStaking reads
   const stakeData = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "getStake",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled },
   });
 
   const tierData = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "getTier",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled },
   });
 
   const isEarly = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "isEarlyUnstake",
     args: userAddress ? [userAddress] : undefined,
     query: { enabled },
@@ -57,26 +57,26 @@ export function useStakingReads(userAddress: `0x${string}` | undefined) {
 
   // Protocol-wide reads (no user address needed)
   const totalStaked = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "totalStaked",
   });
 
   const basicThreshold = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "basicThreshold",
   });
 
   const proThreshold = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "proThreshold",
   });
 
   const eliteThreshold = useReadContract({
-    address: FIT_STAKING_ADDRESS,
-    abi: fitStakingAbi,
+    address: CLAWC_STAKING_ADDRESS,
+    abi: clawcStakingAbi,
     functionName: "eliteThreshold",
   });
 

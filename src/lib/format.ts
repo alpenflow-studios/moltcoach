@@ -1,7 +1,7 @@
 import { formatUnits } from "viem";
 
 /** Format a bigint token amount to human-readable string with commas */
-export function formatFit(amount: bigint, decimals = 18, maxDecimals = 2): string {
+export function formatClawc(amount: bigint, decimals = 18, maxDecimals = 2): string {
   const formatted = formatUnits(amount, decimals);
   const [whole, fraction] = formatted.split(".");
   const withCommas = Number(whole).toLocaleString("en-US");

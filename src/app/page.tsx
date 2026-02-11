@@ -29,7 +29,7 @@ const FEATURES = [
     icon: Zap,
     title: "Move to Earn",
     description:
-      "Track workouts, earn $FIT tokens. Stake for enhanced coaching features. Connect your wearable, upload a screenshot, or log manually — your effort, your proof, your reward.",
+      "Track workouts, earn $CLAWC tokens. Stake for enhanced coaching features. Connect your wearable, upload a screenshot, or log manually — your effort, your proof, your reward.",
   },
   {
     icon: Sparkles,
@@ -93,7 +93,7 @@ export default function LandingPage() {
         </div>
         <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Your personalized coaching agent that lives on the blockchain. Track
-          workouts, earn $FIT rewards, and own a coach that knows and grows
+          workouts, earn $CLAWC rewards, and own a coach that knows and grows
           with you — starting with fitness, expanding everywhere.
         </p>
         <div className="mt-12 flex items-center justify-center gap-4">
@@ -114,7 +114,7 @@ export default function LandingPage() {
 
       <div className="flex justify-center pb-16">
         <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold" asChild>
-          <Link href="/staking">Purchase $FIT</Link>
+          <Link href="/staking">Purchase $CLAWC</Link>
         </Button>
       </div>
 

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-import { formatFit, formatStakeDate, daysUntilPenaltyFree } from "@/lib/format";
+import { formatClawc, formatStakeDate, daysUntilPenaltyFree } from "@/lib/format";
 import type { StakeInfo } from "@/types/staking";
 
 type StakeInfoCardProps = {
@@ -24,7 +24,7 @@ export function StakeInfoCard({ stake, isEarlyUnstake }: StakeInfoCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-2xl font-bold">{formatFit(stake.amount)} FIT</p>
+          <p className="text-2xl font-bold">{formatClawc(stake.amount)} CLAWC</p>
           {hasStake && (
             <p className="text-sm text-muted-foreground">
               Staked since {formatStakeDate(stake.stakedAt)}

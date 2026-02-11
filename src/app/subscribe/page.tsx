@@ -20,11 +20,11 @@ export default function SubscribePage() {
       </h1>
       <p className="mt-4 max-w-lg text-lg text-muted-foreground">
         Pay monthly with USDC or ETH to unlock premium coaching tiers. In the
-        meantime, you can stake $FIT for instant access.
+        meantime, you can stake $CLAWC for instant access.
       </p>
       <div className="mt-8 flex gap-3">
         <Button asChild>
-          <Link href="/staking">Stake $FIT Instead</Link>
+          <Link href="/staking">Stake $CLAWC Instead</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/pricing">View Pricing</Link>

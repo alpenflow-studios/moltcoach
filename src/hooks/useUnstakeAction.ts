@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { FIT_STAKING_ADDRESS, fitStakingAbi } from "@/config/contracts";
+import { CLAWC_STAKING_ADDRESS, clawcStakingAbi } from "@/config/contracts";
 
 type UnstakeState = "idle" | "unstaking" | "waiting" | "success" | "error";
 
@@ -34,8 +34,8 @@ export function useUnstakeAction(options: { onSuccess?: () => void }) {
       setError(null);
       unstake.writeContract(
         {
-          address: FIT_STAKING_ADDRESS,
-          abi: fitStakingAbi,
+          address: CLAWC_STAKING_ADDRESS,
+          abi: clawcStakingAbi,
           functionName: "unstake",
           args: [amount],
         },

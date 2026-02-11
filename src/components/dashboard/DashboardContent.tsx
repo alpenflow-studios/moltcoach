@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 import { useStakingReads } from "@/hooks/useStakingReads";
 import { useAgentReads } from "@/hooks/useAgentReads";
-import { formatFit } from "@/lib/format";
+import { formatClawc } from "@/lib/format";
 import { TIER_NAMES, TIER_COLORS, type TierIndex } from "@/config/contracts";
 
 function truncateAddress(address: string): string {
@@ -102,8 +102,8 @@ export function DashboardContent() {
                 <Coins className="size-5 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">$FIT Balance</p>
-                <p className="text-lg font-bold">{formatFit(staking.walletBalance)}</p>
+                <p className="text-xs text-muted-foreground">$CLAWC Balance</p>
+                <p className="text-lg font-bold">{formatClawc(staking.walletBalance)}</p>
               </div>
             </div>
           </CardContent>
@@ -117,7 +117,7 @@ export function DashboardContent() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Staked</p>
-                <p className="text-lg font-bold">{formatFit(staking.stake.amount)}</p>
+                <p className="text-lg font-bold">{formatClawc(staking.stake.amount)}</p>
               </div>
             </div>
           </CardContent>
@@ -174,15 +174,15 @@ export function DashboardContent() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Your Stake</span>
-              <span className="font-medium">{formatFit(staking.stake.amount)} FIT</span>
+              <span className="font-medium">{formatClawc(staking.stake.amount)} CLAWC</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Wallet Balance</span>
-              <span className="font-medium">{formatFit(staking.walletBalance)} FIT</span>
+              <span className="font-medium">{formatClawc(staking.walletBalance)} CLAWC</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Protocol Total</span>
-              <span className="font-medium">{formatFit(staking.totalStaked)} FIT</span>
+              <span className="font-medium">{formatClawc(staking.totalStaked)} CLAWC</span>
             </div>
 
             {nextThreshold && (
@@ -200,7 +200,7 @@ export function DashboardContent() {
             {staking.stake.amount === 0n && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                 <p className="text-xs text-primary">
-                  Stake $FIT tokens to unlock premium coaching features and earn
+                  Stake $CLAWC tokens to unlock premium coaching features and earn
                   higher tiers.
                 </p>
               </div>
@@ -249,7 +249,7 @@ export function DashboardContent() {
                   <div className="rounded-lg bg-muted/50 p-3 text-center">
                     <Zap className="mx-auto size-4 text-muted-foreground" />
                     <p className="mt-1 text-xs text-muted-foreground">Earned</p>
-                    <p className="text-sm font-medium">0 FIT</p>
+                    <p className="text-sm font-medium">0 CLAWC</p>
                   </div>
                 </div>
               </div>

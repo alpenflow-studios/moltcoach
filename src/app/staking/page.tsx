@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { StakingPageContent } from "@/components/staking/StakingPageContent";
 
 export const metadata: Metadata = {
-  title: "Stake $FIT | ClawCoach",
-  description: "Stake $FIT tokens to unlock premium coaching tiers and features.",
+  title: "Stake $CLAWC | ClawCoach",
+  description: "Stake $CLAWC tokens to unlock premium coaching tiers and features.",
 };
 
 export default function StakingPage() {

@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-11
-- **Duration**: Session 17
+- **Duration**: Session 21
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,64 +15,64 @@
 
 ## What Was Done
 
-### Session 17 (This Session)
+### Session 21
 
-1. **XMTP Persistence Confirmed**
-   - Michael tested full loop: send → refresh → reconnect → history loads with context
-   - TASK-013 fully complete (all acceptance criteria met)
+1. **$FIT → $CLAWC rebrand — Phases 2-4 completed**
 
-2. **Supabase Integration (TASK-009) — COMPLETE**
-   - Created fresh Supabase project `clawcoach` (East US/Ohio, ref: `agvdivapnrqpstvhkbmk`)
-   - 3 env vars configured in `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - Created 6 database tables via Supabase Management API: `users`, `agents`, `messages`, `workouts`, `coaching_sessions`, `subscriptions`
-   - RLS enabled on all 6 tables (SELECT for anon key, service_role bypasses all)
-   - Updated `src/types/database.ts` with `Relationships` + `CompositeTypes` (required by `@supabase/supabase-js` v2.95)
+   **Phase 2 (test files) — completed**
+   - `contracts/test/ProtocolFeeCollector.t.sol` — full rewrite (FitToken→ClawcToken, collectFitFee→collectClawcFee, etc.)
+   - `contracts/test/ClawcoachIdentity.t.sol` — full rewrite (MoltcoachIdentity→ClawcoachIdentity, EIP-712 domain)
 
-3. **New Files Created**
-   - `src/lib/supabase.ts` — added `createServerClient()` using `SUPABASE_SERVICE_ROLE_KEY`
-   - `src/app/api/users/route.ts` — POST upserts user by wallet address
-   - `src/app/api/messages/route.ts` — GET loads chat history, POST saves message pairs
-   - `src/app/api/agents/sync/route.ts` — POST upserts agent from on-chain data
-   - `src/hooks/useChatHistory.ts` — loads Supabase history on mount, provides `saveMessages` callback
-   - `src/hooks/useUserSync.ts` — auto-upserts user to Supabase on wallet connect
+   **Phase 3 (deployment scripts) — completed**
+   - `contracts/script/Deploy.s.sol` — imports, types, variable names, console.log strings
+   - `contracts/script/MintTestTokens.s.sol` — import, constant, variable, console.log
 
-4. **Modified Files**
-   - `src/components/providers/WalletProvider.tsx` — added `WalletSyncProvider` wrapper with `useUserSync`
-   - `src/components/agent/AgentPageContent.tsx` — added Supabase chat history loading + agent sync effect
-   - `src/components/agent/AgentChat.tsx` — saves messages to Supabase after each exchange, loads Supabase history (priority over XMTP)
-   - `src/types/database.ts` — full rewrite with Relationships for Supabase JS v2.95 compat
+   **Phase 3 checkpoint**: `forge build` zero warnings, `forge test` 216 tests pass.
+   **Committed**: `6725293` — `refactor(contracts): rename $FIT to $CLAWC token rebrand`
 
-5. **Supabase Connection Notes**
-   - Project region: East US (Ohio) — NOT us-west-1 as initially assumed
-   - Direct DB connection (`db.[ref].supabase.co`) is disabled on this project
-   - Pooler connection also failed ("Tenant not found" across all regions)
-   - Used Supabase Management API (`POST /v1/projects/{ref}/database/query`) for all DDL
-   - Access token required: `sbp_...` (generated from dashboard/account/tokens)
+   **Phase 4 (frontend) — completed**
+   - Config: `contracts.ts`, `pricing.ts` — all FIT→CLAWC exports, env var refs, types
+   - Lib: `format.ts` — `formatFit`→`formatClawc`
+   - Hooks: `useStakingReads.ts`, `useStakeAction.ts`, `useUnstakeAction.ts` — CLAWC imports
+   - Staking components (7 files): `StakeForm`, `UnstakeForm`, `StakeInfoCard`, `TierBenefitsCard`, `TierCard`, `StakingHeader`, `StakingPageContent`
+   - Other components: `DashboardContent`, `AgentProfileCard`, `PricingPageContent`
+   - Pages: `layout.tsx`, `page.tsx`, `staking/page.tsx`, `pricing/page.tsx`, `subscribe/page.tsx`
+   - Env: `.env.example`, `.env.local` — `FIT_TOKEN`→`CLAWC_TOKEN`, `FIT_STAKING`→`CLAWC_STAKING`
+   - Types: `database.ts` — `fit_earned`→`clawc_earned`, `"FIT"`→`"CLAWC"` in payment_token
 
-### Session 16 (Previous)
+   **Phase 4 checkpoint**: `pnpm typecheck` zero errors, `pnpm build` passes clean.
 
-- XMTP V3 migration complete, agent registered, dev server switched to webpack, temp files cleaned up
-
-### Sessions 1-15
-
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment, shared layout, agent creation, dashboard, landing page, pricing page, rebrand to ClawCoach, per-wallet rate limiting, streaming chat, ERC-8128 agent auth, Agent Hub, multi-token pricing, Supabase setup guide, XMTP V2 code (blocked), XMTP V3 migration
+2. **Commits this session**:
+   - `6725293` — `refactor(contracts): rename $FIT to $CLAWC token rebrand` (Phases 1-3)
+   - (pending) — `refactor(frontend): rename $FIT to $CLAWC across all UI` (Phase 4)
 
 ---
 
 ## What's In Progress
 
-Nothing in progress — Session 17 completed cleanly. Changes NOT yet committed.
+### $FIT → $CLAWC Rebrand (7 Phases)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 1. Contract source files | **DONE** | Renamed + updated all 4 `.sol` files |
+| 2. Test files | **DONE** | All 4 test files updated |
+| 3. Deployment scripts | **DONE** | `Deploy.s.sol` + `MintTestTokens.s.sol` |
+| 4. Frontend | **DONE** | Config, hooks, components, pages, types, env vars |
+| 5. Supabase migration | **NOT STARTED** | `fit_earned` → `clawc_earned` column rename in live DB |
+| 6. Documentation | **NOT STARTED** | CLAUDE.md, CONTRACTS.md, TOKENOMICS.md, PRD.md, etc. |
+| 7. Deploy to Base Sepolia | **NOT STARTED** | Fresh deploy with $CLAWC branding |
 
 ---
 
 ## What's Next
 
-1. **Commit Session 17 changes** — Supabase integration (TASK-009)
-2. **Test Supabase end-to-end** — connect wallet → verify user upserted → chat → verify messages saved → refresh → verify history loads
-3. **Telegram Integration (TASK-014)** — not started
-4. **Vercel password protection** — dashboard toggle
-5. **Privy integration** — email/social onboarding
-6. **Multi-token pricing (TASK-012)** — not started
+1. **Phase 5 — Supabase migration** — Rename `fit_earned` column → `clawc_earned` in workouts table, update `payment_token` enum in subscriptions table (FIT→CLAWC). Use Supabase Management API.
+2. **Phase 6 — Documentation** — Update CLAUDE.md (contract table, env vars, domain concepts), CONTRACTS.md, TOKENOMICS.md, PRD.md, revenue docs, CURRENT_SPRINT.md references
+3. **Phase 7 — Deploy** — Fresh deploy to Base Sepolia with $CLAWC branding, update contract addresses everywhere
+4. **x402 integration** — pay-per-coach endpoints
+5. **Builder Codes wagmi integration** — wire `ox` + `Attribution.toDataSuffix`
+6. **Vercel deployment + password protection**
+7. **Telegram integration (TASK-014)**
 
 ---
 
@@ -95,17 +95,6 @@ User sends message
     └─ XMTP mirror (if connected) → writes to XMTP DM
 ```
 
-### Key Files
-| File | Purpose |
-|------|---------|
-| `src/lib/supabase.ts` | Anon client (reads) + `createServerClient()` (writes) |
-| `src/app/api/users/route.ts` | Upsert user by wallet address |
-| `src/app/api/messages/route.ts` | Load + save chat messages |
-| `src/app/api/agents/sync/route.ts` | Upsert agent from on-chain data |
-| `src/hooks/useUserSync.ts` | Auto-sync wallet to Supabase |
-| `src/hooks/useChatHistory.ts` | Load history + save callback |
-| `src/types/database.ts` | Full typed schema (6 tables) |
-
 ### Supabase Project Details
 | Field | Value |
 |-------|-------|
@@ -118,72 +107,36 @@ User sends message
 
 ---
 
-## XMTP Architecture (Implemented — V3)
-
-### How It Works (MVP)
-```
-User clicks "Connect XMTP" in chat header
-  → useXmtpClient: dynamic import @xmtp/browser-sdk, create V3 client (wallet signature)
-  → useXmtpConversation: createDmWithIdentifier(agent address), sync(), load history
-
-User sends message:
-  ├─ HTTP path (existing): POST /api/chat → Claude → streamed response
-  └─ XMTP path (new): onMessageComplete callback writes both user + AI messages to XMTP DM
-
-On page reload with XMTP connected:
-  → Load DM history from XMTP → seed useChat with initialMessages
-```
-
-### Key Files
-| File | Purpose |
-|------|---------|
-| `src/lib/xmtpSigner.ts` | viem → XMTP V3 signer adapter |
-| `src/config/xmtp.ts` | XMTP env, agent address, prefix constant |
-| `src/hooks/useXmtpClient.ts` | V3 client lifecycle + structural types |
-| `src/hooks/useXmtpConversation.ts` | DM creation, sync, history, send |
-| `src/components/agent/XmtpStatus.tsx` | Status badge component |
-
----
-
 ## Decisions Made
 
+- **$CLAWC replaces $FIT**: $FIT becomes a partner reward token (fitcaster.xyz). $CLAWC is the native platform token (Session 18)
+- **Multi-token reward model**: Agents distribute partner tokens ($FIT, $LEARN, etc.), $CLAWC for staking/governance (Session 18)
+- **Builder Codes app_id**: `698cc32e289e9e19f580444f` (Session 18)
+- **x402 integration planned**: Pay-per-coach, agent autonomous spending, Bazaar discovery (Session 18)
 - **Supabase project**: `clawcoach`, East US (Ohio), ref `agvdivapnrqpstvhkbmk` (Session 17)
-- **Supabase auth model**: Wallet-based (not Supabase Auth). Anon key for reads, service_role for writes via API routes (Session 17)
+- **Supabase auth model**: Wallet-based. Anon key for reads, service_role for writes via API routes (Session 17)
 - **Chat persistence priority**: Supabase history > XMTP history > empty (Session 17)
-- **Agent sync**: Idempotent upsert on every agent page load (Session 17)
-- **XMTP V3 SDK**: `@xmtp/browser-sdk` v6.3.0 (V2 deprecated, forced migration) (Session 16)
-- **XMTP agent inbox ID**: `b9e2011e0f68256545dc1ee6d06e6de0b38c6721b5dbd424e31503b619a17964` (Session 16)
+- **XMTP V3 SDK**: `@xmtp/browser-sdk` v6.3.0 (Session 16)
 - **Dev bundler**: webpack (not Turbopack) — XMTP WASM workers incompatible with Turbopack (Session 16)
-- **XMTP agent address**: `0xC7F839B81bc55a400423B7c8A6beF0Ad7c48E4bB` (Session 15)
-- **XMTP message convention**: `[assistant] ` prefix for AI responses from user's client (Session 15)
-- **XMTP dynamic import**: code-split, only loaded on "Connect XMTP" click (Session 15)
-- **Pricing model**: DUAL — Stake $FIT OR Subscribe USDC/ETH (Session 14)
-- **Subscription pricing**: Free / $10 / $50 / $200 per month
-- **Billing discounts**: Quarterly 10%, Annual 20%
+- **Pricing model**: DUAL — Stake $CLAWC OR Subscribe USDC/ETH (Session 14, updated 18)
 - **Theme**: Dark mode, lime primary on zinc
 - **wagmi**: v3.4.2
-- **Wallets**: Multi-wallet (MetaMask + Coinbase Smart Wallet + WalletConnect)
-- **ERC-8004**: Custom non-upgradeable
-- **ERC-8128**: `@slicekit/erc8128`, Upstash Redis nonce store
-- **Agent Hub**: `/hub` — chain events, no Supabase dependency
-- **API versioning**: `/api/v1/` for agent endpoints
-- **Revenue**: 9 streams, MVP focuses on 3. Treasury 40/30/20/10
-- **Chat model**: claude-sonnet-4-5-20250929
 - **Brand**: ClawCoach (clawcoach.ai)
-- **Beta**: Vercel password + rate limiting (50/hr, 200/day)
 
 ---
 
 ## State of Tests
 
-- `forge test`: **216 tests pass**
-- `pnpm typecheck`: **PASSES**
-- `pnpm lint`: **PASSES** (0 errors, 0 warnings)
-- `pnpm build`: **PASSES** (17 routes — 3 new API routes)
+- `forge build`: **PASSES** (zero warnings)
+- `forge test`: **PASSES** (216 tests, 0 failures)
+- `pnpm typecheck`: **PASSES** (zero errors)
+- `pnpm build`: **PASSES** (all 17 routes)
 
 ---
 
-## On-Chain State (Base Sepolia)
+## On-Chain State (Base Sepolia) — OLD CONTRACTS
+
+> These will be replaced by $CLAWC versions after Phase 7 redeploy.
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
 - **FIT supply**: 10,000 FIT | **Wallet**: 475 FIT | **Staked**: 9,500 FIT
@@ -203,4 +156,4 @@ On page reload with XMTP connected:
 
 ---
 
-*Last updated: Feb 11, 2026 — Session 17*
+*Last updated: Feb 11, 2026 — Session 21*

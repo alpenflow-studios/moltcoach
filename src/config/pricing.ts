@@ -2,7 +2,7 @@
  * ClawCoach pricing configuration.
  *
  * Two access models:
- *   1. Stake $FIT — lock FIT tokens, keep access while staked
+ *   1. Stake $CLAWC — lock CLAWC tokens, keep access while staked
  *   2. Subscribe — pay monthly in USDC or ETH
  */
 
@@ -22,8 +22,8 @@ export type TierDefinition = {
   description: string;
   features: readonly string[];
   highlighted: boolean;
-  /** FIT required to stake for this tier (0 = free) */
-  fitStake: number;
+  /** CLAWC required to stake for this tier (0 = free) */
+  clawcStake: number;
   /** Subscription prices in USD cents per billing period */
   subscription: Record<BillingPeriod, number>;
 };
@@ -42,10 +42,10 @@ export const TIERS: readonly TierDefinition[] = [
       "Manual workout entry",
       "Basic progress tracking",
       "Web dashboard access",
-      "Earn $FIT per workout",
+      "Earn $CLAWC per workout",
     ],
     highlighted: false,
-    fitStake: 0,
+    clawcStake: 0,
     subscription: { monthly: 0, quarterly: 0, annual: 0 },
   },
   {
@@ -60,7 +60,7 @@ export const TIERS: readonly TierDefinition[] = [
       "Higher reward multiplier",
     ],
     highlighted: false,
-    fitStake: 100,
+    clawcStake: 100,
     subscription: { monthly: 1000, quarterly: 2700, annual: 9600 },
   },
   {
@@ -75,7 +75,7 @@ export const TIERS: readonly TierDefinition[] = [
       "Workout plan generation",
     ],
     highlighted: true,
-    fitStake: 1_000,
+    clawcStake: 1_000,
     subscription: { monthly: 5000, quarterly: 13500, annual: 48000 },
   },
   {
@@ -90,7 +90,7 @@ export const TIERS: readonly TierDefinition[] = [
       "Shape the product roadmap",
     ],
     highlighted: false,
-    fitStake: 10_000,
+    clawcStake: 10_000,
     subscription: { monthly: 20000, quarterly: 54000, annual: 192000 },
   },
 ] as const;
@@ -106,10 +106,10 @@ export function formatUsd(cents: number): string {
   return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`;
 }
 
-/** Format FIT stake amount. e.g. 1000 → "1,000 FIT" */
-export function formatFitStake(amount: number): string {
+/** Format CLAWC stake amount. e.g. 1000 → "1,000 CLAWC" */
+export function formatClawcStake(amount: number): string {
   if (amount === 0) return "Free";
-  return `${amount.toLocaleString("en-US")} FIT`;
+  return `${amount.toLocaleString("en-US")} CLAWC`;
 }
 
 /**

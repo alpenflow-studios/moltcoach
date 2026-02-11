@@ -8,7 +8,7 @@ import {
   TIER_DESCRIPTIONS,
   type TierIndex,
 } from "@/config/contracts";
-import { formatFit } from "@/lib/format";
+import { formatClawc } from "@/lib/format";
 
 type TierBenefitsCardProps = {
   currentTier: TierIndex;
@@ -55,7 +55,7 @@ export function TierBenefitsCard({ currentTier, thresholds }: TierBenefitsCardPr
                   {TIER_NAMES[tier]}
                 </Badge>
                 <p className="text-sm font-medium">
-                  {tier === 0 ? "Free" : `${formatFit(threshold)} FIT`}
+                  {tier === 0 ? "Free" : `${formatClawc(threshold)} CLAWC`}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {TIER_DESCRIPTIONS[tier]}

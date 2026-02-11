@@ -116,7 +116,7 @@ export function AgentProfileCard({ agentId, agentURI, ownerAddress }: AgentProfi
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="text-xs">Fitness Coaching</Badge>
               <Badge variant="outline" className="text-xs">Workout Tracking</Badge>
-              <Badge variant="outline" className="text-xs">$FIT Rewards</Badge>
+              <Badge variant="outline" className="text-xs">$CLAWC Rewards</Badge>
               <Badge variant="outline" className="text-xs">Personalized Plans</Badge>
             </div>
           </div>

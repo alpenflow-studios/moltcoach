@@ -15,51 +15,86 @@
 
 ### Not Started
 
-#### TASK-009: Supabase Integration (Blocked)
+#### TASK-012: Multi-Token Pricing + Subscription Model
 - **Priority**: P1
-- **Scope**: `src/lib/supabase.ts`, new hooks, API routes
-- **Depends on**: Michael completing Supabase project setup with Claude.ai
+- **Scope**: `src/app/pricing/page.tsx`, new components, `src/config/pricing.ts`
+- **Started**: Session 14 (Feb 10, 2026)
 - **Acceptance Criteria**:
-  - [ ] Supabase project ID and anon key in `.env.local`
-  - [ ] User record created on wallet connect
-  - [ ] Agent registration synced to Supabase
-  - [ ] Workout data stored in Supabase
-  - [ ] RLS policies working (users can only read/write own data)
+  - [ ] Pricing page shows prices in FIT, USDC, ETH, and Base ETH
+  - [ ] Subscription model alongside staking (monthly/quarterly/yearly)
+  - [ ] Token selector UI on pricing page
+  - [ ] `src/config/pricing.ts` with tier prices per token
+  - [ ] Pricing FAQ updated for dual model (stake vs subscribe)
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm lint` passes
+  - [ ] `pnpm build` passes
 
-#### TASK-011: Wire Landing Page Placeholders
-- **Priority**: P1
-- **Scope**: `src/app/page.tsx`, new components/routes
+#### TASK-013: XMTP Integration
+- **Priority**: P2
+- **Scope**: XMTP SDK, agent messaging, new hooks/components
 - **Acceptance Criteria**:
-  - [ ] "I AM HUMAN" / "I AM NOT" buttons trigger distinct onboarding paths
-  - [ ] "Purchase $FIT" links to DEX/swap or purchase mechanism
-  - [ ] "Sign up with your email" opens Privy modal (depends on Privy integration)
-  - [ ] Pricing page tiers show ETH/Base ETH/USDC amounts (not just FIT)
+  - [ ] XMTP client initialized with wallet
+  - [ ] Agent can send/receive messages via XMTP
+  - [ ] Chat UI supports XMTP channel
+  - [ ] Landing page XMTP button functional
+
+#### TASK-014: Telegram Integration
+- **Priority**: P2
+- **Scope**: Telegram Bot API, webhook handler, new API routes
+- **Acceptance Criteria**:
+  - [ ] Telegram bot created and configured
+  - [ ] Webhook handler at `/api/telegram`
+  - [ ] Agent can respond to Telegram messages
+  - [ ] Landing page Telegram button functional
 
 ---
 
 ### In Progress
 
+#### TASK-009: Supabase Integration (In Progress)
+- **Priority**: P1
+- **Scope**: `src/lib/supabase.ts`, new hooks, API routes
+- **Status**: Michael setting up Supabase project with Claude.ai. Setup guide created at `docs/SUPABASE_SETUP.md`.
+- **Acceptance Criteria**:
+  - [ ] Supabase project ID and anon key in `.env.local`
+  - [ ] User record created on wallet connect
+  - [ ] Agent registration synced to Supabase
+  - [ ] Workout data stored in Supabase
+  - [ ] Chat messages persisted in Supabase
+  - [ ] RLS policies working (users can only read/write own data)
+
+---
+
+### Done
+
+#### TASK-011: Wire Landing Page Placeholders (Partial)
+- **Priority**: P1
+- **Scope**: `src/app/page.tsx`, landing page buttons
+- **Completed**: Session 13 (Feb 10, 2026)
+- **Notes**: Buttons wired ("I AM HUMAN" → /agent, "I AM NOT" → /hub, "Purchase $FIT" → /staking). Privy email signup and ETH/USDC pricing deferred to separate tasks.
+- **Acceptance Criteria**:
+  - [x] "I AM HUMAN" / "I AM NOT" buttons trigger distinct onboarding paths
+  - [x] "Purchase $FIT" links to staking page
+  - [ ] "Sign up with your email" opens Privy modal (deferred — needs Privy integration)
+  - [ ] Pricing page tiers show ETH/USDC (moved to TASK-012)
+
 #### TASK-010: Agent Coaching Chat
 - **Priority**: P1
-- **Scope**: New chat interface, Claude API integration
+- **Scope**: Chat interface, Claude API integration
 - **Started**: Session 10 (Feb 10, 2026)
-- **Status**: ~70% coded. Backend complete. Need AgentChat.tsx container + AgentPageContent integration.
+- **Completed**: Session 11 (Feb 10, 2026)
 - **Acceptance Criteria**:
   - [x] Chat interface within `/agent` page (below AgentProfileCard)
   - [x] Streaming API route at `/api/chat` using Anthropic SDK
   - [x] System prompt built from FITNESS_COACHING_SKILL.md per coaching style
   - [x] useChat hook with streaming fetch via ReadableStream
   - [x] ChatMessage + ChatInput components
-  - [ ] AgentChat container component (auto-scroll, empty state greeting)
-  - [ ] Integration into AgentPageContent (parse agentURI, render chat)
+  - [x] AgentChat container component (auto-scroll, empty state greeting)
+  - [x] Integration into AgentPageContent (parse agentURI, render chat)
   - [ ] Conversation history stored in Supabase (deferred to TASK-009)
-  - [ ] `pnpm typecheck` passes
-  - [ ] `pnpm lint` passes
-  - [ ] `pnpm build` passes
-
----
-
-### Done
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm lint` passes
+  - [x] `pnpm build` passes
 
 #### TASK-008: Manual Testing + Mint Test Tokens
 - **Priority**: P0

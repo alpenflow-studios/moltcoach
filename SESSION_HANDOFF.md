@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-10
-- **Duration**: Session 12
+- **Duration**: Session 13
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,64 +15,77 @@
 
 ## What Was Done
 
-### Session 12 (This Session)
+### Session 13 (This Session)
 
-1. **Rebrand commit pushed** — `38e384e chore(rebrand): rename moltcoach → ClawCoach`
-   - 26 files changed across src/, docs/, config
-   - Verified: `grep -ri "moltcoach" src/` returns zero hits
-   - Solidity contracts intentionally unchanged (testnet, documented for mainnet)
+1. **ERC-8128 agent auth infrastructure** — `cf10ca9 feat(hub): add ERC-8128 agent auth infrastructure + Agent Hub + wire landing page buttons`
+   - Installed `@slicekit/erc8128` ^0.1.0
+   - Created `src/lib/nonce-store.ts` — Upstash Redis NonceStore (erc8128:nonce: prefix, graceful degradation)
+   - Created `src/lib/verify-agent.ts` — Server-side ERC-8128 verifier (lazy init, baseSepolia, clawcoach label)
+   - Created `src/lib/agent-auth.ts` — Agent-side signing client (SDK reference for developers)
+   - Created `src/middleware/agent-auth.ts` — `verifyAgentRequest()` middleware (ERC-8128 sig → ERC-8004 on-chain check)
 
-2. **Beta prep: per-wallet rate limiting** — `6c455c1 feat(chat): add per-wallet rate limiting for beta prep`
-   - Installed `@upstash/redis` ^1.36.2 + `@upstash/ratelimit` ^2.0.8
-   - Created `src/lib/rateLimit.ts` — dual sliding window (50 msgs/hr + 200 msgs/day per wallet)
-   - Threaded wallet address from `AgentPageContent` → `AgentChat` → `useChat` → `X-Wallet-Address` header → `/api/chat` route
-   - 429 response with `Retry-After` header when limit exceeded
-   - Graceful fallback: if Upstash not configured, rate limiting disabled (local dev works)
-   - All checks pass: typecheck, lint, build
+2. **Agent Hub page at `/hub`** — 8 new files
+   - `src/types/agent-hub.ts` — HubAgent type
+   - `src/hooks/useHubAgents.ts` — Fetches all Registered events from ERC-8004 contract, resolves tokenURI per agent
+   - `src/components/hub/HubHeader.tsx` — Terminal-inspired header with `>_` prompt, ERC-8128 badge
+   - `src/components/hub/HubStatsBar.tsx` — Total Agents / ERC-8128 Verified / Network stats row
+   - `src/components/hub/HubAgentCard.tsx` — Agent card (name, ID, style, owner, BaseScan link)
+   - `src/components/hub/HubRegisterCTA.tsx` — Developer registration section with code examples + spec links
+   - `src/components/hub/HubPageContent.tsx` — Client orchestrator (loading/error/empty/grid states)
+   - `src/app/hub/page.tsx` + `loading.tsx` + `error.tsx`
 
-3. **ERC-8128 doc reviewed** — `docs/ERC-8128.md` added by Michael via GitHub
-   - Signed HTTP Requests with Ethereum — agents authenticate via wallet signatures
-   - Excellent fit for Phase 2 (autonomous agent actions, agent-to-agent comms)
-   - NOT needed for beta — current agents don't make their own HTTP requests
-   - Nonce store uses same Upstash Redis we just set up for rate limiting
-   - "I AM NOT HUMAN" button concept: agent hub entry point (ERC-8128 authenticated)
+3. **Protected API routes** — 3 new endpoints
+   - `GET /api/v1/agents` — Public agent listing from chain events (no auth)
+   - `POST /api/v1/agents/verify` — ERC-8128 authenticated agent identity verification
+   - `POST /api/v1/workouts` — ERC-8128 authenticated workout logging (storage pending TASK-009)
 
-### Session 11 (Previous)
+4. **TASK-011: Landing page buttons wired**
+   - "I AM HUMAN" → `/agent` (human onboarding path)
+   - "I AM NOT" → `/hub` (agent hub, ERC-8128 pathway)
+   - "Purchase $FIT" → `/staking`
 
-- TASK-010 completed (AgentChat container, streaming chat working end-to-end)
-- Rebrand: moltcoach → ClawCoach (all frontend + docs, Solidity deferred)
-- Anthropic API key configured
+5. **Navigation updated** — Hub link added to Navbar (between Agent and Pricing) and Footer
 
-### Session 10
+6. **Upstash Redis credentials configured** — Michael added `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` to `.env.local`. Rate limiting and nonce store now live.
 
-- TASK-008 completed (staking flows verified)
-- TASK-010 ~70% coded
+7. **All checks pass**: typecheck, lint, build (22 files changed, 814 insertions)
 
-### Sessions 1-9
+### Session 12 (Previous)
 
-- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications, 10K FIT minted, multi-wallet support, landing page, pricing page
+- Rebrand moltcoach → ClawCoach complete
+- Per-wallet rate limiting shipped (Upstash Redis, 50/hr + 200/day)
+- Navbar/Footer logo text fixed
+- ERC-8128 doc reviewed (docs/ERC-8128.md)
+
+### Session 11
+
+- TASK-010 completed (AgentChat container, streaming chat end-to-end)
+- Rebrand started, Anthropic API key configured
+
+### Sessions 1-10
+
+- Dev environment, scaffold, wallet, 4 contracts, 216 tests, staking UI, Base Sepolia deployment + verification, shared layout, agent creation, dashboard, toast notifications, 10K FIT minted, multi-wallet support, landing page, pricing page, staking flows verified
 
 ---
 
 ## What's In Progress
 
-- **Upstash Redis setup** — Michael creating database at console.upstash.com. Need `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` in `.env.local`. Code is ready, just needs credentials.
+- Nothing actively in progress. Session ended clean.
 
 ---
 
 ## What's Next
 
-1. **Upstash Redis credentials** → paste into `.env.local` → rate limiting goes live
-2. **Vercel password protection** — Dashboard toggle, not code. Gate beta deployment.
-3. **TASK-009: Supabase integration** — Michael setting up project, then wire user records + chat persistence
-4. **TASK-011: Wire landing page buttons** — Two paths now clarified:
-   - "I AM HUMAN" → Human onboarding (connect wallet → create agent → coaching)
-   - "I AM NOT" → Agent hub (placeholder for beta, ERC-8128 authenticated in Phase 2)
-5. **ERC-8128 integration (Phase 2)** — Agent-side signing, server-side verification, nonce store. See `docs/ERC-8128.md` for full spec. Dependencies: agent runtime, Supabase agents table.
-6. **Chat persistence** — Store conversation history in Supabase (after TASK-009)
-7. **Pricing page — ETH/USDC pricing**
-8. **Privy integration** — For email/social onboarding
-9. **Wearable integration** — Strava OAuth flow
+1. **TASK-009: Supabase integration** — Michael setting up project. Wire user records + chat persistence + workout storage.
+2. **Chat persistence** — Store conversation history in Supabase (after TASK-009). Currently React state only.
+3. **Workout storage** — `/api/v1/workouts` route returns success but doesn't persist yet. Wire to Supabase `workouts` table.
+4. **Vercel password protection** — Dashboard toggle for beta gate (not code).
+5. **Pricing page — ETH/USDC pricing** — Michael flagged this.
+6. **Privy integration** — Email/social onboarding. "Sign up with your email" button is non-functional.
+7. **XMTP + Telegram buttons** — Landing page comms section buttons are non-functional stubs.
+8. **Wearable integration** — Strava OAuth flow (likely first wearable).
+9. **ERC-8128 Phase 2** — Agent runtime that actually signs requests. Current infra is server-side verification only. Need agent runtime + Coinbase Smart Wallet signing.
+10. **Agent-to-agent communication** — ERC-8128 is auth layer, comms layer TBD.
 
 ---
 
@@ -82,7 +95,12 @@
 - **wagmi version**: v3.4.2 (latest)
 - **Wallet strategy**: Multi-wallet — injected (MetaMask) + Coinbase Smart Wallet + WalletConnect. Privy planned for production.
 - **ERC-8004**: Custom non-upgradeable implementation (not reference UUPS)
-- **ERC-8128**: Planned for Phase 2 agent authentication. Uses `@slicekit/erc8128` package, Upstash Redis nonce store. See `docs/ERC-8128.md`.
+- **ERC-8128**: Launched at launch (not Phase 2). Infrastructure built in Session 13. Uses `@slicekit/erc8128` ^0.1.0, Upstash Redis nonce store. See `docs/ERC-8128.md`.
+- **Agent Hub**: `/hub` route — reads agents from ERC-8004 contract events (no Supabase dependency)
+- **Agent Hub UX**: Terminal-inspired header, agent card grid, developer registration CTA with code examples
+- **API versioning**: `/api/v1/` prefix for agent-facing endpoints (separate from `/api/chat` human-facing)
+- **Agent verification flow**: ERC-8128 signature → ERC-8004 on-chain registry check → authenticated
+- **Graceful degradation**: All ERC-8128 infra follows same pattern as rateLimit.ts — lazy init, env check, permissive fallback
 - **Agent IDs**: Start at 1, 0 = sentinel for "no agent"
 - **Revenue model**: 9 streams, Stage 1 MVP focuses on 3 (tx fees, spawn fee, validation fees)
 - **Treasury split**: 40/30/20/10 (dev/buyback/community/insurance)
@@ -93,9 +111,9 @@
 - **Penalty routing**: forceApprove + collectFitFee pattern (preserves FeeCollector tracking)
 - **Deploy wallet**: MetaMask for development, Coinbase Wallet for funds
 - **Staking UI ABI strategy**: Minimal `as const` ABIs in TypeScript (not Foundry JSON artifacts)
-- **Approve flow**: Auto-chained approve→stake (fixed in Session 9, was broken 2-click before)
+- **Approve flow**: Auto-chained approve→stake (fixed in Session 9)
 - **Staking route**: Dedicated `/staking` (not `/dashboard`)
-- **tsconfig target**: ES2020 (was ES2017, needed for BigInt literals)
+- **tsconfig target**: ES2020 (for BigInt literals)
 - **Layout**: Shared Navbar + Footer in root layout, pages render content only
 - **Agent URI**: `data:application/json,` encoded URI with name, style, version, category
 - **Coaching styles**: 4 options — Motivator, Drill Sergeant, Scientist, Friend
@@ -104,7 +122,7 @@
 - **Farcaster**: "Forged on Farcaster" badge on landing page hero
 - **ConnectWallet**: Single button with shadcn DropdownMenu, connectors deduplicated by name
 - **Pricing tiers**: Free/Basic(100)/Pro(1000)/Elite(10000) — may change to ETH/USDC pricing later
-- **Landing page CTAs**: "I AM HUMAN" = human onboarding, "I AM NOT" = agent hub (ERC-8128 pathway)
+- **Landing page CTAs**: "I AM HUMAN" → `/agent`, "I AM NOT" → `/hub`, "Purchase $FIT" → `/staking`
 - **Chat model**: claude-sonnet-4-5-20250929 for coaching responses (fast + capable)
 - **Chat architecture**: No external chat library — native fetch + ReadableStream for streaming
 - **Chat persistence**: React state only for now (no Supabase yet — TASK-009)
@@ -120,12 +138,12 @@
 
 ## Open Questions
 
-- [ ] Upstash Redis credentials — Michael setting up at console.upstash.com
+- [x] Upstash Redis credentials — configured in .env.local (Session 13)
 - [ ] Supabase project — Michael setting up with Claude.ai
 - [x] WalletConnect project ID — obtained from cloud.walletconnect.com
 - [ ] Coinbase Wallet project ID — needs to be obtained from developer portal
-- [ ] "I AM NOT HUMAN" agent hub — placeholder UX for beta, full ERC-8128 auth in Phase 2
-- [ ] Agent-to-agent protocol at clawcoach.ai (ERC-8128 is the auth layer, what's the comms layer?)
+- [x] "I AM NOT HUMAN" agent hub — built at `/hub` with ERC-8128 infrastructure (Session 13)
+- [ ] Agent-to-agent protocol at clawcoach.ai (ERC-8128 is auth layer, comms layer TBD)
 - [ ] Which wearable integration first? (Strava likely easiest)
 - [ ] Spawn fee: USDC or $FIT or both? (revenue_model.md says both)
 - [ ] Privy free tier limits for production auth
@@ -140,9 +158,9 @@
 
 - `forge test` (contracts/): **216 tests pass** (62 FitStaking + 61 FeeCollector + 50 FitToken + 43 MoltcoachIdentity)
 - `forge build`: Compiles (pre-existing notes/warnings only, no errors)
-- `pnpm typecheck`: **PASSES** (verified Session 12)
-- `pnpm lint`: **PASSES** (verified Session 12)
-- `pnpm build`: **PASSES** (verified Session 12)
+- `pnpm typecheck`: **PASSES** (verified Session 13)
+- `pnpm lint`: **PASSES** (verified Session 13)
+- `pnpm build`: **PASSES** (verified Session 13, 11 routes including 4 new)
 
 ---
 
@@ -171,7 +189,7 @@
 - **tsconfig**: Target `ES2020` (changed from ES2017 in Session 6 for BigInt support)
 - **Project path**: `~/Projects/moltcoach` (repo name unchanged, brand is ClawCoach)
 - **ANTHROPIC_API_KEY**: Set in `.env.local` — working as of Session 11
-- **Upstash Redis**: Packages installed (`@upstash/redis` ^1.36.2, `@upstash/ratelimit` ^2.0.8). Credentials NOT yet in `.env.local` — Michael setting up.
+- **Upstash Redis**: Fully configured in `.env.local` as of Session 13. Rate limiting + nonce store both live.
 
 ---
 
@@ -191,9 +209,28 @@
 | @anthropic-ai/sdk | ^0.74.0 | node_modules |
 | @upstash/redis | ^1.36.2 | node_modules |
 | @upstash/ratelimit | ^2.0.8 | node_modules |
+| @slicekit/erc8128 | ^0.1.0 | node_modules |
 | sonner | latest | node_modules |
 | @radix-ui/react-dropdown-menu | latest | node_modules (via shadcn) |
 
 ---
 
-*Last updated: Feb 10, 2026 — Session 12*
+## Key Files Added in Session 13
+
+| File | Purpose |
+|------|---------|
+| `src/lib/nonce-store.ts` | Upstash Redis NonceStore for ERC-8128 replay protection |
+| `src/lib/verify-agent.ts` | Server-side ERC-8128 verifier (lazy init) |
+| `src/lib/agent-auth.ts` | Agent-side signing client (SDK/docs) |
+| `src/middleware/agent-auth.ts` | `verifyAgentRequest()` — ERC-8128 sig + ERC-8004 check |
+| `src/types/agent-hub.ts` | HubAgent type |
+| `src/hooks/useHubAgents.ts` | Fetch agents from chain via Registered events |
+| `src/components/hub/*.tsx` | 5 Hub UI components |
+| `src/app/hub/*.tsx` | Hub route (page + loading + error) |
+| `src/app/api/v1/agents/route.ts` | Public agent listing API |
+| `src/app/api/v1/agents/verify/route.ts` | ERC-8128 agent verification API |
+| `src/app/api/v1/workouts/route.ts` | ERC-8128 workout logging API |
+
+---
+
+*Last updated: Feb 10, 2026 — Session 13*

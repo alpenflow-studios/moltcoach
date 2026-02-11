@@ -106,6 +106,58 @@ export type Database = {
           ended_at?: string | null;
         };
       };
+      messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          agent_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          agent_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          content?: string;
+        };
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          tier: number;
+          payment_token: "FIT" | "USDC" | "ETH";
+          amount: string;
+          tx_hash: string | null;
+          starts_at: string;
+          expires_at: string | null;
+          auto_renew: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          tier: number;
+          payment_token: "FIT" | "USDC" | "ETH";
+          amount: string;
+          tx_hash?: string | null;
+          starts_at?: string;
+          expires_at?: string | null;
+          auto_renew?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          tier?: number;
+          expires_at?: string | null;
+          auto_renew?: boolean;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

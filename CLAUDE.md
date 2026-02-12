@@ -8,7 +8,7 @@
 ## Project Identity
 
 - **Name**: ClawCoach
-- **One-liner**: AI coaching agent with on-chain identity and Coinbase Smart Wallet
+- **One-liner**: AI coaching agent with on-chain identity and Privy-powered auth
 - **Repo**: github.com/alpenflow-studios/moltcoach
 - **Live**: https://clawcoach.ai
 
@@ -21,8 +21,9 @@
 | GitHub Repo | https://github.com/alpenflow-studios/moltcoach |
 | ERC-8004 Spec | https://eips.ethereum.org/EIPS/eip-8004 |
 | Base Sepolia Explorer | https://sepolia.basescan.org |
-| Supabase Dashboard | TBD |
-| Vercel Dashboard | TBD |
+| Supabase Dashboard | https://supabase.com/dashboard/project/agvdivapnrqpstvhkbmk |
+| Vercel Dashboard | https://vercel.com/classcoin/moltcoach |
+| Privy Dashboard | https://dashboard.privy.io |
 
 ---
 
@@ -66,8 +67,8 @@ NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS=
 NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS=
 NEXT_PUBLIC_CLAWC_STAKING_ADDRESS=
 
-# Coinbase
-NEXT_PUBLIC_COINBASE_WALLET_PROJECT_ID=
+# Privy Auth (get from dashboard.privy.io)
+NEXT_PUBLIC_PRIVY_APP_ID=
 
 # AI
 ANTHROPIC_API_KEY=
@@ -81,14 +82,14 @@ ANTHROPIC_API_KEY=
 
 | Layer | Technology |
 |-------|-----------|
-| Auth | Coinbase Smart Wallet (primary) |
+| Auth | Privy (email + Farcaster + wallet: Coinbase, MetaMask, WalletConnect) |
 | Agent Framework | Claude Agent SDK (coaching agent runtime) |
 | Agent Identity | ERC-8004 (Trustless Agents) on Base |
 | Agent Comms | XMTP, Telegram |
 | Token | $CLAWC (ERC-20, platform staking & governance) |
 | Staking | $CLAWC staking contract |
 | Wearables | Strava, Apple Health, Garmin integrations |
-| Database | Supabase (project ID: TBD) |
+| Database | Supabase (project: `clawcoach`, ref: `agvdivapnrqpstvhkbmk`) |
 | Chain | Base Sepolia (84532) for dev, Base mainnet (8453) for prod |
 
 ---
@@ -96,7 +97,7 @@ ANTHROPIC_API_KEY=
 ## Domain Concepts
 
 ### What is ClawCoach?
-A **ClawCoach** is an AI coaching agent that lives on-chain via ERC-8004. Each user gets their own ClawCoach agent when they verify and connect a Coinbase Smart Wallet. The agent has a persistent identity, personality, and reputation.
+A **ClawCoach** is an AI coaching agent that lives on-chain via ERC-8004. Each user gets their own ClawCoach agent when they connect via Privy (email, Farcaster, or external wallet). The agent has a persistent identity, personality, and reputation.
 
 ### Agent Lifecycle
 ```
@@ -140,18 +141,22 @@ clawcoach.ai is where ClawCoach agents gather to interact, discuss, and implemen
 
 ## Database Tables
 
-> To be created in Supabase.
+> Supabase project `clawcoach` (ref `agvdivapnrqpstvhkbmk`, East US/Ohio). RLS enabled on all tables.
 
-Core tables (planned):
-- `users` — User profiles, wallet addresses
-- `agents` — ClawCoach agent instances (linked to ERC-8004 identity)
+Implemented tables:
+- `users` — User profiles, wallet addresses (upserted on wallet connect)
+- `agents` — ClawCoach agent instances (synced from on-chain ERC-8004)
+- `messages` — Agent-human conversation history
+- `workouts` — Tracked workout data (API route ready, needs wearable integration)
+- `coaching_sessions` — Structured coaching session records
+- `subscriptions` — User subscription records
+
+Planned tables:
 - `agent_personas` — Personality, heartbeat, persona config per agent
-- `workouts` — Tracked workout data
 - `wearable_connections` — Strava, Apple Health, Garmin links
 - `clawc_rewards` — $CLAWC earning history
 - `clawc_stakes` — $CLAWC staking positions
-- `messages` — Agent-human conversation history
-- `coaching_sessions` — Structured coaching session records
+- `telegram_links` — Telegram chat-to-wallet mappings
 
 ---
 
@@ -193,4 +198,4 @@ Core tables (planned):
 
 ---
 
-*Last updated: Feb 10, 2026*
+*Last updated: Feb 12, 2026*

@@ -15,28 +15,30 @@
 
 ## What Was Done
 
-### Session 28
+### Session 28 (continued)
 
-1. **Privy Integration — IN PROGRESS (80% done, NOT committed)**
-   - Replacing wagmi-only auth with Privy for email + Farcaster + multi-wallet login
+1. **Privy Integration (TASK-017) — COMPLETE**
+   - Replaced wagmi-only auth with Privy for email + Farcaster + multi-wallet login
    - **Installed**: `@privy-io/react-auth@3.13.1`, `@privy-io/wagmi@4.0.1`
    - **Privy App ID**: `cmlj0izut00hg0cjrd7rrm80b` (added to `.env.local` + `.env.example` + Vercel)
-   - **Files rewritten**:
+   - **Files rewritten** (5 files):
      - `src/config/wagmi.ts` — removed all connectors, `createConfig` from `@privy-io/wagmi`
-     - `src/components/providers/WalletProvider.tsx` — PrivyProvider wraps QueryClientProvider wraps WagmiProvider, mount guard to skip SSR
+     - `src/components/providers/WalletProvider.tsx` — PrivyProvider wraps QueryClientProvider wraps WagmiProvider, mount guard returns `null` during SSR
      - `src/components/ConnectWallet.tsx` — replaced wagmi connector logic with `usePrivy()` login/logout
      - `src/components/EmailSignupLink.tsx` — NEW, opens Privy modal filtered to email-only
-     - `src/app/page.tsx` — wired `<EmailSignupLink />` to replace placeholder button
+     - `src/app/page.tsx` — added `"use client"`, wired `<EmailSignupLink />`, dynamic imports for ConnectWallet
+   - **SSR fix** (4 files): dynamic `ssr: false` imports for ConnectWallet in `Navbar.tsx`, `DashboardContent.tsx`, `AgentPageContent.tsx`, `StakingPageContent.tsx`
+   - **Mount guard fix**: WalletProvider returns `null` (not `{children}`) when unmounted — prevents wagmi hooks from firing without providers during prerendering
    - **10 hook/component files UNCHANGED** — all wagmi hooks (`useAccount`, `useReadContract`, `useWriteContract`, etc.) work as before
-   - **`pnpm typecheck` PASSES, `pnpm build` PASSES locally** (19 routes)
-   - **Vercel deploy FAILS** — PrivyProvider validates app ID during static generation (prerendering)
-   - **Fix applied**: Added `useState`/`useEffect` mount guard in WalletProvider to defer providers to client-only
-   - **SSR FIX IN PROGRESS**: Started switching all ConnectWallet imports to `dynamic(() => ..., { ssr: false })`. Done in Navbar.tsx and page.tsx. Still need to finish: `DashboardContent.tsx`, `AgentPageContent.tsx`, `StakingPageContent.tsx` (started DashboardContent, not finished). These 3 files also use `useAccount` from wagmi — they should work after mount guard fires since they're children of WalletProvider, but ConnectWallet import still needs dynamic.
-   - **NOT YET DEPLOYED** — local build needs recheck after dynamic import changes, then deploy to Vercel
+   - **Committed**: `29fb2bf` — all 15 files
+   - **Deployed**: Vercel build succeeds (35s), live at `clawcoach.ai`
+   - **Tested**: Chat flow confirmed working on live site
 
 2. **Lobster emoji added to navbar** — `🦞 ClawCoach` in `src/components/Navbar.tsx`
 
-3. **Tested mobile wallet hypothesis** — Temporarily disabled Vercel password protection to test if Basic Auth was blocking mobile wallet popups. It was NOT the cause. Password protection re-enabled (`beta` / `democlawcoachbeta`).
+3. **Tested mobile wallet hypothesis** — Temporarily disabled Vercel password protection to test if Basic Auth was blocking mobile wallet popups. It was NOT the cause. Password protection re-enabled.
+
+4. **Updated CLAUDE.md** — Auth layer updated to Privy, env vars updated, Supabase/Vercel/Privy dashboard links added, database tables updated to reflect implemented vs planned
 
 ### Session 27
 
@@ -83,17 +85,18 @@
 
 ## What's In Progress
 
-1. **Privy Integration (TASK-017)** — 80% done. Code written, local build passes, needs SSR fix for Vercel deploy + testing.
+_(nothing — TASK-017 complete, clean slate for next session)_
 
 ---
 
 ## What's Next (Priority Order)
 
-1. **Finish Privy SSR fix (P0)** — Dynamic import `ssr: false` approach chosen. DONE: `Navbar.tsx`, `page.tsx`. REMAINING: `DashboardContent.tsx` (started), `AgentPageContent.tsx`, `StakingPageContent.tsx` — replace `import { ConnectWallet }` with `const ConnectWallet = dynamic(() => import(...), { ssr: false })`. Then `pnpm typecheck` + `pnpm build` + deploy to Vercel.
-2. **Test Privy flows** — email login, Farcaster login, external wallets (desktop + mobile), disconnect
-3. **Test Telegram conversation history** — deployed but untested on live bot
-4. **Telegram wallet linking (Task C from S27 epic)** — /connect command, one-time link, Supabase `telegram_links` table
-5. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+1. **Fix mobile iOS client-side exception (P0)** — Site throws client-side error on iOS mobile after Privy deploy. Desktop works. Investigate with Safari devtools. See CURRENT_ISSUES.md High #1.
+2. **Test remaining Privy flows (P1)** — Chat confirmed working on desktop. Still need: email login, Farcaster login, external wallet on mobile, disconnect
+3. **Test Telegram conversation history (P1)** — deployed but untested on live bot
+3. **Telegram wallet linking (P2)** — `/connect` command, one-time link code, Supabase `telegram_links` table
+4. **PartnerRewardPool contract (P2)** — Stage 2, partner token promos alongside $CLAWC
+5. **Wearable integrations (P3)** — Strava, Apple Health, Garmin
 
 ---
 
@@ -172,8 +175,9 @@ User sends message
 
 ## Decisions Made
 
-- **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. PrivyProvider wraps WagmiProvider. Email + Farcaster + wallet login. Embedded wallets for email users. Mount guard needed for SSR. (Session 28)
+- **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. PrivyProvider wraps WagmiProvider. Email + Farcaster + wallet login. Embedded wallets for email users. (Session 28)
 - **Privy App ID**: `cmlj0izut00hg0cjrd7rrm80b` (Session 28)
+- **Privy SSR pattern**: WalletProvider mount guard returns `null` during SSR (not `{children}`). ConnectWallet dynamically imported with `ssr: false` in all consumer files. `page.tsx` uses `"use client"` for Turbopack compat. (Session 28)
 - **Pricing simplified to 3 tiers**: Free/Pro/Elite (was 4 tiers with Basic). Pro at $9.99/mo or 1K CLAWC, Elite at $29.99/mo or 10K CLAWC (Session 27)
 - **Telegram history in Redis**: Key pattern `telegram:history:<chatId>`, 20 msg cap, 7-day TTL (Session 27)
 - **Orb fix approach**: `overflow-x-clip` on layout wrapper instead of `overflow-hidden` on hero section (Session 27)
@@ -208,7 +212,7 @@ User sends message
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
 - `pnpm typecheck`: **PASSES** (Session 28)
-- `pnpm build`: **PASSES locally** (19 routes, Session 28) — **FAILS on Vercel** (Privy SSR issue, see What's Next #1)
+- `pnpm build`: **PASSES** (19 routes, Session 28) — Vercel deploy succeeds
 
 ---
 

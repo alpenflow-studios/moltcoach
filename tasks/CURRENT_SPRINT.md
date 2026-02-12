@@ -59,7 +59,7 @@ _(none)_
 - **Priority**: P0
 - **Scope**: `src/config/wagmi.ts`, `src/components/providers/WalletProvider.tsx`, `src/components/ConnectWallet.tsx`, `src/components/EmailSignupLink.tsx`, `src/app/page.tsx`
 - **Started**: Session 28 (Feb 12, 2026)
-- **Notes**: Replaces wagmi-only connector flow with Privy. `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. Privy App ID: `cmlj0izut00hg0cjrd7rrm80b`. Local `pnpm typecheck` + `pnpm build` pass. Vercel deploy fails because PrivyProvider validates app ID during static generation. Mount guard added in WalletProvider but ConnectWallet/EmailSignupLink still need SSR resilience (they call `usePrivy()` which throws without provider). All 10 hook/component files that import from wagmi are UNCHANGED.
+- **Notes**: Replaces wagmi-only connector flow with Privy. `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. Privy App ID: `cmlj0izut00hg0cjrd7rrm80b`. All 10 hook/component files that import from wagmi are UNCHANGED. SSR fix: WalletProvider mount guard returns `null` (not `{children}`), ConnectWallet/EmailSignupLink dynamically imported with `ssr: false`. Vercel deploy succeeds (35s). Chat flow confirmed on desktop. Remaining items need manual browser testing.
 - **Acceptance Criteria**:
   - [x] `@privy-io/react-auth` and `@privy-io/wagmi` installed
   - [x] `NEXT_PUBLIC_PRIVY_APP_ID` env var added (local + Vercel)
@@ -70,8 +70,8 @@ _(none)_
   - [x] Landing page wired to `<EmailSignupLink />`
   - [x] `pnpm typecheck` passes locally
   - [x] `pnpm build` passes locally
-  - [ ] ConnectWallet + EmailSignupLink resilient to SSR (no provider throws)
-  - [ ] Vercel deploy succeeds
+  - [x] ConnectWallet + EmailSignupLink resilient to SSR (no provider throws)
+  - [x] Vercel deploy succeeds
   - [ ] Email login creates embedded wallet
   - [ ] Farcaster login works
   - [ ] External wallet login works (desktop + mobile)

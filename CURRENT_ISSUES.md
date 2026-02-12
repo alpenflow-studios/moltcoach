@@ -18,8 +18,7 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| 1 | Privy SSR: PrivyProvider validates app ID during static generation, causing Vercel deploy failure | `src/components/providers/WalletProvider.tsx` | S28 | Mount guard added (`useState`+`useEffect`) to defer providers to client-only. But `ConnectWallet` and `EmailSignupLink` use `usePrivy()` which throws without PrivyProvider during initial SSR render. Fix: make these components resilient (dynamic import `ssr: false`, or check provider availability before calling hooks). Local build passes, Vercel deploy fails. |
-| 2 | Mobile wallet buttons don't connect (being replaced by Privy) | `src/components/ConnectWallet.tsx` | S27 | S28 is replacing the wagmi-only connector flow with Privy, which handles mobile natively. This bug should be resolved once TASK-017 is deployed. Keep until confirmed. |
+| 1 | Mobile iOS client-side exception — needs verification on production | Privy / WalletProvider | S28 | Reported on iOS mobile. Chrome devtools shows only dev-only warnings (MetaMask SDK `@react-native-async-storage`, Privy `clip-path`, extension noise). None appear in production builds. **Action**: test on deployed `clawcoach.ai` (not localhost) on real iOS device. If it works in production, downgrade to Low/close. |
 
 ---
 

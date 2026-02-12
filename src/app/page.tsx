@@ -168,9 +168,11 @@ export default function LandingPage() {
               XMTP
             </Link>
           </Button>
-          <Button variant="outline" size="lg" className="rounded-full text-base">
-            <Send className="size-4" />
-            Telegram
+          <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
+            <a href={process.env.NEXT_PUBLIC_TELEGRAM_BOT_URL ?? "https://t.me/ClawCoachBot"} target="_blank" rel="noopener noreferrer">
+              <Send className="size-4" />
+              Telegram
+            </a>
           </Button>
         </div>
       </section>

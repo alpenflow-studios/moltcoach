@@ -18,17 +18,31 @@
 ### Session 23
 
 1. **Phase 7 — Deployed $CLAWC contracts to Base Sepolia (COMPLETE)**
-
    - Deployed all 4 contracts via `forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify`
    - All 4 contracts verified on BaseScan automatically
    - Minted 10,000 CLAWC to deployer via `MintTestTokens.s.sol`
    - Updated addresses in: `.env.local`, `.env.example`, `CLAUDE.md`, `docs/CONTRACTS.md`
    - Fixed 2 hardcoded old addresses in frontend (`AgentProfileCard.tsx`, `HubAgentCard.tsx`)
    - Updated `MintTestTokens.s.sol` with new ClawcToken address
-   - `pnpm build` passes clean (all 17 routes)
+   - Michael smoke-tested: staked 9,500 CLAWC, unstaked 500 CLAWC — all working
+   - **Committed**: `692aaba` — `chore(deploy): deploy $CLAWC contracts to Base Sepolia`
 
-2. **Commits this session**:
-   - `chore(deploy): deploy $CLAWC contracts to Base Sepolia`
+2. **Builder Codes wagmi integration (COMPLETE)**
+   - Installed `ox` (`^0.12.1`) for `Attribution.toDataSuffix` from `ox/erc8021`
+   - Created `src/lib/builderCodes.ts` — generates data suffix from builder code `698cc32e289e9e19f580444f`
+   - Added `dataSuffix` to all 5 `writeContract` calls (register, approve, stake x2, unstake)
+   - `pnpm typecheck` + `pnpm build` both pass
+   - **Committed**: `818fb59` — `feat(web3): integrate Builder Codes dataSuffix for Base attribution`
+
+3. **Multi-token reward model (DISCUSSED, NOT BUILT)**
+   - Designed architecture for partner token promos alongside $CLAWC rewards
+   - Key distinction: Fitcaster's $FIT is a SEPARATE token from a different project, NOT the old $FIT we renamed
+   - Model: PartnerRewardPool contract where partners deposit their tokens, ClawCoach distributes alongside $CLAWC
+   - Stage 2 feature — needs RewardDistributor + WorkoutValidator first
+
+4. **Commits this session**:
+   - `692aaba` — `chore(deploy): deploy $CLAWC contracts to Base Sepolia`
+   - `818fb59` — `feat(web3): integrate Builder Codes dataSuffix for Base attribution`
 
 ---
 
@@ -46,15 +60,21 @@
 | 6. Documentation | **DONE** | 10 doc files updated, committed |
 | 7. Deploy to Base Sepolia | **DONE** | 4 contracts deployed, verified, 10K CLAWC minted |
 
+### Builder Codes — COMPLETE
+
+- `ox/erc8021` Attribution wired into all 5 write calls
+- Builder code: `698cc32e289e9e19f580444f`
+- Every on-chain tx now appends attribution bytes
+
 ---
 
 ## What's Next
 
-1. **x402 integration** — pay-per-coach endpoints
-2. **Builder Codes wagmi integration** — wire `ox` + `Attribution.toDataSuffix`
-3. **Vercel deployment + password protection**
-4. **Telegram integration (TASK-014)**
-5. **Multi-token pricing (TASK-012)**
+1. **Vercel deployment + password protection** — get clawcoach.ai live with staging password
+2. **x402 integration** — pay-per-coach endpoints
+3. **Telegram integration (TASK-014)** — bot + webhook handler
+4. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
+5. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
 
 ---
 
@@ -92,8 +112,10 @@ User sends message
 ## Decisions Made
 
 - **$CLAWC replaces $FIT**: $FIT becomes a partner reward token (fitcaster.xyz). $CLAWC is the native platform token (Session 18)
-- **Multi-token reward model**: Agents distribute partner tokens ($FIT, $LEARN, etc.), $CLAWC for staking/governance (Session 18)
-- **Builder Codes app_id**: `698cc32e289e9e19f580444f` (Session 18)
+- **Multi-token reward model**: Agents distribute partner tokens ($FIT, $LEARN, etc.), $CLAWC for staking/governance (Session 18, refined Session 23)
+- **Partner token model**: PartnerRewardPool contract — partners deposit tokens, ClawCoach distributes alongside $CLAWC, 5% platform fee (Session 23)
+- **Fitcaster's $FIT is SEPARATE**: NOT the old $FIT we renamed — it's Fitcaster's own reward token, a different project (Session 23)
+- **Builder Codes**: app_id `698cc32e289e9e19f580444f`, dataSuffix wired via `ox/erc8021` (Session 23)
 - **x402 integration planned**: Pay-per-coach, agent autonomous spending, Bazaar discovery (Session 18)
 - **Supabase project**: `clawcoach`, East US (Ohio), ref `agvdivapnrqpstvhkbmk` (Session 17)
 - **Supabase auth model**: Wallet-based. Anon key for reads, service_role for writes via API routes (Session 17)
@@ -128,9 +150,9 @@ User sends message
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
-- **CLAWC supply**: 10,000 CLAWC (all in deployer wallet)
-- **Staked**: 0 (fresh deploy)
-- **Agents**: 0 (fresh deploy)
+- **CLAWC supply**: 10,000 CLAWC
+- **Staked**: 9,500 CLAWC | **Wallet**: ~475 CLAWC | **FeeCollector**: ~25 CLAWC
+- **Agents**: 0 (no agent registered on new contracts yet)
 
 ---
 
@@ -142,6 +164,7 @@ User sends message
 - **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
 - **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY
 - **NOT configured**: Coinbase Wallet project ID
+- **New dep**: `ox` ^0.12.1 (Builder Codes Attribution)
 
 ---
 

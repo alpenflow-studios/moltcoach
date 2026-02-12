@@ -34,6 +34,7 @@ export function useAgentReads(userAddress: `0x${string}` | undefined) {
   });
 
   const isLoading = hasAgent.isLoading;
+  const error = hasAgent.error ?? agentId.error ?? agentURI.error ?? null;
 
   function refetchAll() {
     void hasAgent.refetch();
@@ -46,6 +47,7 @@ export function useAgentReads(userAddress: `0x${string}` | undefined) {
     agentId: agentId.data ?? 0n,
     agentURI: agentURI.data ?? "",
     isLoading,
+    error,
     refetchAll,
   };
 }

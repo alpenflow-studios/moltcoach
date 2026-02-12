@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { baseSepolia } from "wagmi/chains";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
@@ -9,18 +10,23 @@ const ConnectWallet = dynamic(
   () => import("@/components/ConnectWallet").then((m) => m.ConnectWallet),
   { ssr: false },
 );
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle } from "lucide-react";
 import { useAgentReads } from "@/hooks/useAgentReads";
 import { useChatHistory } from "@/hooks/useChatHistory";
 import { useXmtpClient } from "@/hooks/useXmtpClient";
 import { useXmtpConversation } from "@/hooks/useXmtpConversation";
 import { parseAgentURI } from "@/lib/agentURI";
+import { parseContractError } from "@/lib/contractErrors";
 import { RegisterAgentForm } from "./RegisterAgentForm";
 import { AgentProfileCard } from "./AgentProfileCard";
 import { AgentChat } from "./AgentChat";
 
 export function AgentPageContent() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const data = useAgentReads(address);
   const searchParams = useSearchParams();
 
@@ -84,6 +90,24 @@ export function AgentPageContent() {
     );
   }
 
+  if (isConnected && chainId !== baseSepolia.id) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 py-24 text-center">
+        <AlertTriangle className="size-10 text-yellow-500" />
+        <h2 className="text-2xl font-bold">Wrong Network</h2>
+        <p className="max-w-md text-muted-foreground">
+          ClawCoach runs on Base Sepolia. Please switch your wallet to continue.
+        </p>
+        <Button
+          size="lg"
+          onClick={() => switchChain({ chainId: baseSepolia.id })}
+        >
+          Switch to Base Sepolia
+        </Button>
+      </div>
+    );
+  }
+
   if (data.isLoading) {
     return (
       <div className="space-y-6">
@@ -92,6 +116,19 @@ export function AgentPageContent() {
           <Skeleton className="mt-2 h-5 w-96" />
         </div>
         <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  if (data.error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 py-24 text-center">
+        <AlertTriangle className="size-10 text-destructive" />
+        <h2 className="text-2xl font-bold">Failed to load agent data</h2>
+        <p className="max-w-md text-sm text-muted-foreground">
+          {parseContractError(data.error)}
+        </p>
+        <Button onClick={data.refetchAll}>Try again</Button>
       </div>
     );
   }

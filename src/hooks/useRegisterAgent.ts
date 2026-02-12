@@ -7,6 +7,7 @@ import {
   clawcoachIdentityAbi,
 } from "@/config/contracts";
 import { builderCodesDataSuffix } from "@/lib/builderCodes";
+import { parseContractError } from "@/lib/contractErrors";
 
 type RegisterState = "idle" | "registering" | "waiting" | "success" | "error";
 
@@ -48,7 +49,7 @@ export function useRegisterAgent(options: { onSuccess?: () => void }) {
           onSuccess: () => setState("waiting"),
           onError: (err) => {
             setState("error");
-            setError(err.message.split("\n")[0] ?? "Registration rejected");
+            setError(parseContractError(err));
           },
         },
       );

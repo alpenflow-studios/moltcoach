@@ -33,12 +33,12 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const isTouch = useIsTouchDevice();
-  const [showMobileWallets, setShowMobileWallets] = useState(false);
 
-  // Deduplicate connectors by name (wagmi can return duplicates for injected providers)
+  // Deduplicate connectors by name, skip generic "Injected" when no real provider detected
   const uniqueConnectors = useMemo(() => {
     const seen = new Set<string>();
     return connectors.filter((c) => {
+      if (c.id === "injected" && c.name === "Injected") return false;
       if (seen.has(c.name)) return false;
       seen.add(c.name);
       return true;
@@ -88,37 +88,22 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
     );
   }
 
-  // State: disconnected — mobile touch: plain buttons (bypasses Radix portal issues)
+  // State: disconnected — mobile touch: direct buttons (no dropdown/overlay)
   if (isTouch) {
     return (
-      <div className="flex flex-col items-end gap-2">
-        <Button
-          variant="outline"
-          size={size}
-          onClick={() => setShowMobileWallets((v) => !v)}
-        >
-          <Wallet className="size-4" />
-          Connect Wallet
-          <ChevronDown className={`size-3 transition-transform ${showMobileWallets ? "rotate-180" : ""}`} />
-        </Button>
-        {showMobileWallets && (
-          <div className="flex flex-col gap-1 rounded-md border border-border bg-popover p-1 shadow-md">
-            {uniqueConnectors.map((connector) => (
-              <button
-                key={connector.uid}
-                type="button"
-                className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-popover-foreground hover:bg-accent active:bg-accent"
-                onClick={() => {
-                  setShowMobileWallets(false);
-                  connect({ connector });
-                }}
-              >
-                <Wallet className="size-4" />
-                {connector.name}
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="flex flex-col gap-2">
+        {uniqueConnectors.map((connector) => (
+          <Button
+            key={connector.uid}
+            variant="outline"
+            size={size}
+            className="w-full justify-start"
+            onClick={() => connect({ connector })}
+          >
+            <Wallet className="size-4" />
+            {connector.name}
+          </Button>
+        ))}
       </div>
     );
   }

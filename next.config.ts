@@ -4,7 +4,13 @@ const nextConfig: NextConfig = {
   // Turbopack (Next.js 16 default for build) — empty config silences the
   // "webpack config without turbopack config" error. Dev uses --webpack flag
   // because Turbopack can't handle @xmtp/browser-sdk Web Workers + WASM.
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      // Stub out React Native deps that @metamask/sdk imports — not available
+      // in browser builds (crashes production on all browsers)
+      "@react-native-async-storage/async-storage": "",
+    },
+  },
 
   webpack: (config, { isServer }) => {
     // Enable async WebAssembly (needed for @xmtp/browser-sdk WASM bindings)
@@ -18,6 +24,13 @@ const nextConfig: NextConfig = {
       test: /\.wasm$/,
       type: "asset/resource",
     });
+
+    // Stub out React Native deps that @metamask/sdk imports but aren't
+    // available in browser builds (breaks iOS Safari + mobile browsers)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@react-native-async-storage/async-storage": false,
+    };
 
     // Exclude XMTP packages from server-side bundling
     if (isServer) {

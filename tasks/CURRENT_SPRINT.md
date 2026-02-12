@@ -59,7 +59,7 @@ _(none)_
 - **Priority**: P0
 - **Scope**: `src/config/wagmi.ts`, `src/components/providers/WalletProvider.tsx`, `src/components/ConnectWallet.tsx`, `src/components/EmailSignupLink.tsx`, `src/app/page.tsx`
 - **Started**: Session 28 (Feb 12, 2026)
-- **Notes**: Replaces wagmi-only connector flow with Privy. `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. Privy App ID: `cmlj0izut00hg0cjrd7rrm80b`. All 10 hook/component files that import from wagmi are UNCHANGED. SSR fix: WalletProvider mount guard returns `null` (not `{children}`), ConnectWallet/EmailSignupLink dynamically imported with `ssr: false`. Vercel deploy succeeds (35s). Chat flow confirmed on desktop. Remaining items need manual browser testing.
+- **Notes**: Replaces wagmi-only connector flow with Privy. `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. Privy App ID: `cmlj0izut00hg0cjrd7rrm80b`. All 10 hook/component files that import from wagmi are UNCHANGED. SSR fix: WalletProvider mount guard returns `null` (not `{children}`), ConnectWallet/EmailSignupLink dynamically imported with `ssr: false`. Vercel deploy succeeds (35s). Chat flow confirmed on desktop. S29: Fixed production crash (Privy app ID had trailing `\n` on Vercel + MetaMask SDK React Native import stubbed). Site verified working in incognito + mobile.
 - **Acceptance Criteria**:
   - [x] `@privy-io/react-auth` and `@privy-io/wagmi` installed
   - [x] `NEXT_PUBLIC_PRIVY_APP_ID` env var added (local + Vercel)
@@ -72,6 +72,7 @@ _(none)_
   - [x] `pnpm build` passes locally
   - [x] ConnectWallet + EmailSignupLink resilient to SSR (no provider throws)
   - [x] Vercel deploy succeeds
+  - [x] Site loads on production (incognito + mobile) — S29 fix
   - [ ] Email login creates embedded wallet
   - [ ] Farcaster login works
   - [ ] External wallet login works (desktop + mobile)

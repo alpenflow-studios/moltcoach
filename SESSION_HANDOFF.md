@@ -7,13 +7,30 @@
 ## Last Session
 
 - **Date**: 2026-02-12
-- **Duration**: Session 28
+- **Duration**: Session 29
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
 ---
 
 ## What Was Done
+
+### Session 29
+
+1. **Fixed production crash — all browsers + mobile (P0)**
+   - **Root cause 1**: `NEXT_PUBLIC_PRIVY_APP_ID` on Vercel had trailing `\n` — Privy rejected it as invalid app ID
+   - **Fix**: Removed and re-added env var cleanly via `vercel env rm` + `vercel env add` with `printf` (no newline)
+   - **Root cause 2**: `@metamask/sdk` imports `@react-native-async-storage/async-storage` which doesn't exist in browser builds
+   - **Fix**: Added `turbopack.resolveAlias` (production) and `webpack.resolve.alias` (dev) in `next.config.ts` to stub the module
+   - **Added**: `src/app/global-error.tsx` for better error visibility on layout-level crashes
+   - **Committed**: `84754d6` — pushed, Vercel deploy succeeded
+   - **Verified**: Site loads in incognito (desktop) and on mobile (iOS Safari)
+   - **Note**: Mobile load time ~10s (logged as Medium tech debt — mount guard returns `null` during SSR)
+
+2. **Wallet extension conflict diagnosed**
+   - MetaMask + Coinbase Wallet extensions fight over `window.ethereum` via `Object.defineProperty`
+   - MetaMask's SES lockdown makes property non-configurable, Coinbase's `evmAsk.js` crashes
+   - Not our code — user should disable one extension. Privy handles multi-wallet via EIP-6963.
 
 ### Session 28 (continued)
 
@@ -85,18 +102,18 @@
 
 ## What's In Progress
 
-_(nothing — TASK-017 complete, clean slate for next session)_
+_(nothing — S29 P0 fix complete, clean slate for next session)_
 
 ---
 
 ## What's Next (Priority Order)
 
-1. **Fix mobile iOS client-side exception (P0)** — Site throws client-side error on iOS mobile after Privy deploy. Desktop works. Investigate with Safari devtools. See CURRENT_ISSUES.md High #1.
-2. **Test remaining Privy flows (P1)** — Chat confirmed working on desktop. Still need: email login, Farcaster login, external wallet on mobile, disconnect
+1. **Test remaining Privy flows (P1)** — Chat confirmed working on desktop. Still need: email login, Farcaster login, external wallet on mobile, disconnect
+2. **Improve mobile load time (P1)** — ~10s on mobile. Mount guard returns `null` → blank page. Show loading skeleton instead.
 3. **Test Telegram conversation history (P1)** — deployed but untested on live bot
-3. **Telegram wallet linking (P2)** — `/connect` command, one-time link code, Supabase `telegram_links` table
-4. **PartnerRewardPool contract (P2)** — Stage 2, partner token promos alongside $CLAWC
-5. **Wearable integrations (P3)** — Strava, Apple Health, Garmin
+4. **Telegram wallet linking (P2)** — `/connect` command, one-time link code, Supabase `telegram_links` table
+5. **PartnerRewardPool contract (P2)** — Stage 2, partner token promos alongside $CLAWC
+6. **Wearable integrations (P3)** — Strava, Apple Health, Garmin
 
 ---
 
@@ -175,6 +192,8 @@ User sends message
 
 ## Decisions Made
 
+- **MetaMask SDK stub pattern**: `@react-native-async-storage/async-storage` aliased to empty in both Turbopack (`resolveAlias`) and webpack (`resolve.alias`) configs. Required because `@metamask/sdk` (pulled in by wagmi connectors via Privy) imports React Native deps. (Session 29)
+- **Vercel env var hygiene**: Always use `printf` (not `echo`) when piping values to `vercel env add` to avoid trailing newlines. (Session 29)
 - **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. PrivyProvider wraps WagmiProvider. Email + Farcaster + wallet login. Embedded wallets for email users. (Session 28)
 - **Privy App ID**: `cmlj0izut00hg0cjrd7rrm80b` (Session 28)
 - **Privy SSR pattern**: WalletProvider mount guard returns `null` during SSR (not `{children}`). ConnectWallet dynamically imported with `ssr: false` in all consumer files. `page.tsx` uses `"use client"` for Turbopack compat. (Session 28)
@@ -211,8 +230,8 @@ User sends message
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 28)
-- `pnpm build`: **PASSES** (19 routes, Session 28) — Vercel deploy succeeds
+- `pnpm typecheck`: **PASSES** (Session 29)
+- `pnpm build`: **PASSES** (19 routes, Session 29) — Vercel deploy succeeds
 
 ---
 
@@ -248,4 +267,4 @@ User sends message
 
 ---
 
-*Last updated: Feb 12, 2026 — Session 28*
+*Last updated: Feb 12, 2026 — Session 29*

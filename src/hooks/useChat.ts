@@ -3,6 +3,13 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import type { ChatMessage } from "@/types/chat";
 
+type FreeTierInfo = {
+  used: number;
+  limit: number;
+  paidEndpoint: string;
+  message: string;
+};
+
 type UseChatOptions = {
   agentName: string;
   coachingStyle: string;
@@ -23,6 +30,7 @@ export function useChat({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paywall, setPaywall] = useState<FreeTierInfo | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // Seed from XMTP history when it loads (only if chat is empty)
@@ -59,6 +67,32 @@ export function useChat({
           }),
           signal: abortRef.current.signal,
         });
+
+        // Handle x402 paywall — free tier exceeded
+        if (res.status === 402) {
+          const body = (await res.json()) as {
+            error: string;
+            used: number;
+            limit: number;
+            paidEndpoint: string;
+            message: string;
+          };
+          setPaywall({
+            used: body.used,
+            limit: body.limit,
+            paidEndpoint: body.paidEndpoint,
+            message: body.message,
+          });
+          // Remove the empty assistant placeholder
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "assistant" && last.content === "") {
+              return prev.slice(0, -1);
+            }
+            return prev;
+          });
+          return;
+        }
 
         if (!res.ok) {
           const errBody = (await res.json().catch(() => null)) as {
@@ -114,12 +148,17 @@ export function useChat({
     [messages, isStreaming, agentName, coachingStyle, walletAddress, onMessageComplete],
   );
 
+  const dismissPaywall = useCallback(() => {
+    setPaywall(null);
+  }, []);
+
   const reset = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
     setError(null);
+    setPaywall(null);
     setIsStreaming(false);
   }, []);
 
-  return { messages, isStreaming, error, sendMessage, reset };
+  return { messages, isStreaming, error, paywall, sendMessage, dismissPaywall, reset };
 }

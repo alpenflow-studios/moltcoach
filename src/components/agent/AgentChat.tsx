@@ -3,7 +3,8 @@
 import { useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MessageSquare, AlertCircle, X } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import type { ChatMessage as ChatMessageType } from "@/types/chat";
 import type { XmtpClientStatus } from "@/hooks/useXmtpClient";
@@ -68,7 +69,7 @@ export function AgentChat({
   // Supabase history takes priority, XMTP history as fallback
   const initialMessages = chatHistory && chatHistory.length > 0 ? chatHistory : xmtpHistory;
 
-  const { messages, isStreaming, error, sendMessage } = useChat({
+  const { messages, isStreaming, error, paywall, sendMessage, dismissPaywall } = useChat({
     agentName,
     coachingStyle,
     walletAddress,
@@ -128,6 +129,32 @@ export function AgentChat({
 
           <div ref={scrollRef} />
         </div>
+
+        {/* x402 paywall banner */}
+        {paywall && (
+          <div className="px-6 pb-2">
+            <Alert className="border-primary/30 bg-primary/5 relative">
+              <AlertCircle className="size-4 text-primary" />
+              <AlertTitle>Free tier reached</AlertTitle>
+              <AlertDescription>
+                <p>
+                  You&apos;ve used {paywall.used}/{paywall.limit} free messages.
+                  Continue coaching for <strong>$0.01/message</strong> in USDC on Base.
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Powered by x402 micro-payments — pay directly from your wallet.
+                </p>
+              </AlertDescription>
+              <button
+                onClick={dismissPaywall}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                aria-label="Dismiss"
+              >
+                <X className="size-4" />
+              </button>
+            </Alert>
+          </div>
+        )}
 
         <ChatInput onSend={sendMessage} disabled={isStreaming} />
       </CardContent>

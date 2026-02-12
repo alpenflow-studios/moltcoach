@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { checkFreeMessages } from "@/lib/freeMessages";
 import type { ChatMessage } from "@/types/chat";
 
 const anthropic = new Anthropic();
@@ -39,6 +40,23 @@ export async function POST(req: Request): Promise<Response> {
         return Response.json(
           { error: `You've hit the ${rl.window} message limit (${rl.limit}). Try again in ${timeStr}.` },
           { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+        );
+      }
+    }
+
+    // Check free message quota (x402 paywall after limit)
+    if (walletAddress) {
+      const free = await checkFreeMessages(walletAddress);
+      if (!free.allowed) {
+        return Response.json(
+          {
+            error: "free_tier_exceeded",
+            used: free.used,
+            limit: free.limit,
+            paidEndpoint: "/api/chat/paid",
+            message: `You've used ${free.limit} free messages. Continue coaching with x402 micro-payments ($0.01/message in USDC on Base).`,
+          },
+          { status: 402 },
         );
       }
     }

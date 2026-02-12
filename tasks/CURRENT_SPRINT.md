@@ -15,19 +15,7 @@
 
 ### Not Started
 
-#### TASK-012: Multi-Token Pricing + Subscription Model
-- **Priority**: P1
-- **Scope**: `src/app/pricing/page.tsx`, new components, `src/config/pricing.ts`
-- **Started**: Session 14 (Feb 10, 2026)
-- **Acceptance Criteria**:
-  - [ ] Pricing page shows prices in CLAWC, USDC, ETH, and Base ETH
-  - [ ] Subscription model alongside staking (monthly/quarterly/yearly)
-  - [ ] Token selector UI on pricing page
-  - [ ] `src/config/pricing.ts` with tier prices per token
-  - [ ] Pricing FAQ updated for dual model (stake vs subscribe)
-  - [ ] `pnpm typecheck` passes
-  - [ ] `pnpm lint` passes
-  - [ ] `pnpm build` passes
+_(none)_
 
 ---
 
@@ -72,6 +60,21 @@ _(nothing)_
 ---
 
 ### Done
+
+#### TASK-012: Multi-Token Pricing + Subscription Model
+- **Priority**: P1
+- **Scope**: `src/app/pricing/page.tsx`, `src/components/pricing/PricingPageContent.tsx`, `src/config/pricing.ts`
+- **Started**: Session 14 (Feb 10, 2026)
+- **Completed**: Session 27 (Feb 12, 2026)
+- **Notes**: Simplified from 4 tiers to 3 (Free/Pro/Elite). Pro: $9.99/mo or 1K CLAWC. Elite: $29.99/mo or 10K CLAWC. Added FAQ section with 5 items.
+- **Acceptance Criteria**:
+  - [x] Pricing page shows prices in CLAWC, USDC, and ETH
+  - [x] Subscription model alongside staking (monthly/quarterly/yearly)
+  - [x] Token selector UI on pricing page
+  - [x] `src/config/pricing.ts` with tier prices per token
+  - [x] Pricing FAQ updated for dual model (stake vs subscribe)
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm build` passes
 
 #### TASK-014: Telegram Integration
 - **Priority**: P2

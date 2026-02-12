@@ -7,13 +7,35 @@
 ## Last Session
 
 - **Date**: 2026-02-12
-- **Duration**: Session 26
+- **Duration**: Session 27
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
 ---
 
 ## What Was Done
+
+### Session 27
+
+1. **Multi-Token Pricing Page (TASK-012) — COMPLETE**
+   - Simplified from 4 tiers to 3: Free / Pro / Elite
+   - Free: 10 messages/month, $0
+   - Pro: 1,000 CLAWC staked OR $9.99/mo USDC (unlimited messages, advanced programs)
+   - Elite: 10,000 CLAWC staked OR $29.99/mo USDC (everything + priority, wearable integration)
+   - 3-column card layout with token selector (USDC/ETH) and billing toggle (monthly/quarterly/annual)
+   - Added 5-item FAQ section ("What's the difference between staking and subscribing?" etc.)
+   - Stake buttons → /staking, Subscribe buttons → /subscribe, Free → /agent
+   - `pnpm typecheck` + `pnpm build` pass
+
+2. **Telegram Conversation History — COMPLETE**
+   - Added multi-turn memory to @ClawCoachBot via Upstash Redis
+   - History stored at `telegram:history:<chatId>` key
+   - Capped at 20 messages (10 turns) per chat
+   - 7-day TTL on inactivity (auto-expires unused chats)
+   - `/reset` command clears history
+   - `/start` also clears history for fresh onboarding
+   - Graceful fallback to single-turn if Redis unavailable
+   - Can only test on live deploy (Telegram webhook needs public URL)
 
 ### Session 26
 
@@ -34,43 +56,12 @@
    - Cleaned up test Redis key
 
 3. **Telegram Integration (P2) — COMPLETE (TASK-014)**
-   - Installed `grammy` v1.40 (kept as dep but not used at runtime)
    - Created `/api/telegram` webhook handler using direct fetch to Telegram API
    - `/start` command returns welcome message; all other messages go to Claude → reply
-   - Wired landing page Telegram button → `https://t.me/ClawCoachBot`
    - Bot created via BotFather: `@ClawCoachBot`, token set in `.env.local` + Vercel
    - Webhook registered: `https://clawcoach.ai/api/telegram`
-   - Proxy bypass added for `/api/telegram` (Telegram servers can't Basic Auth)
-   - Hit Turbopack bundling 500 during debugging — resolved after redeploy
+   - Proxy bypass added for `/api/telegram`
    - Bot is LIVE and responding on Telegram
-   - **Future enhancements**: Conversation history (single-turn only now), wallet linking, x402 integration
-
-### Session 25
-
-1. **x402 Integration (COMPLETE)**
-   - Added paywall banner UI in `AgentChat.tsx` — shows usage count, price, dismiss button
-   - Fixed type errors in `src/lib/x402.ts` (network template literal type) and `src/app/api/chat/paid/route.ts` (ContentBlock access, withX402 generic)
-   - `pnpm typecheck` passes, `pnpm build` passes (18 routes)
-
-2. **Committed All Session 24 Work (4 commits)**
-   - `b0a098e` — `feat(deploy): add Vercel deployment with staging password protection`
-   - `34569a8` — `feat(x402): add pay-per-coach with free tier and x402 payment gate`
-   - `7dfd771` — `chore(docs): update session handoff and sprint tracking for Session 24`
-   - `58e773a` — `refactor(proxy): migrate middleware.ts to proxy.ts convention`
-
-3. **Middleware → Proxy Migration (COMPLETE)**
-   - Renamed `src/middleware.ts` → `src/proxy.ts`
-   - Renamed exported function `middleware` → `proxy`
-   - Build deprecation warning eliminated
-   - Tech debt item #1 from CURRENT_ISSUES.md resolved
-
-4. **Mobile Fixes (PARTIAL)**
-   - Fixed hero horizontal scroll — added `overflow-hidden` + `-translate-x/y-1/2` on orb wrapper
-   - Attempted wallet dropdown fix — `onSelect` + `modal={false}` did NOT fix mobile taps
-   - **BUG OPEN**: Wallet dropdown items don't respond to taps on mobile (see CURRENT_ISSUES.md High #1)
-
-5. **Deployed to Vercel (3 times total)**
-   - All builds clean, 18 routes, site live at `https://clawcoach.ai`
 
 ---
 
@@ -82,9 +73,9 @@ _(nothing)_
 
 ## What's Next
 
-1. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
-2. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
-3. **Telegram enhancements** — conversation history, wallet linking, /connect command
+1. **Deploy Session 27 changes** — push to origin, Vercel auto-deploys, test Telegram history on live bot
+2. **Telegram wallet linking (Task C)** — /connect command, one-time link, Supabase `telegram_links` table
+3. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
 
 ---
 
@@ -162,6 +153,8 @@ User sends message
 
 ## Decisions Made
 
+- **Pricing simplified to 3 tiers**: Free/Pro/Elite (was 4 tiers with Basic). Pro at $9.99/mo or 1K CLAWC, Elite at $29.99/mo or 10K CLAWC (Session 27)
+- **Telegram history in Redis**: Key pattern `telegram:history:<chatId>`, 20 msg cap, 7-day TTL (Session 27)
 - **Proxy convention**: Migrated `middleware.ts` → `proxy.ts` per Next.js 16 deprecation (Session 25)
 - **Vercel deployment**: Team `classcoin`, project `moltcoach`, domain `clawcoach.ai` via Vercel DNS (Session 24)
 - **Password protection**: Basic Auth proxy, not Vercel built-in (works on all plans) (Session 24)
@@ -180,7 +173,7 @@ User sends message
 - **Chat persistence priority**: Supabase history > XMTP history > empty (Session 17)
 - **XMTP V3 SDK**: `@xmtp/browser-sdk` v6.3.0 (Session 16)
 - **Dev bundler**: webpack (not Turbopack) — XMTP WASM workers incompatible with Turbopack (Session 16)
-- **Pricing model**: DUAL — Stake $CLAWC OR Subscribe USDC/ETH (Session 14, updated 18)
+- **Pricing model**: DUAL — Stake $CLAWC OR Subscribe USDC/ETH (Session 14, updated 27)
 - **Theme**: Dark mode, lime primary on zinc
 - **wagmi**: v3.4.2
 - **Brand**: ClawCoach (clawcoach.ai)
@@ -192,8 +185,8 @@ User sends message
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 26)
-- `pnpm build`: **PASSES** (19 routes incl `/api/telegram`, Session 26)
+- `pnpm typecheck`: **PASSES** (Session 27)
+- `pnpm build`: **PASSES** (17 routes, Session 27)
 
 ---
 
@@ -225,7 +218,8 @@ User sends message
 - **NOT configured**: Coinbase Wallet project ID
 - **Deps**: `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0
 - **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
+- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history)
 
 ---
 
-*Last updated: Feb 12, 2026 — Session 26*
+*Last updated: Feb 12, 2026 — Session 27*

@@ -74,10 +74,10 @@ _(none)_
   - [x] Vercel deploy succeeds
   - [x] Site loads on production (incognito + mobile) — S29 fix
   - [ ] Email login creates embedded wallet (S30: modal opens correctly, needs burner email to complete test)
-  - [ ] Farcaster login works (S30: blocked by Privy dashboard setting — needs enabling)
+  - [ ] Farcaster login works (S31: enabled in Privy dashboard + auto-link wallets on, untested)
   - [x] External wallet login works (desktop) — S30: confirmed working
   - [ ] External wallet login works (mobile) — untested S30
-  - [ ] Google OAuth (S30: needs enabling in Privy dashboard)
+  - [ ] Google OAuth (S31: in progress — redirect URI `https://auth.privy.io/api/v1/oauth/callback`, needs Google Cloud Console setup)
   - [x] Disconnect works — S30: confirmed
 
 ---

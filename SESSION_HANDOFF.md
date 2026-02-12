@@ -7,13 +7,43 @@
 ## Last Session
 
 - **Date**: 2026-02-12
-- **Duration**: Session 30
+- **Duration**: Session 31
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
 ---
 
 ## What Was Done
+
+### Session 31
+
+1. **Fixed Telegram Redis on Vercel (P1) — COMPLETE**
+   - Root cause confirmed: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` had trailing whitespace (same pattern as Privy app ID S29)
+   - Fix: `vercel env rm` + `vercel env add` with `printf` for both vars
+   - Redeployed to Vercel (build succeeded, 21s)
+   - Verified: 2 test messages sent via webhook, Redis key created with 4 messages, bot recalled prior message content
+   - Michael confirmed working on Telegram
+   - **Committed**: `3fbd80d` (issue tracking update)
+
+2. **Landing Page Updates — COMPLETE**
+   - Restored missing "Your AI Coach. On-chain." h1 headline (dropped during S30 edits)
+   - Updated Base pill to brand spec per base.org/brand/core-identifiers:
+     - Logo: circle "B" mark → rounded square (5% radius per spec)
+     - Color: `#0052FF` → `#0000FF` (Base Blue exact)
+     - Style: filled `#0000FF` background with white text (readable on dark zinc)
+   - **Committed**: `3fbd80d`, `d3f03cb`, `a74c0a9`, `c11e30e`
+
+3. **Privy Dashboard Config (Michael — manual)**
+   - Farcaster login: enabled, auto-link wallets turned on
+   - Google OAuth: in progress (redirect URI: `https://auth.privy.io/api/v1/oauth/callback`)
+   - Apple: deferred (developer account takes ~2 weeks)
+   - X/GitHub: deferred to post-launch
+
+4. **Tester Bug Report — Agent Page Error (IN PROGRESS)**
+   - Tester getting `Address "0xB95....1116c"` error at agent profile box
+   - Investigated: likely wrong chain (Ethereum Sepolia vs Base Sepolia) or viem contract read error
+   - Shared Base Sepolia network details with Michael to relay
+   - Need to confirm which chain tester is on; if Base Sepolia, dig into viem error further
 
 ### Session 30
 
@@ -86,14 +116,15 @@
 
 ## What's In Progress
 
-1. **Telegram conversation history on Vercel** — Bot responds but history not saving. Suspect Vercel Upstash env vars have whitespace/newline issues. Next step: clean re-add via `vercel env rm` + `vercel env add` with `printf`.
+1. **Tester agent page error** — `Address "0xB95....1116c"` error at agent profile. Need to confirm tester is on Base Sepolia (84532), not Ethereum Sepolia (11155111). If they are on Base Sepolia, investigate viem contract read error further.
+2. **Privy flow testing (TASK-017)** — Farcaster enabled in dashboard. Google OAuth in progress (needs Google Cloud Console setup). Email + mobile still untested.
 
 ---
 
 ## What's Next (Priority Order)
 
-1. **Fix Telegram Redis on Vercel (P1)** — Clean re-add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` via `printf` (same pattern as Privy fix). Then test multi-turn history on @ClawCoachBot.
-2. **Complete Privy flow testing (P1)** — Need: burner email for email login test, enable Farcaster + Google OAuth in Privy dashboard, test mobile wallet
+1. **Resolve tester agent page error** — Confirm chain, fix if needed
+2. **Complete Privy flow testing (P1)** — Test: Farcaster login (now enabled), Google OAuth (once configured), email login with burner, mobile wallet
 3. **Telegram wallet linking (P2)** — `/connect` command, one-time link code, Supabase `telegram_links` table
 4. **PartnerRewardPool contract (P2)** — Stage 2, partner token promos alongside $CLAWC
 5. **Wearable integrations (P3)** — Strava, Apple Health, Garmin
@@ -138,7 +169,7 @@
 
 **NOT on Vercel**: PRIVATE_KEY, BASESCAN_KEY (deploy-only, never on hosted infra)
 
-**⚠️ SUSPECT**: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` may have whitespace/newline issues — same pattern as Privy app ID in S29. Need to clean re-add.
+**✅ FIXED S31**: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` cleaned and re-added via `printf`. Telegram history now works on production.
 
 ---
 
@@ -179,7 +210,7 @@ User sends message
 
 - **Loading skeleton pattern**: WalletProvider mount guard shows navbar/content/footer skeleton instead of `null`. Uses shadcn `Skeleton` component. (Session 30)
 - **🦞 branding standard**: All visible ClawCoach references use `🦞 Claw<span class="text-primary">Coach</span>` — navbar (S28), footer (S30), landing CTA (S30), loading skeleton (S30). (Session 30)
-- **Base blue pill**: Hero badge uses Base blue (#0052FF) for text + Base logo SVG, lists ERC-8004/8021/8128. (Session 30)
+- **Base pill (brand-compliant)**: Filled `#0000FF` background, white text, rounded square logo (5% radius). Per base.org/brand/core-identifiers. (Session 31, replaces S30)
 - **MetaMask SDK stub pattern**: `@react-native-async-storage/async-storage` aliased to empty in both Turbopack (`resolveAlias`) and webpack (`resolve.alias`) configs. (Session 29)
 - **Vercel env var hygiene**: Always use `printf` (not `echo`) when piping values to `vercel env add` to avoid trailing newlines. (Session 29)
 - **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. PrivyProvider wraps WagmiProvider. Email + Farcaster + wallet login. Embedded wallets for email users. (Session 28)
@@ -238,8 +269,8 @@ User sends message
 - **NOT configured**: Coinbase Wallet project ID
 - **Deps**: `@privy-io/react-auth` ^3.13.1, `@privy-io/wagmi` ^4.0.1, `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0
 - **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
-- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history — works locally, broken on Vercel)
+- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history — **working on Vercel since S31**)
 
 ---
 
-*Last updated: Feb 12, 2026 — Session 30*
+*Last updated: Feb 12, 2026 — Session 31*

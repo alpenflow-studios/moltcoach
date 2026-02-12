@@ -18,7 +18,7 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| — | — | — | — | — |
+| 1 | Tester gets `Address "0xB95....1116c"` error on agent page | `src/hooks/useAgentReads.ts`, `src/components/agent/AgentPageContent.tsx` | S31 | Likely wrong chain (Eth Sepolia vs Base Sepolia). Need tester to confirm chain ID. If on Base Sepolia, investigate viem contract read error. Wagmi config only has `baseSepolia`, Privy `supportedChains` only `baseSepolia`. |
 
 ---
 

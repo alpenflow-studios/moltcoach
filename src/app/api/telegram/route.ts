@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
 
@@ -7,6 +8,11 @@ const anthropic = new Anthropic();
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ?? "";
 const DEFAULT_AGENT_NAME = "ClawCoach";
 const DEFAULT_COACHING_STYLE = "motivator";
+
+/** Max messages to keep per chat (20 messages = 10 user/assistant turns) */
+const MAX_HISTORY = 20;
+/** Redis key TTL — 7 days of inactivity */
+const HISTORY_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 type TelegramUpdate = {
   update_id: number;
@@ -18,6 +24,62 @@ type TelegramUpdate = {
   };
 };
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+// ---------------------------------------------------------------------------
+// Redis singleton (lazy init)
+// ---------------------------------------------------------------------------
+
+let redis: Redis | null = null;
+let redisInitialized = false;
+
+function getRedis(): Redis | null {
+  if (redisInitialized) return redis;
+  redisInitialized = true;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  redis = new Redis({ url, token });
+  return redis;
+}
+
+function historyKey(chatId: number): string {
+  return `telegram:history:${chatId}`;
+}
+
+async function loadHistory(chatId: number): Promise<ChatMessage[]> {
+  const r = getRedis();
+  if (!r) return [];
+
+  const raw = await r.get<ChatMessage[]>(historyKey(chatId));
+  if (!raw || !Array.isArray(raw)) return [];
+  return raw;
+}
+
+async function saveHistory(chatId: number, messages: ChatMessage[]): Promise<void> {
+  const r = getRedis();
+  if (!r) return;
+
+  // Trim to MAX_HISTORY most recent
+  const trimmed = messages.slice(-MAX_HISTORY);
+  await r.set(historyKey(chatId), trimmed, { ex: HISTORY_TTL_SECONDS });
+}
+
+async function clearHistory(chatId: number): Promise<void> {
+  const r = getRedis();
+  if (!r) return;
+  await r.del(historyKey(chatId));
+}
+
+// ---------------------------------------------------------------------------
+// Telegram helpers
+// ---------------------------------------------------------------------------
+
 async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
   await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: "POST",
@@ -25,6 +87,10 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
     body: JSON.stringify({ chat_id: chatId, text }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Webhook handler
+// ---------------------------------------------------------------------------
 
 export async function POST(req: Request): Promise<Response> {
   if (!TELEGRAM_BOT_TOKEN) {
@@ -47,27 +113,47 @@ export async function POST(req: Request): Promise<Response> {
 
     // Handle /start command
     if (userText.startsWith("/start")) {
+      await clearHistory(chatId);
       await sendTelegramMessage(
         chatId,
-        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
+        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nCommands:\n/reset — Clear conversation history\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
       );
       return NextResponse.json({ ok: true });
     }
 
-    // Send to Claude
+    // Handle /reset command
+    if (userText.startsWith("/reset")) {
+      await clearHistory(chatId);
+      await sendTelegramMessage(
+        chatId,
+        "Conversation history cleared. Let's start fresh! What are your fitness goals?",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Load conversation history
+    const history = await loadHistory(chatId);
+
+    // Append user message
+    history.push({ role: "user", content: userText });
+
+    // Build messages array for Claude
     const systemPrompt = buildSystemPrompt(DEFAULT_AGENT_NAME, DEFAULT_COACHING_STYLE);
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5-20250929",
       max_tokens: 1024,
       system: systemPrompt,
-      messages: [{ role: "user", content: userText }],
+      messages: history,
     });
 
     const firstBlock = response.content[0];
     const text = firstBlock && firstBlock.type === "text" ? firstBlock.text : "";
 
     if (text) {
+      // Append assistant response to history
+      history.push({ role: "assistant", content: text });
+      await saveHistory(chatId, history);
       await sendTelegramMessage(chatId, text);
     }
 

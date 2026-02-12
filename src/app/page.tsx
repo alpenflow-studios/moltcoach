@@ -103,26 +103,23 @@ export default function LandingPage() {
           />
         </div>
 
-        <div className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-[#8A63D2]/20 bg-[#8A63D2]/10 px-3 py-1 text-xs text-[#8A63D2]">
-          <FarcasterIcon className="size-3" />
-          Forged on Farcaster
-        </div>
-        <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
-          Your AI Coach.
-          <br />
-          <span className="text-primary">On-Chain.</span>
-        </h1>
-        <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/25 bg-[#0052FF]/10 px-3 py-1 text-xs text-[#0052FF]">
-          <svg viewBox="0 0 111 111" fill="currentColor" className="size-3.5" aria-hidden="true">
-            <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H0C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" />
-          </svg>
-          Built on Base
-          <span className="text-[#0052FF]/40">·</span>
-          ERC-8004
-          <span className="text-[#0052FF]/40">·</span>
-          ERC-8021
-          <span className="text-[#0052FF]/40">·</span>
-          ERC-8128
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#8A63D2]/20 bg-[#8A63D2]/10 px-3 py-1 text-xs text-[#8A63D2]">
+            <FarcasterIcon className="size-3" />
+            Forged on Farcaster
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/25 bg-[#0052FF]/10 px-3 py-1 text-xs text-[#0052FF]">
+            <svg viewBox="0 0 111 111" fill="currentColor" className="size-3.5" aria-hidden="true">
+              <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H0C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" />
+            </svg>
+            Built on Base with
+            <span className="text-[#0052FF]/40">·</span>
+            ERC-8004
+            <span className="text-[#0052FF]/40">·</span>
+            ERC-8021
+            <span className="text-[#0052FF]/40">·</span>
+            ERC-8128
+          </div>
         </div>
         <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Your personalized coaching agent that lives on the blockchain. Track
@@ -138,19 +135,18 @@ export default function LandingPage() {
             <Link href="/hub">I AM NOT</Link>
           </Button>
         </div>
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="mt-8 flex justify-center">
+          <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold" asChild>
+            <Link href="/staking">Purchase $CLAWC</Link>
+          </Button>
+        </div>
+        <div className="mt-6 flex items-center justify-center gap-4">
           <ConnectWallet size="lg" />
           <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
             <Link href="/staking">Start Staking</Link>
           </Button>
         </div>
       </section>
-
-      <div className="flex justify-center pb-16">
-        <Button size="lg" className="rounded-full px-10 py-6 text-lg font-semibold" asChild>
-          <Link href="/staking">Purchase $CLAWC</Link>
-        </Button>
-      </div>
 
       {/* Features */}
       <section className="border-t border-border/50 bg-muted/30">

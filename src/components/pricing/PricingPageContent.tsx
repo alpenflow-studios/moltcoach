@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Dumbbell, BarChart3, Crown, Zap } from "lucide-react";
+import { Check, Dumbbell, BarChart3, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -21,10 +21,37 @@ import {
 
 const TIER_ICONS: Record<number, typeof Dumbbell> = {
   0: Dumbbell,
-  1: Zap,
-  2: BarChart3,
-  3: Crown,
+  1: BarChart3,
+  2: Crown,
 };
+
+const FAQ_ITEMS = [
+  {
+    question: "What's the difference between staking and subscribing?",
+    answer:
+      "Staking locks your $CLAWC tokens in a smart contract — you keep ownership and can unstake anytime (5% penalty if before 30 days). Subscribing is a recurring payment in USDC or ETH. Both unlock the same features at each tier.",
+  },
+  {
+    question: "Can I switch between staking and subscribing?",
+    answer:
+      "Yes. If you unstake your $CLAWC, you can start a subscription instead (and vice versa). Your coaching history and agent identity stay the same.",
+  },
+  {
+    question: "What happens to my $CLAWC when I stake?",
+    answer:
+      "Staked tokens are held in the ClawcStaking smart contract on Base. They aren't spent — think of it as a deposit. Unstake after 30 days with zero penalty, or earlier with a 5% early withdrawal fee.",
+  },
+  {
+    question: "How do I earn $CLAWC?",
+    answer:
+      "Complete verified workouts to earn $CLAWC rewards. Connect a wearable (Strava, Apple Health, Garmin) for automatic verification and higher reward multipliers.",
+  },
+  {
+    question: "Is ETH pricing exact?",
+    answer:
+      "ETH prices are approximate based on a reference rate. The exact amount is calculated at the time of payment. USDC prices are fixed since USDC is pegged to USD.",
+  },
+] as const;
 
 export default function PricingPageContent() {
   const [model, setModel] = useState<PricingModel>("stake");
@@ -32,7 +59,7 @@ export default function PricingPageContent() {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-10">
+    <div className="mx-auto w-full max-w-5xl px-6 py-10">
       {/* Header */}
       <div className="mb-10 text-center">
         <Badge variant="outline" className="mb-4 border-primary/30 text-primary">
@@ -113,13 +140,12 @@ export default function PricingPageContent() {
         </div>
       )}
 
-      {/* Tier cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Tier cards — 3 columns */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {TIERS.map((tier, i) => {
           const Icon = TIER_ICONS[i] ?? Dumbbell;
           const isStake = model === "stake";
 
-          // Determine the price display
           const priceLabel = isStake
             ? formatClawcStake(tier.clawcStake)
             : tier.subscription[billing] === 0
@@ -134,7 +160,6 @@ export default function PricingPageContent() {
               ? `/${billing === "monthly" ? "mo" : billing === "quarterly" ? "qtr" : "yr"}`
               : null;
 
-          // CTA
           const ctaText = isStake
             ? tier.clawcStake === 0
               ? "Get Started"
@@ -292,6 +317,26 @@ export default function PricingPageContent() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* FAQ Section */}
+      <div className="mt-16">
+        <h2 className="mb-8 text-center text-2xl font-bold">
+          Frequently asked questions
+        </h2>
+        <div className="mx-auto max-w-3xl space-y-6">
+          {FAQ_ITEMS.map((item) => (
+            <div
+              key={item.question}
+              className="rounded-xl border border-border/50 bg-card p-6"
+            >
+              <h3 className="font-semibold">{item.question}</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                {item.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

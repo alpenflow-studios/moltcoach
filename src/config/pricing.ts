@@ -14,7 +14,7 @@ export type PaymentToken = "USDC" | "ETH";
 export type BillingPeriod = "monthly" | "quarterly" | "annual";
 export type PricingModel = "stake" | "subscribe";
 
-export type TierIndex = 0 | 1 | 2 | 3;
+export type TierIndex = 0 | 1 | 2;
 
 export type TierDefinition = {
   name: string;
@@ -36,62 +36,49 @@ export const TIERS: readonly TierDefinition[] = [
   {
     name: "Free",
     index: 0,
-    description: "Start your journey with core coaching features.",
+    description: "10 messages per month. Start coaching for free.",
     features: [
-      "AI coaching chat",
-      "Manual workout entry",
-      "Basic progress tracking",
+      "10 AI coaching messages/month",
+      "Basic fitness guidance",
       "Web dashboard access",
-      "Earn $CLAWC per workout",
+      "Manual workout logging",
     ],
     highlighted: false,
     clawcStake: 0,
     subscription: { monthly: 0, quarterly: 0, annual: 0 },
   },
   {
-    name: "Basic",
-    index: 1,
-    description: "Connect your wearables for verified tracking.",
-    features: [
-      "Everything in Free",
-      "Wearable API integration",
-      "Strava, Apple Health, Garmin",
-      "Auto-validated workouts",
-      "Higher reward multiplier",
-    ],
-    highlighted: false,
-    clawcStake: 100,
-    subscription: { monthly: 1000, quarterly: 2700, annual: 9600 },
-  },
-  {
     name: "Pro",
-    index: 2,
-    description: "Advanced analytics and nutrition guidance.",
+    index: 1,
+    description: "Unlimited coaching with advanced programs.",
     features: [
-      "Everything in Basic",
-      "Advanced performance analytics",
+      "Unlimited AI coaching messages",
+      "Personalized workout programs",
       "Nutrition guidance",
+      "Wearable integration (Strava, Garmin, Apple Health)",
       "Priority coach responses",
-      "Workout plan generation",
+      "Earn $CLAWC per workout",
     ],
     highlighted: true,
     clawcStake: 1_000,
-    subscription: { monthly: 5000, quarterly: 13500, annual: 48000 },
+    subscription: { monthly: 999, quarterly: 2699, annual: 9599 },
   },
   {
     name: "Elite",
-    index: 3,
-    description: "Full suite with exclusive features and early access.",
+    index: 2,
+    description: "Everything plus priority access and exclusive features.",
     features: [
       "Everything in Pro",
+      "Priority response queue",
+      "Advanced performance analytics",
+      "Custom agent personality tuning",
       "Early access to new features",
-      "Custom agent skills",
       "Exclusive community access",
       "Shape the product roadmap",
     ],
     highlighted: false,
     clawcStake: 10_000,
-    subscription: { monthly: 20000, quarterly: 54000, annual: 192000 },
+    subscription: { monthly: 2999, quarterly: 8099, annual: 28799 },
   },
 ] as const;
 
@@ -99,7 +86,7 @@ export const TIERS: readonly TierDefinition[] = [
 // Formatting helpers
 // ---------------------------------------------------------------------------
 
-/** Format cents as a USD string. e.g. 5000 → "$50" or 2700 → "$27" */
+/** Format cents as a USD string. e.g. 999 → "$9.99" or 0 → "Free" */
 export function formatUsd(cents: number): string {
   if (cents === 0) return "Free";
   const dollars = cents / 100;
@@ -122,7 +109,6 @@ const ETH_USD_REFERENCE = 2500;
 export function usdCentsToEth(cents: number): string {
   if (cents === 0) return "Free";
   const eth = cents / 100 / ETH_USD_REFERENCE;
-  // Show enough decimals to be meaningful
   if (eth < 0.001) return `~${eth.toFixed(5)} ETH`;
   if (eth < 0.01) return `~${eth.toFixed(4)} ETH`;
   return `~${eth.toFixed(3)} ETH`;

@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CLAWC_STAKING_ADDRESS, clawcStakingAbi } from "@/config/contracts";
+import { builderCodesDataSuffix } from "@/lib/builderCodes";
 
 type UnstakeState = "idle" | "unstaking" | "waiting" | "success" | "error";
 
@@ -38,6 +39,7 @@ export function useUnstakeAction(options: { onSuccess?: () => void }) {
           abi: clawcStakingAbi,
           functionName: "unstake",
           args: [amount],
+          dataSuffix: builderCodesDataSuffix,
         },
         {
           onSuccess: () => setState("waiting"),

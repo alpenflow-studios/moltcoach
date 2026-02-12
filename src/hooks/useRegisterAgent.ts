@@ -6,6 +6,7 @@ import {
   CLAWCOACH_IDENTITY_ADDRESS,
   clawcoachIdentityAbi,
 } from "@/config/contracts";
+import { builderCodesDataSuffix } from "@/lib/builderCodes";
 
 type RegisterState = "idle" | "registering" | "waiting" | "success" | "error";
 
@@ -41,6 +42,7 @@ export function useRegisterAgent(options: { onSuccess?: () => void }) {
           abi: clawcoachIdentityAbi,
           functionName: "register",
           args: [agentURI],
+          dataSuffix: builderCodesDataSuffix,
         },
         {
           onSuccess: () => setState("waiting"),

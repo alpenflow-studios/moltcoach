@@ -8,6 +8,7 @@ import {
   clawcTokenAbi,
   clawcStakingAbi,
 } from "@/config/contracts";
+import { builderCodesDataSuffix } from "@/lib/builderCodes";
 
 type StakeState =
   | "idle"
@@ -46,6 +47,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
           abi: clawcStakingAbi,
           functionName: "stake",
           args: [pendingAmount.current],
+          dataSuffix: builderCodesDataSuffix,
         },
         {
           onSuccess: () => setState("waitingStake"),
@@ -83,6 +85,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
           abi: clawcTokenAbi,
           functionName: "approve",
           args: [CLAWC_STAKING_ADDRESS, amount],
+          dataSuffix: builderCodesDataSuffix,
         },
         {
           onSuccess: () => setState("waitingApproval"),
@@ -107,6 +110,7 @@ export function useStakeAction(options: { onSuccess?: () => void }) {
           abi: clawcStakingAbi,
           functionName: "stake",
           args: [amount],
+          dataSuffix: builderCodesDataSuffix,
         },
         {
           onSuccess: () => setState("waitingStake"),

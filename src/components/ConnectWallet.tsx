@@ -80,7 +80,7 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
 
   // State: disconnected — single button with dropdown for wallet selection
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size={size}>
           <Wallet className="size-4" />
@@ -92,7 +92,7 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
         {uniqueConnectors.map((connector) => (
           <DropdownMenuItem
             key={connector.uid}
-            onClick={() => connect({ connector })}
+            onSelect={() => connect({ connector })}
           >
             <Wallet className="size-4" />
             {connector.name}

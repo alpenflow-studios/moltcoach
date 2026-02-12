@@ -43,11 +43,11 @@ export default function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative mx-auto flex max-w-4xl flex-col items-center px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
+      <section className="relative mx-auto flex max-w-4xl flex-col items-center overflow-hidden px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
         {/* Orb — layered breathing glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[500px] w-[500px] sm:h-[600px] sm:w-[600px]"
+          className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 sm:h-[600px] sm:w-[600px]"
         >
           {/* Core green glow */}
           <div

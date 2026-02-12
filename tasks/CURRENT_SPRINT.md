@@ -29,15 +29,6 @@
   - [ ] `pnpm lint` passes
   - [ ] `pnpm build` passes
 
-#### TASK-014: Telegram Integration
-- **Priority**: P2
-- **Scope**: Telegram Bot API, webhook handler, new API routes
-- **Acceptance Criteria**:
-  - [ ] Telegram bot created and configured
-  - [ ] Webhook handler at `/api/telegram`
-  - [ ] Agent can respond to Telegram messages
-  - [ ] Landing page Telegram button functional
-
 ---
 
 #### TASK-015: Vercel Deployment + Password Protection
@@ -76,7 +67,16 @@
 
 ### In Progress
 
-_(nothing)_
+#### TASK-014: Telegram Integration
+- **Priority**: P2
+- **Scope**: Telegram Bot API, webhook handler, new API routes
+- **Started**: Session 26 (Feb 12, 2026)
+- **Notes**: grammy v1.40 installed. Webhook handler at `/api/telegram`, bot config at `src/lib/telegram.ts`, landing page button wired. Bot not yet created via BotFather.
+- **Acceptance Criteria**:
+  - [ ] Telegram bot created and configured (need BotFather)
+  - [x] Webhook handler at `/api/telegram`
+  - [x] Agent can respond to Telegram messages (handler coded, needs bot token)
+  - [x] Landing page Telegram button functional
 
 ---
 

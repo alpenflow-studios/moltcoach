@@ -6,14 +6,41 @@
 
 ## Last Session
 
-- **Date**: 2026-02-11
-- **Duration**: Session 25
+- **Date**: 2026-02-12
+- **Duration**: Session 26
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
 ---
 
 ## What Was Done
+
+### Session 26
+
+1. **Fixed Mobile Wallet Connect (P0) — COMPLETE**
+   - Replaced Radix `DropdownMenu` with plain `<button>` elements on touch devices
+   - Added `useIsTouchDevice()` hook using `matchMedia("(pointer: coarse)")`
+   - On mobile: renders togglable button list that calls `connect({ connector })` directly
+   - On desktop: keeps existing Radix `DropdownMenu` (works fine)
+   - Bypasses all Radix portal/focus-trap/pointer-event issues on mobile Safari
+   - `pnpm typecheck` + `pnpm build` pass
+
+2. **E2E Tested x402 Flow (P1) — COMPLETE**
+   - Verified free tier: message sent → Redis counter at `x402:free:<addr>` incremented to 1
+   - Set counter to 10 (limit), sent another → 402 response with correct payload
+   - 402 body: `error: "free_tier_exceeded"`, `used: 11`, `limit: 10`, `paidEndpoint: "/api/chat/paid"`
+   - Paid endpoint without payment → 402 + `payment-required` header with base64 x402 requirements
+   - Decoded payment requirements: Base Sepolia, USDC, $0.01, payTo ProtocolFeeCollector — all correct
+   - Cleaned up test Redis key
+
+3. **Telegram Integration Started (P2) — PARTIAL (TASK-014)**
+   - Installed `grammy` v1.40 (Telegram bot framework)
+   - Created `src/lib/telegram.ts` — bot config with `TELEGRAM_BOT_TOKEN` env var
+   - Created `/api/telegram` webhook handler — receives Telegram updates, sends to Claude, replies
+   - `/start` command returns welcome message with clawcoach.ai link
+   - Wired landing page Telegram button → `https://t.me/ClawCoachBot`
+   - **NOT DONE**: Create bot via BotFather, set webhook URL, set `TELEGRAM_BOT_TOKEN` env
+   - **NOT DONE**: Conversation history (single-turn only), wallet linking, x402 integration
 
 ### Session 25
 
@@ -46,20 +73,19 @@
 
 ## What's In Progress
 
-### Mobile wallet connect bug (High #1 in CURRENT_ISSUES.md)
-- Radix `DropdownMenu` items don't fire on mobile touch
-- Current state: `onSelect` + `modal={false}` — still not working
-- Recommended: Replace dropdown with inline buttons or Dialog on mobile
+### Telegram Integration (TASK-014 — partial)
+- Webhook handler + bot config created, landing page button wired
+- **Remaining**: Create bot via BotFather, set `TELEGRAM_BOT_TOKEN` on Vercel, set webhook URL
+- **Future**: Multi-turn conversation history, wallet linking, x402 payment integration
 
 ---
 
 ## What's Next
 
-1. **FIX: Mobile wallet connect** (P0) — see CURRENT_ISSUES.md High #1. Replace Radix dropdown with mobile-friendly approach
-2. **End-to-end test x402 flow** — send 10+ messages locally, verify 402 response, verify paywall banner
-3. **Telegram integration (TASK-014)** — bot + webhook handler
-4. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
-5. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+1. **Complete Telegram bot setup** — BotFather creation, webhook registration, env var on Vercel
+2. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
+3. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+4. **Telegram enhancements** — conversation history, wallet linking, /connect command
 
 ---
 

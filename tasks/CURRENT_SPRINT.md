@@ -71,11 +71,11 @@
 - **Priority**: P2
 - **Scope**: Telegram Bot API, webhook handler, new API routes
 - **Started**: Session 26 (Feb 12, 2026)
-- **Notes**: grammy v1.40 installed. Webhook handler at `/api/telegram`, bot config at `src/lib/telegram.ts`, landing page button wired. Bot not yet created via BotFather.
+- **Notes**: grammy v1.40 installed (not used at runtime). Webhook handler uses direct fetch to Telegram API. Bot created via BotFather (`@ClawCoachBot`). Token set in `.env.local` + Vercel. Webhook registered. Proxy bypass for `/api/telegram`. **BLOCKED**: 500 on Vercel (`TypeError: p.end is not a function`). Fix: replace `NextResponse.json()` with `Response.json()`.
 - **Acceptance Criteria**:
-  - [ ] Telegram bot created and configured (need BotFather)
+  - [x] Telegram bot created and configured
   - [x] Webhook handler at `/api/telegram`
-  - [x] Agent can respond to Telegram messages (handler coded, needs bot token)
+  - [ ] Agent can respond to Telegram messages (500 on Vercel — see CURRENT_ISSUES.md High #1)
   - [x] Landing page Telegram button functional
 
 ---

@@ -33,13 +33,20 @@
    - Decoded payment requirements: Base Sepolia, USDC, $0.01, payTo ProtocolFeeCollector — all correct
    - Cleaned up test Redis key
 
-3. **Telegram Integration Started (P2) — PARTIAL (TASK-014)**
-   - Installed `grammy` v1.40 (Telegram bot framework)
-   - Created `src/lib/telegram.ts` — bot config with `TELEGRAM_BOT_TOKEN` env var
-   - Created `/api/telegram` webhook handler — receives Telegram updates, sends to Claude, replies
-   - `/start` command returns welcome message with clawcoach.ai link
+3. **Telegram Integration (P2) — IN PROGRESS (TASK-014)**
+   - Installed `grammy` v1.40 (Telegram bot framework — kept as dep but not used at runtime)
+   - Created `/api/telegram` webhook handler using direct fetch to Telegram API (no grammy at runtime)
+   - `/start` command returns welcome message; all other messages go to Claude → reply
    - Wired landing page Telegram button → `https://t.me/ClawCoachBot`
-   - **NOT DONE**: Create bot via BotFather, set webhook URL, set `TELEGRAM_BOT_TOKEN` env
+   - Bot created via BotFather: `@ClawCoachBot`, token set in `.env.local` + Vercel
+   - Webhook registered: `https://clawcoach.ai/api/telegram`
+   - Proxy bypass added for `/api/telegram` (Telegram servers can't Basic Auth)
+   - **BUG**: Vercel returns `500 — TypeError: p.end is not a function` on `/api/telegram`
+     - Error is in bundled chunk, not in our code — likely Turbopack bundling issue
+     - The `NextResponse.json()` call may need to be replaced with `Response.json()` or `new Response()`
+     - Tried: grammy webhookCallback ("next-js" adapter) → 500, manual handleUpdate → 500, direct fetch (no grammy) → 500
+     - All approaches hit the same `p.end is not a function` error in the bundled output
+     - **Next step**: Replace `NextResponse.json()` with `Response.json()` or `new Response(JSON.stringify(...))` to bypass the Turbopack bundling issue
    - **NOT DONE**: Conversation history (single-turn only), wallet linking, x402 integration
 
 ### Session 25
@@ -73,19 +80,21 @@
 
 ## What's In Progress
 
-### Telegram Integration (TASK-014 — partial)
-- Webhook handler + bot config created, landing page button wired
-- **Remaining**: Create bot via BotFather, set `TELEGRAM_BOT_TOKEN` on Vercel, set webhook URL
-- **Future**: Multi-turn conversation history, wallet linking, x402 payment integration
+### Telegram Integration (TASK-014) — 500 on Vercel
+- Bot created, webhook registered, env vars set, proxy bypass added
+- **Blocker**: `TypeError: p.end is not a function` on Vercel (Turbopack bundling issue)
+- **Fix to try**: Replace `NextResponse.json()` with `Response.json()` in `/api/telegram/route.ts`
+- File: `src/app/api/telegram/route.ts`
 
 ---
 
 ## What's Next
 
-1. **Complete Telegram bot setup** — BotFather creation, webhook registration, env var on Vercel
-2. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
-3. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
-4. **Telegram enhancements** — conversation history, wallet linking, /connect command
+1. **Fix Telegram 500** — Replace `NextResponse.json()` with `Response.json()` in telegram route, push, redeploy
+2. **Test Telegram bot** — Send messages in Telegram, verify responses
+3. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
+4. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+5. **Telegram enhancements** — conversation history, wallet linking, /connect command
 
 ---
 

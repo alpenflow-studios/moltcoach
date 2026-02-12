@@ -102,7 +102,7 @@ _(nothing)_
 | Node | 24.x (Vercel default) |
 | Builder | Turbopack (Vercel build uses Turbopack, dev uses webpack) |
 
-### Env Vars on Vercel (14 total)
+### Env Vars on Vercel (16 total)
 
 | Variable | Env | Sensitive |
 |----------|-----|-----------|
@@ -121,6 +121,7 @@ _(nothing)_
 | UPSTASH_REDIS_REST_TOKEN | production | yes |
 | STAGING_USERNAME | production | yes |
 | STAGING_PASSWORD | production | yes |
+| TELEGRAM_BOT_TOKEN | production | yes |
 
 **NOT on Vercel**: PRIVATE_KEY, BASESCAN_KEY (deploy-only, never on hosted infra)
 
@@ -191,8 +192,8 @@ User sends message
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 25)
-- `pnpm build`: **PASSES** (18 routes, Session 25)
+- `pnpm typecheck`: **PASSES** (Session 26)
+- `pnpm build`: **PASSES** (19 routes incl `/api/telegram`, Session 26)
 
 ---
 
@@ -220,10 +221,11 @@ User sends message
 - **Vercel CLI**: v50.13.2
 - **Project**: `~/Projects/moltcoach`
 - **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
-- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY
+- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY, TELEGRAM_BOT_TOKEN
 - **NOT configured**: Coinbase Wallet project ID
-- **Deps**: `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1
+- **Deps**: `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0
+- **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
 
 ---
 
-*Last updated: Feb 11, 2026 — Session 25*
+*Last updated: Feb 12, 2026 — Session 26*

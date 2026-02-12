@@ -73,10 +73,12 @@ _(none)_
   - [x] ConnectWallet + EmailSignupLink resilient to SSR (no provider throws)
   - [x] Vercel deploy succeeds
   - [x] Site loads on production (incognito + mobile) — S29 fix
-  - [ ] Email login creates embedded wallet
-  - [ ] Farcaster login works
-  - [ ] External wallet login works (desktop + mobile)
-  - [ ] Mobile wallet connect works (fixes P0 bug from S25-S27)
+  - [ ] Email login creates embedded wallet (S30: modal opens correctly, needs burner email to complete test)
+  - [ ] Farcaster login works (S30: blocked by Privy dashboard setting — needs enabling)
+  - [x] External wallet login works (desktop) — S30: confirmed working
+  - [ ] External wallet login works (mobile) — untested S30
+  - [ ] Google OAuth (S30: needs enabling in Privy dashboard)
+  - [x] Disconnect works — S30: confirmed
 
 ---
 

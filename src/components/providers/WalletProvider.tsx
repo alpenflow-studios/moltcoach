@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { baseSepolia } from "wagmi/chains";
 import { config } from "@/config/wagmi";
 import { useUserSync } from "@/hooks/useUserSync";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const queryClient = new QueryClient();
 
@@ -29,7 +30,37 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return null;
+    return (
+      <div className="flex min-h-screen flex-col overflow-x-clip">
+        {/* Navbar skeleton */}
+        <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
+          <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+            <div className="flex items-center gap-8">
+              <Skeleton className="h-6 w-32" />
+              <div className="hidden items-center gap-2 md:flex">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-4 w-16" />
+                ))}
+              </div>
+            </div>
+            <Skeleton className="hidden h-9 w-28 rounded-md md:block" />
+          </nav>
+        </header>
+
+        {/* Content skeleton */}
+        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24">
+          <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading ClawCoach...</p>
+        </main>
+
+        {/* Footer skeleton */}
+        <footer className="border-t border-border/50 py-6">
+          <div className="mx-auto flex max-w-6xl items-center justify-center px-6">
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </footer>
+      </div>
+    );
   }
 
   return (

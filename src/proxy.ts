@@ -6,6 +6,9 @@ const STAGING_PASSWORD = process.env.STAGING_PASSWORD;
 export function proxy(request: NextRequest) {
   if (!STAGING_USERNAME || !STAGING_PASSWORD) return NextResponse.next();
 
+  // Allow Telegram webhook through without auth (Telegram servers can't authenticate)
+  if (request.nextUrl.pathname === "/api/telegram") return NextResponse.next();
+
   const authHeader = request.headers.get("authorization");
 
   if (authHeader) {

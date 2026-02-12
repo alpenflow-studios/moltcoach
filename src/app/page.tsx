@@ -43,7 +43,7 @@ export default function LandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative mx-auto flex max-w-4xl flex-col items-center overflow-hidden px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
+      <section className="relative mx-auto flex max-w-4xl flex-col items-center px-6 pt-24 pb-20 text-center sm:pt-32 sm:pb-28">
         {/* Orb — layered breathing glow */}
         <div
           aria-hidden="true"

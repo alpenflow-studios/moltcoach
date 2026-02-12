@@ -67,20 +67,23 @@
 
 ### In Progress
 
-#### TASK-014: Telegram Integration
-- **Priority**: P2
-- **Scope**: Telegram Bot API, webhook handler, new API routes
-- **Started**: Session 26 (Feb 12, 2026)
-- **Notes**: grammy v1.40 installed (not used at runtime). Webhook handler uses direct fetch to Telegram API. Bot created via BotFather (`@ClawCoachBot`). Token set in `.env.local` + Vercel. Webhook registered. Proxy bypass for `/api/telegram`. **BLOCKED**: 500 on Vercel (`TypeError: p.end is not a function`). Fix: replace `NextResponse.json()` with `Response.json()`.
-- **Acceptance Criteria**:
-  - [x] Telegram bot created and configured
-  - [x] Webhook handler at `/api/telegram`
-  - [ ] Agent can respond to Telegram messages (500 on Vercel — see CURRENT_ISSUES.md High #1)
-  - [x] Landing page Telegram button functional
+_(nothing)_
 
 ---
 
 ### Done
+
+#### TASK-014: Telegram Integration
+- **Priority**: P2
+- **Scope**: Telegram Bot API, webhook handler, new API routes
+- **Started**: Session 26 (Feb 12, 2026)
+- **Completed**: Session 26 (Feb 12, 2026)
+- **Notes**: grammy v1.40 installed (not used at runtime). Webhook handler uses direct fetch to Telegram API. Bot: `@ClawCoachBot`. Proxy bypass for `/api/telegram`. Bot is live and responding.
+- **Acceptance Criteria**:
+  - [x] Telegram bot created and configured
+  - [x] Webhook handler at `/api/telegram`
+  - [x] Agent can respond to Telegram messages
+  - [x] Landing page Telegram button functional
 
 #### TASK-009: Supabase Integration
 - **Priority**: P1

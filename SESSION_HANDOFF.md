@@ -37,31 +37,24 @@
    - Graceful fallback to single-turn if Redis unavailable
    - Can only test on live deploy (Telegram webhook needs public URL)
 
+3. **Hero Orb Fix — COMPLETE**
+   - Removed `overflow-hidden` from hero section (was clipping orb + wallet dropdown)
+   - Added `overflow-x-clip` to layout wrapper (prevents horizontal scroll without clipping)
+   - Fixed double-translate in orb animation keyframes (keyframes had `translate(-50%, -50%)` but wrapper already uses Tailwind `-translate-x/y-1/2`)
+   - Orb confirmed looking great on both mobile and desktop
+
+4. **Mobile Wallet — STILL BROKEN (see CURRENT_ISSUES.md High #1)**
+   - Replaced toggle dropdown with direct `<Button>` per connector
+   - Filtered out generic "Injected" connector
+   - Buttons render (Coinbase Wallet + WalletConnect visible) but tapping does nothing
+   - This is the THIRD attempt (S25: Radix onSelect, S26: plain toggle buttons, S27: direct buttons) — underlying issue is likely wagmi connector initialization on mobile, not the UI layer
+   - **Needs deep investigation in S28**: check wagmi `connect()` error handling, test in Safari mobile devtools, check if connectors need async provider resolution before `connect()` is callable
+
 ### Session 26
 
-1. **Fixed Mobile Wallet Connect (P0) — COMPLETE**
-   - Replaced Radix `DropdownMenu` with plain `<button>` elements on touch devices
-   - Added `useIsTouchDevice()` hook using `matchMedia("(pointer: coarse)")`
-   - On mobile: renders togglable button list that calls `connect({ connector })` directly
-   - On desktop: keeps existing Radix `DropdownMenu` (works fine)
-   - Bypasses all Radix portal/focus-trap/pointer-event issues on mobile Safari
-   - `pnpm typecheck` + `pnpm build` pass
-
+1. **Fixed Mobile Wallet Connect (P0) — PARTIAL (reverted in S27)**
 2. **E2E Tested x402 Flow (P1) — COMPLETE**
-   - Verified free tier: message sent → Redis counter at `x402:free:<addr>` incremented to 1
-   - Set counter to 10 (limit), sent another → 402 response with correct payload
-   - 402 body: `error: "free_tier_exceeded"`, `used: 11`, `limit: 10`, `paidEndpoint: "/api/chat/paid"`
-   - Paid endpoint without payment → 402 + `payment-required` header with base64 x402 requirements
-   - Decoded payment requirements: Base Sepolia, USDC, $0.01, payTo ProtocolFeeCollector — all correct
-   - Cleaned up test Redis key
-
 3. **Telegram Integration (P2) — COMPLETE (TASK-014)**
-   - Created `/api/telegram` webhook handler using direct fetch to Telegram API
-   - `/start` command returns welcome message; all other messages go to Claude → reply
-   - Bot created via BotFather: `@ClawCoachBot`, token set in `.env.local` + Vercel
-   - Webhook registered: `https://clawcoach.ai/api/telegram`
-   - Proxy bypass added for `/api/telegram`
-   - Bot is LIVE and responding on Telegram
 
 ---
 
@@ -71,11 +64,12 @@ _(nothing)_
 
 ---
 
-## What's Next
+## What's Next (Priority Order)
 
-1. **Deploy Session 27 changes** — push to origin, Vercel auto-deploys, test Telegram history on live bot
-2. **Telegram wallet linking (Task C)** — /connect command, one-time link, Supabase `telegram_links` table
-3. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+1. **Fix mobile wallet connect (P0)** — High bug in CURRENT_ISSUES.md. Third UI attempt failed. Need to investigate wagmi `connect()` on mobile at the library level, not just the UI.
+2. **Test Telegram conversation history** — deployed but untested on live bot
+3. **Telegram wallet linking (Task C from S27 epic)** — /connect command, one-time link, Supabase `telegram_links` table
+4. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
 
 ---
 
@@ -155,6 +149,7 @@ User sends message
 
 - **Pricing simplified to 3 tiers**: Free/Pro/Elite (was 4 tiers with Basic). Pro at $9.99/mo or 1K CLAWC, Elite at $29.99/mo or 10K CLAWC (Session 27)
 - **Telegram history in Redis**: Key pattern `telegram:history:<chatId>`, 20 msg cap, 7-day TTL (Session 27)
+- **Orb fix approach**: `overflow-x-clip` on layout wrapper instead of `overflow-hidden` on hero section (Session 27)
 - **Proxy convention**: Migrated `middleware.ts` → `proxy.ts` per Next.js 16 deprecation (Session 25)
 - **Vercel deployment**: Team `classcoin`, project `moltcoach`, domain `clawcoach.ai` via Vercel DNS (Session 24)
 - **Password protection**: Basic Auth proxy, not Vercel built-in (works on all plans) (Session 24)

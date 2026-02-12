@@ -18,7 +18,7 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| — | — | — | — | — |
+| 1 | Mobile wallet buttons don't connect — Coinbase Wallet and WalletConnect show as stacked buttons on touch devices but tapping does nothing | `src/components/ConnectWallet.tsx` | S27 | S27 replaced toggle dropdown with direct `<Button>` elements calling `connect({ connector })`. Buttons render but `connect()` call appears to fail silently on mobile. Needs investigation: check if connectors are properly initialized on mobile, check wagmi error handling, test in mobile Safari devtools. Previous Radix dropdown also didn't work (S26) — underlying issue may be wagmi connector init on mobile, not the UI approach. |
 
 ---
 
@@ -44,10 +44,10 @@
 
 | # | Issue | Resolution | Date |
 |---|-------|------------|------|
-| 1 | Telegram webhook 500 on Vercel | Resolved after redeploy (Turbopack bundling issue with `NextResponse.json()`) | S26 |
-| 2 | Mobile wallet dropdown not responding to taps | Replaced Radix DropdownMenu with plain buttons on touch devices (`useIsTouchDevice` + `pointer: coarse`) | S26 |
+| 1 | Hero orb clipped on left side of mobile + messed up glow | Removed `overflow-hidden` from hero section, added `overflow-x-clip` to layout wrapper, fixed double-translate in orb animation keyframes | S27 |
+| 2 | Telegram webhook 500 on Vercel | Resolved after redeploy (Turbopack bundling issue with `NextResponse.json()`) | S26 |
 | 3 | Next.js 16 middleware deprecation warning | Migrated `middleware.ts` → `proxy.ts` | S25 |
-| 4 | Mobile hero horizontal scroll | Added `overflow-hidden` + `-translate-x/y-1/2` to orb | S25 |
+| 4 | Mobile hero horizontal scroll | Added `overflow-hidden` + `-translate-x/y-1/2` to orb (later refined in S27) | S25 |
 
 ---
 

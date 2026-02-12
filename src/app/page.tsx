@@ -121,6 +121,11 @@ export default function LandingPage() {
             ERC-8128
           </div>
         </div>
+        <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl">
+          Your AI Coach.
+          <br />
+          <span className="text-primary">On-chain.</span>
+        </h1>
         <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Your personalized coaching agent that lives on the blockchain. Track
           workouts, customize nutrition goals, talk about life — anything — all

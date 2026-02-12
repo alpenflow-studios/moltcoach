@@ -112,9 +112,17 @@ export default function LandingPage() {
           <br />
           <span className="text-primary">On-Chain.</span>
         </h1>
-        <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
-          <Zap className="size-3" />
-          Built on Base with ERC-8004
+        <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#0052FF]/25 bg-[#0052FF]/10 px-3 py-1 text-xs text-[#0052FF]">
+          <svg viewBox="0 0 111 111" fill="currentColor" className="size-3.5" aria-hidden="true">
+            <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H0C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" />
+          </svg>
+          Built on Base
+          <span className="text-[#0052FF]/40">·</span>
+          ERC-8004
+          <span className="text-[#0052FF]/40">·</span>
+          ERC-8021
+          <span className="text-[#0052FF]/40">·</span>
+          ERC-8128
         </div>
         <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Your personalized coaching agent that lives on the blockchain. Track

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const STAGING_USERNAME = process.env.STAGING_USERNAME;
 const STAGING_PASSWORD = process.env.STAGING_PASSWORD;
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   if (!STAGING_USERNAME || !STAGING_PASSWORD) return NextResponse.next();
 
   const authHeader = request.headers.get("authorization");

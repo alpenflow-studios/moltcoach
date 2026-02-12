@@ -40,9 +40,44 @@
 
 ---
 
+#### TASK-015: Vercel Deployment + Password Protection
+- **Priority**: P0
+- **Scope**: Vercel project, env vars, domain, middleware
+- **Started**: Session 24 (Feb 11, 2026)
+- **Completed**: Session 24 (Feb 11, 2026)
+- **Acceptance Criteria**:
+  - [x] Vercel project linked (`classcoin/moltcoach`)
+  - [x] 14 env vars set on Vercel production
+  - [x] `clawcoach.ai` domain configured
+  - [x] `www.clawcoach.ai` redirect added
+  - [x] ERC-8021 Builder Codes verified on Base Codes
+  - [x] Password protection via Basic Auth middleware
+  - [x] Site loads after auth at `clawcoach.ai`
+
+#### TASK-016: x402 Pay-Per-Coach Integration
+- **Priority**: P1
+- **Scope**: x402 packages, API routes, useChat hook, paywall UI
+- **Started**: Session 24 (Feb 11, 2026)
+- **Notes**: ~60% done. Server config, paid route, free tier counter, hook changes done. Paywall UI, typecheck, build, commit, and deploy remaining.
+- **Acceptance Criteria**:
+  - [x] `@x402/next`, `@x402/core`, `@x402/evm` installed
+  - [x] `src/lib/x402.ts` server config (FeeCollector, $0.01, Base Sepolia)
+  - [x] `src/lib/freeMessages.ts` Redis counter (10 free/30 days)
+  - [x] `/api/chat/paid` route wrapped with `withX402`
+  - [x] `/api/chat` returns 402 when free tier exceeded
+  - [x] `useChat` hook handles 402 response with `paywall` state
+  - [ ] `AgentChat.tsx` renders paywall banner
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm build` passes
+  - [ ] Changes committed
+  - [ ] Deployed to Vercel
+
+---
+
 ### In Progress
 
-_(none)_
+#### TASK-016: x402 Pay-Per-Coach Integration
+_(see above — ~60% complete, needs Session 25)_
 
 ---
 

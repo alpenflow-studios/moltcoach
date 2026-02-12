@@ -1,7 +1,12 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import { ConnectWallet } from "@/components/ConnectWallet";
+import dynamic from "next/dynamic";
+
+const ConnectWallet = dynamic(
+  () => import("@/components/ConnectWallet").then((m) => m.ConnectWallet),
+  { ssr: false },
+);
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStakingReads } from "@/hooks/useStakingReads";
 import { StakingHeader } from "./StakingHeader";

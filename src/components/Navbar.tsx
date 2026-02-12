@@ -1,12 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ConnectWallet } from "@/components/ConnectWallet";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const ConnectWallet = dynamic(
+  () => import("@/components/ConnectWallet").then((m) => m.ConnectWallet),
+  {
+    ssr: false,
+    loading: () => (
+      <Button variant="outline" size="sm" disabled>
+        <Loader2 className="size-4 animate-spin" />
+        Loading...
+      </Button>
+    ),
+  },
+);
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -26,7 +39,7 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-bold tracking-tight">
-            Claw<span className="text-primary">Coach</span>
+            🦞 Claw<span className="text-primary">Coach</span>
           </Link>
 
           {/* Desktop nav links */}

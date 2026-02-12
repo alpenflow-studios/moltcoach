@@ -1,7 +1,32 @@
+"use client";
+
 import Link from "next/link";
-import { ConnectWallet } from "@/components/ConnectWallet";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Fingerprint, Zap, Sparkles, ArrowRight, Send, MessageCircle } from "lucide-react";
+import { Fingerprint, Zap, Sparkles, ArrowRight, Send, MessageCircle, Loader2 } from "lucide-react";
+
+const ConnectWallet = dynamic(
+  () => import("@/components/ConnectWallet").then((m) => m.ConnectWallet),
+  {
+    ssr: false,
+    loading: () => (
+      <Button variant="outline" size="lg" disabled>
+        <Loader2 className="size-4 animate-spin" />
+        Loading...
+      </Button>
+    ),
+  },
+);
+
+const EmailSignupLink = dynamic(
+  () => import("@/components/EmailSignupLink").then((m) => m.EmailSignupLink),
+  {
+    ssr: false,
+    loading: () => (
+      <span className="text-primary underline underline-offset-2">Sign up with your email</span>
+    ),
+  },
+);
 
 function FarcasterIcon({ className }: { className?: string }) {
   return (
@@ -129,9 +154,7 @@ export default function LandingPage() {
           </p>
           <p className="mx-auto mb-16 mt-2 max-w-2xl text-center text-sm text-muted-foreground/70">
             Don&apos;t have a wallet?{" "}
-            <button type="button" className="text-primary underline underline-offset-2 hover:text-primary/80">
-              Sign up with your email
-            </button>{" "}
+            <EmailSignupLink />{" "}
             and we&apos;ll create one for you.
           </p>
           <div className="grid gap-8 sm:grid-cols-3">

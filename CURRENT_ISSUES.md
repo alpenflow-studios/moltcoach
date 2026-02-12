@@ -18,7 +18,8 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| 1 | Mobile wallet buttons don't connect — Coinbase Wallet and WalletConnect show as stacked buttons on touch devices but tapping does nothing | `src/components/ConnectWallet.tsx` | S27 | S27 replaced toggle dropdown with direct `<Button>` elements calling `connect({ connector })`. Buttons render but `connect()` call appears to fail silently on mobile. Needs investigation: check if connectors are properly initialized on mobile, check wagmi error handling, test in mobile Safari devtools. Previous Radix dropdown also didn't work (S26) — underlying issue may be wagmi connector init on mobile, not the UI approach. |
+| 1 | Privy SSR: PrivyProvider validates app ID during static generation, causing Vercel deploy failure | `src/components/providers/WalletProvider.tsx` | S28 | Mount guard added (`useState`+`useEffect`) to defer providers to client-only. But `ConnectWallet` and `EmailSignupLink` use `usePrivy()` which throws without PrivyProvider during initial SSR render. Fix: make these components resilient (dynamic import `ssr: false`, or check provider availability before calling hooks). Local build passes, Vercel deploy fails. |
+| 2 | Mobile wallet buttons don't connect (being replaced by Privy) | `src/components/ConnectWallet.tsx` | S27 | S28 is replacing the wagmi-only connector flow with Privy, which handles mobile natively. This bug should be resolved once TASK-017 is deployed. Keep until confirmed. |
 
 ---
 

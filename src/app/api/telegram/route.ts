@@ -1,77 +1,80 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { getTelegramBot } from "@/lib/telegram";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
 
 const anthropic = new Anthropic();
 
-/**
- * Telegram webhook handler (App Router).
- *
- * Receives updates from Telegram Bot API and responds via ClawCoach agent.
- * Manually processes updates instead of using grammy's webhookCallback,
- * which expects Pages Router (req, res) format.
- */
-
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ?? "";
 const DEFAULT_AGENT_NAME = "ClawCoach";
 const DEFAULT_COACHING_STYLE = "motivator";
 
-const bot = getTelegramBot();
+type TelegramUpdate = {
+  update_id: number;
+  message?: {
+    message_id: number;
+    from: { id: number; first_name: string };
+    chat: { id: number; type: string };
+    text?: string;
+  };
+};
 
-if (bot) {
-  bot.on("message:text", async (ctx) => {
-    const userMessage = ctx.message.text;
-
-    if (userMessage.startsWith("/start")) {
-      await ctx.reply(
-        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
-      );
-      return;
-    }
-
-    try {
-      const systemPrompt = buildSystemPrompt(
-        DEFAULT_AGENT_NAME,
-        DEFAULT_COACHING_STYLE,
-      );
-
-      const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-5-20250929",
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userMessage }],
-      });
-
-      const firstBlock = response.content[0];
-      const text =
-        firstBlock && firstBlock.type === "text" ? firstBlock.text : "";
-
-      if (text) {
-        await ctx.reply(text);
-      }
-    } catch (err) {
-      console.error("[telegram] Error processing message:", err);
-      await ctx.reply(
-        "Sorry, I hit a snag. Try again in a moment.",
-      );
-    }
+async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
+  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text }),
   });
 }
 
 export async function POST(req: Request): Promise<Response> {
-  if (!bot) {
+  if (!TELEGRAM_BOT_TOKEN) {
     return NextResponse.json(
-      { error: "Telegram bot not configured. Set TELEGRAM_BOT_TOKEN." },
+      { error: "TELEGRAM_BOT_TOKEN not set" },
       { status: 503 },
     );
   }
 
   try {
-    const update = await req.json();
-    await bot.handleUpdate(update);
+    const update = (await req.json()) as TelegramUpdate;
+    const message = update.message;
+
+    if (!message?.text) {
+      return NextResponse.json({ ok: true });
+    }
+
+    const chatId = message.chat.id;
+    const userText = message.text;
+
+    // Handle /start command
+    if (userText.startsWith("/start")) {
+      await sendTelegramMessage(
+        chatId,
+        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Send to Claude
+    const systemPrompt = buildSystemPrompt(DEFAULT_AGENT_NAME, DEFAULT_COACHING_STYLE);
+
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-5-20250929",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userText }],
+    });
+
+    const firstBlock = response.content[0];
+    const text = firstBlock && firstBlock.type === "text" ? firstBlock.text : "";
+
+    if (text) {
+      await sendTelegramMessage(chatId, text);
+    }
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[telegram] Webhook error:", err);
+    // Always return 200 so Telegram doesn't retry
     return NextResponse.json({ ok: true });
   }
 }

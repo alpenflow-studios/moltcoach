@@ -108,16 +108,16 @@ export default function LandingPage() {
             <FarcasterIcon className="size-3" />
             Forged on Farcaster
           </div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#0000FF]/25 bg-[#0000FF]/10 px-3 py-1 text-xs text-[#0000FF]">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#4169FF]/40 bg-[#4169FF]/12 px-3 py-1 text-xs text-[#4169FF]">
             <svg viewBox="0 0 111 111" fill="currentColor" className="size-3.5" aria-hidden="true">
               <rect width="111" height="111" rx="5.55" ry="5.55" />
             </svg>
             Built on Base with
-            <span className="text-[#0000FF]/40">·</span>
+            <span className="text-[#4169FF]/40">·</span>
             ERC-8004
-            <span className="text-[#0000FF]/40">·</span>
+            <span className="text-[#4169FF]/40">·</span>
             ERC-8021
-            <span className="text-[#0000FF]/40">·</span>
+            <span className="text-[#4169FF]/40">·</span>
             ERC-8128
           </div>
         </div>

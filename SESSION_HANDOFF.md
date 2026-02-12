@@ -34,25 +34,32 @@
    - Build deprecation warning eliminated
    - Tech debt item #1 from CURRENT_ISSUES.md resolved
 
-4. **Deployed to Vercel (twice)**
-   - First deploy: x402 + paywall UI + Session 24 commits
-   - Second deploy: proxy migration
-   - Both builds clean, 18 routes, site live at `https://clawcoach.ai`
+4. **Mobile Fixes (PARTIAL)**
+   - Fixed hero horizontal scroll — added `overflow-hidden` + `-translate-x/y-1/2` on orb wrapper
+   - Attempted wallet dropdown fix — `onSelect` + `modal={false}` did NOT fix mobile taps
+   - **BUG OPEN**: Wallet dropdown items don't respond to taps on mobile (see CURRENT_ISSUES.md High #1)
+
+5. **Deployed to Vercel (3 times total)**
+   - All builds clean, 18 routes, site live at `https://clawcoach.ai`
 
 ---
 
 ## What's In Progress
 
-Nothing — clean slate.
+### Mobile wallet connect bug (High #1 in CURRENT_ISSUES.md)
+- Radix `DropdownMenu` items don't fire on mobile touch
+- Current state: `onSelect` + `modal={false}` — still not working
+- Recommended: Replace dropdown with inline buttons or Dialog on mobile
 
 ---
 
 ## What's Next
 
-1. **End-to-end test x402 flow** — send 10+ messages locally, verify 402 response, verify paywall banner
-2. **Telegram integration (TASK-014)** — bot + webhook handler
-3. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
-4. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
+1. **FIX: Mobile wallet connect** (P0) — see CURRENT_ISSUES.md High #1. Replace Radix dropdown with mobile-friendly approach
+2. **End-to-end test x402 flow** — send 10+ messages locally, verify 402 response, verify paywall banner
+3. **Telegram integration (TASK-014)** — bot + webhook handler
+4. **Multi-token pricing (TASK-012)** — pricing page with CLAWC/USDC/ETH
+5. **PartnerRewardPool contract** (Stage 2) — partner token promos alongside $CLAWC
 
 ---
 

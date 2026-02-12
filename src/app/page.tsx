@@ -118,8 +118,9 @@ export default function LandingPage() {
         </div>
         <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Your personalized coaching agent that lives on the blockchain. Track
-          workouts, earn $CLAWC rewards, and own a coach that knows and grows
-          with you — starting with fitness, expanding everywhere.
+          workouts, customize nutrition goals, talk about life — anything — all
+          while earning $CLAWC rewards and partner perks. A coach that knows you
+          and grows with you. Starting with fitness, expanding everywhere.
         </p>
         <div className="mt-12 flex items-center justify-center gap-4">
           <Button variant="outline" size="lg" className="rounded-full text-base" asChild>
@@ -204,7 +205,7 @@ export default function LandingPage() {
       <section className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           Ready to meet your{" "}
-          <span className="text-primary">ClawCoach</span>?
+          🦞 Claw<span className="text-primary">Coach</span>?
         </h2>
         <p className="mt-4 text-muted-foreground">
           A coach that knows and grows with you — connect your wallet to get started.

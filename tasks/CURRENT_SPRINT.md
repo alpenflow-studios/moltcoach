@@ -58,7 +58,7 @@
 - **Priority**: P1
 - **Scope**: x402 packages, API routes, useChat hook, paywall UI
 - **Started**: Session 24 (Feb 11, 2026)
-- **Notes**: ~60% done. Server config, paid route, free tier counter, hook changes done. Paywall UI, typecheck, build, commit, and deploy remaining.
+- **Completed**: Session 25 (Feb 11, 2026)
 - **Acceptance Criteria**:
   - [x] `@x402/next`, `@x402/core`, `@x402/evm` installed
   - [x] `src/lib/x402.ts` server config (FeeCollector, $0.01, Base Sepolia)
@@ -66,18 +66,17 @@
   - [x] `/api/chat/paid` route wrapped with `withX402`
   - [x] `/api/chat` returns 402 when free tier exceeded
   - [x] `useChat` hook handles 402 response with `paywall` state
-  - [ ] `AgentChat.tsx` renders paywall banner
-  - [ ] `pnpm typecheck` passes
-  - [ ] `pnpm build` passes
-  - [ ] Changes committed
-  - [ ] Deployed to Vercel
+  - [x] `AgentChat.tsx` renders paywall banner
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm build` passes
+  - [x] Changes committed
+  - [x] Deployed to Vercel
 
 ---
 
 ### In Progress
 
-#### TASK-016: x402 Pay-Per-Coach Integration
-_(see above — ~60% complete, needs Session 25)_
+_(nothing)_
 
 ---
 

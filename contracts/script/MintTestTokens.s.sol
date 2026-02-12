@@ -7,8 +7,8 @@ import {ClawcToken} from "../src/ClawcToken.sol";
 /// @title MintTestTokens — Mint $CLAWC to test wallets on Base Sepolia
 /// @notice Usage: forge script script/MintTestTokens.s.sol --rpc-url base_sepolia --broadcast
 contract MintTestTokens is Script {
-    // Deployed ClawcToken address on Base Sepolia (will update after redeploy)
-    address constant CLAWC_TOKEN = 0xf33c2C2879cfEDb467F70F74418F4Ce30e31B138;
+    // Deployed ClawcToken address on Base Sepolia
+    address constant CLAWC_TOKEN = 0x275534e19e025058d02a7837350ffaD6Ba136b7c;
 
     function run() external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");

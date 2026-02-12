@@ -85,6 +85,22 @@ forge script script/Deploy.s.sol \
 
 ---
 
+## Deployed Addresses (Base Sepolia — 84532)
+
+> Deployed Session 23, Feb 11 2026. All verified on BaseScan.
+
+| Contract | Address |
+|----------|---------|
+| ClawcToken ($CLAWC) | [`0x275534e19e025058d02a7837350ffaD6Ba136b7c`](https://sepolia.basescan.org/address/0x275534e19e025058d02a7837350ffaD6Ba136b7c) |
+| ProtocolFeeCollector | [`0x9233CC1Ab2ca19F7a240AD9238cBcf59516Def55`](https://sepolia.basescan.org/address/0x9233CC1Ab2ca19F7a240AD9238cBcf59516Def55) |
+| ClawcStaking | [`0x6B2D2f674373466F0C490E26a1DE00FF7F63BFad`](https://sepolia.basescan.org/address/0x6B2D2f674373466F0C490E26a1DE00FF7F63BFad) |
+| ClawcoachIdentity (ERC-8004) | [`0xB95fab07C7750C50583eDe6CE751cc753811116c`](https://sepolia.basescan.org/address/0xB95fab07C7750C50583eDe6CE751cc753811116c) |
+| USDC (testnet) | [`0x036CbD53842c5426634e7929541eC2318f3dCF7e`](https://sepolia.basescan.org/address/0x036CbD53842c5426634e7929541eC2318f3dCF7e) |
+
+**Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
+
+---
+
 ## Security Checklist
 
 ### Pre-Testnet

@@ -102,7 +102,7 @@ export function AgentProfileCard({ agentId, agentURI, ownerAddress }: AgentProfi
 
           <Button variant="outline" className="w-full" asChild>
             <a
-              href={`https://sepolia.basescan.org/token/0x949488bD2F10884a0E2eB89e4947837b48814c9a?a=${agentId}`}
+              href={`https://sepolia.basescan.org/token/0xB95fab07C7750C50583eDe6CE751cc753811116c?a=${agentId}`}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -7,7 +7,7 @@
 ## Last Session
 
 - **Date**: 2026-02-11
-- **Duration**: Session 21
+- **Duration**: Session 23
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
 
@@ -15,42 +15,26 @@
 
 ## What Was Done
 
-### Session 21
+### Session 23
 
-1. **$FIT → $CLAWC rebrand — Phases 2-4 completed**
+1. **Phase 7 — Deployed $CLAWC contracts to Base Sepolia (COMPLETE)**
 
-   **Phase 2 (test files) — completed**
-   - `contracts/test/ProtocolFeeCollector.t.sol` — full rewrite (FitToken→ClawcToken, collectFitFee→collectClawcFee, etc.)
-   - `contracts/test/ClawcoachIdentity.t.sol` — full rewrite (MoltcoachIdentity→ClawcoachIdentity, EIP-712 domain)
-
-   **Phase 3 (deployment scripts) — completed**
-   - `contracts/script/Deploy.s.sol` — imports, types, variable names, console.log strings
-   - `contracts/script/MintTestTokens.s.sol` — import, constant, variable, console.log
-
-   **Phase 3 checkpoint**: `forge build` zero warnings, `forge test` 216 tests pass.
-   **Committed**: `6725293` — `refactor(contracts): rename $FIT to $CLAWC token rebrand`
-
-   **Phase 4 (frontend) — completed**
-   - Config: `contracts.ts`, `pricing.ts` — all FIT→CLAWC exports, env var refs, types
-   - Lib: `format.ts` — `formatFit`→`formatClawc`
-   - Hooks: `useStakingReads.ts`, `useStakeAction.ts`, `useUnstakeAction.ts` — CLAWC imports
-   - Staking components (7 files): `StakeForm`, `UnstakeForm`, `StakeInfoCard`, `TierBenefitsCard`, `TierCard`, `StakingHeader`, `StakingPageContent`
-   - Other components: `DashboardContent`, `AgentProfileCard`, `PricingPageContent`
-   - Pages: `layout.tsx`, `page.tsx`, `staking/page.tsx`, `pricing/page.tsx`, `subscribe/page.tsx`
-   - Env: `.env.example`, `.env.local` — `FIT_TOKEN`→`CLAWC_TOKEN`, `FIT_STAKING`→`CLAWC_STAKING`
-   - Types: `database.ts` — `fit_earned`→`clawc_earned`, `"FIT"`→`"CLAWC"` in payment_token
-
-   **Phase 4 checkpoint**: `pnpm typecheck` zero errors, `pnpm build` passes clean.
+   - Deployed all 4 contracts via `forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify`
+   - All 4 contracts verified on BaseScan automatically
+   - Minted 10,000 CLAWC to deployer via `MintTestTokens.s.sol`
+   - Updated addresses in: `.env.local`, `.env.example`, `CLAUDE.md`, `docs/CONTRACTS.md`
+   - Fixed 2 hardcoded old addresses in frontend (`AgentProfileCard.tsx`, `HubAgentCard.tsx`)
+   - Updated `MintTestTokens.s.sol` with new ClawcToken address
+   - `pnpm build` passes clean (all 17 routes)
 
 2. **Commits this session**:
-   - `6725293` — `refactor(contracts): rename $FIT to $CLAWC token rebrand` (Phases 1-3)
-   - (pending) — `refactor(frontend): rename $FIT to $CLAWC across all UI` (Phase 4)
+   - `chore(deploy): deploy $CLAWC contracts to Base Sepolia`
 
 ---
 
 ## What's In Progress
 
-### $FIT → $CLAWC Rebrand (7 Phases)
+### $FIT → $CLAWC Rebrand (7 Phases) — ALL COMPLETE
 
 | Phase | Status | Description |
 |-------|--------|-------------|
@@ -58,21 +42,19 @@
 | 2. Test files | **DONE** | All 4 test files updated |
 | 3. Deployment scripts | **DONE** | `Deploy.s.sol` + `MintTestTokens.s.sol` |
 | 4. Frontend | **DONE** | Config, hooks, components, pages, types, env vars |
-| 5. Supabase migration | **NOT STARTED** | `fit_earned` → `clawc_earned` column rename in live DB |
-| 6. Documentation | **NOT STARTED** | CLAUDE.md, CONTRACTS.md, TOKENOMICS.md, PRD.md, etc. |
-| 7. Deploy to Base Sepolia | **NOT STARTED** | Fresh deploy with $CLAWC branding |
+| 5. Supabase migration | **DONE** | `fit_earned` → `clawc_earned` live in DB |
+| 6. Documentation | **DONE** | 10 doc files updated, committed |
+| 7. Deploy to Base Sepolia | **DONE** | 4 contracts deployed, verified, 10K CLAWC minted |
 
 ---
 
 ## What's Next
 
-1. **Phase 5 — Supabase migration** — Rename `fit_earned` column → `clawc_earned` in workouts table, update `payment_token` enum in subscriptions table (FIT→CLAWC). Use Supabase Management API.
-2. **Phase 6 — Documentation** — Update CLAUDE.md (contract table, env vars, domain concepts), CONTRACTS.md, TOKENOMICS.md, PRD.md, revenue docs, CURRENT_SPRINT.md references
-3. **Phase 7 — Deploy** — Fresh deploy to Base Sepolia with $CLAWC branding, update contract addresses everywhere
-4. **x402 integration** — pay-per-coach endpoints
-5. **Builder Codes wagmi integration** — wire `ox` + `Attribution.toDataSuffix`
-6. **Vercel deployment + password protection**
-7. **Telegram integration (TASK-014)**
+1. **x402 integration** — pay-per-coach endpoints
+2. **Builder Codes wagmi integration** — wire `ox` + `Attribution.toDataSuffix`
+3. **Vercel deployment + password protection**
+4. **Telegram integration (TASK-014)**
+5. **Multi-token pricing (TASK-012)**
 
 ---
 
@@ -122,26 +104,33 @@ User sends message
 - **Theme**: Dark mode, lime primary on zinc
 - **wagmi**: v3.4.2
 - **Brand**: ClawCoach (clawcoach.ai)
+- **BaseScan API key**: Created via Etherscan (Session 22)
 
 ---
 
 ## State of Tests
 
-- `forge build`: **PASSES** (zero warnings)
+- `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
 - `pnpm typecheck`: **PASSES** (zero errors)
 - `pnpm build`: **PASSES** (all 17 routes)
 
 ---
 
-## On-Chain State (Base Sepolia) — OLD CONTRACTS
+## On-Chain State (Base Sepolia) — $CLAWC Contracts (Phase 7 deploy)
 
-> These will be replaced by $CLAWC versions after Phase 7 redeploy.
+| Contract | Address |
+|----------|---------|
+| ClawcToken ($CLAWC) | `0x275534e19e025058d02a7837350ffaD6Ba136b7c` |
+| ProtocolFeeCollector | `0x9233CC1Ab2ca19F7a240AD9238cBcf59516Def55` |
+| ClawcStaking | `0x6B2D2f674373466F0C490E26a1DE00FF7F63BFad` |
+| ClawcoachIdentity (ERC-8004) | `0xB95fab07C7750C50583eDe6CE751cc753811116c` |
+| USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
-- **FIT supply**: 10,000 FIT | **Wallet**: 475 FIT | **Staked**: 9,500 FIT
-- **Tier**: Pro (2) | **FeeCollector**: 25 FIT
-- **Agent #1**: "daddy", motivator
+- **CLAWC supply**: 10,000 CLAWC (all in deployer wallet)
+- **Staked**: 0 (fresh deploy)
+- **Agents**: 0 (fresh deploy)
 
 ---
 
@@ -151,9 +140,9 @@ User sends message
 - **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: v25.6.0
 - **Project**: `~/Projects/moltcoach`
 - **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
-- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project)
+- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY
 - **NOT configured**: Coinbase Wallet project ID
 
 ---
 
-*Last updated: Feb 11, 2026 — Session 21*
+*Last updated: Feb 11, 2026 — Session 23*

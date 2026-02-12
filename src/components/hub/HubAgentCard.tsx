@@ -35,7 +35,7 @@ export function HubAgentCard({ agent }: HubAgentCardProps) {
             </div>
           </div>
           <a
-            href={`https://sepolia.basescan.org/token/0x949488bD2F10884a0E2eB89e4947837b48814c9a?a=${agent.agentId}`}
+            href={`https://sepolia.basescan.org/token/0xB95fab07C7750C50583eDe6CE751cc753811116c?a=${agent.agentId}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground transition-colors hover:text-foreground"

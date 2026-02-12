@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getTelegramBot } from "@/lib/telegram";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
-import { webhookCallback } from "grammy";
 
 const anthropic = new Anthropic();
 
 /**
- * Telegram webhook handler.
+ * Telegram webhook handler (App Router).
  *
  * Receives updates from Telegram Bot API and responds via ClawCoach agent.
- * Default coaching style is "motivator" for Telegram users (no wallet-based
- * onboarding yet — that requires linking wallet to Telegram chat ID).
+ * Manually processes updates instead of using grammy's webhookCallback,
+ * which expects Pages Router (req, res) format.
  */
 
 const DEFAULT_AGENT_NAME = "ClawCoach";
@@ -23,7 +22,6 @@ if (bot) {
   bot.on("message:text", async (ctx) => {
     const userMessage = ctx.message.text;
 
-    // Skip commands for now (handled separately in future)
     if (userMessage.startsWith("/start")) {
       await ctx.reply(
         "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
@@ -60,11 +58,20 @@ if (bot) {
   });
 }
 
-// Export webhook handler — grammy handles update parsing and routing
-export const POST = bot
-  ? (webhookCallback(bot, "next-js") as unknown as (req: Request) => Promise<Response>)
-  : async () =>
-      NextResponse.json(
-        { error: "Telegram bot not configured. Set TELEGRAM_BOT_TOKEN." },
-        { status: 503 },
-      );
+export async function POST(req: Request): Promise<Response> {
+  if (!bot) {
+    return NextResponse.json(
+      { error: "Telegram bot not configured. Set TELEGRAM_BOT_TOKEN." },
+      { status: 503 },
+    );
+  }
+
+  try {
+    const update = await req.json();
+    await bot.handleUpdate(update);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[telegram] Webhook error:", err);
+    return NextResponse.json({ ok: true });
+  }
+}

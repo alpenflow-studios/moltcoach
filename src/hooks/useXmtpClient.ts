@@ -62,7 +62,14 @@ export function useXmtpClient() {
     try {
       const { Client } = await import("@xmtp/browser-sdk");
       const signer = walletClientToXmtpSigner(walletClient);
-      const xmtpClient = await Client.create(signer, { env: XMTP_ENV });
+
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("XMTP connection timed out — check wallet signature popup")), 30_000),
+      );
+      const xmtpClient = await Promise.race([
+        Client.create(signer, { env: XMTP_ENV }),
+        timeout,
+      ]);
 
       clientRef.current = xmtpClient as unknown as XmtpClientRef;
       setClient(xmtpClient as unknown as XmtpClientRef);

@@ -8,7 +8,7 @@ export const XMTP_ENV = "dev" as const;
  * Phase 2: Server-side agent reads/responds from this address.
  */
 export const CLAWCOACH_AGENT_XMTP_ADDRESS = (
-  process.env.NEXT_PUBLIC_CLAWCOACH_AGENT_XMTP_ADDRESS ?? ""
+  process.env.NEXT_PUBLIC_CLAWCOACH_AGENT_XMTP_ADDRESS?.trim() ?? ""
 ) as `0x${string}`;
 
 /** Prefix used to mark AI responses sent from the user's XMTP client */

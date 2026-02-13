@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { resolveSystemPrompt } from "@/lib/systemPrompt";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { checkFreeMessages } from "@/lib/freeMessages";
+import { createServerClient } from "@/lib/supabase";
 import type { ChatMessage } from "@/types/chat";
 
 const anthropic = new Anthropic();
@@ -46,23 +47,6 @@ export async function POST(req: Request): Promise<Response> {
       }
     }
 
-    // Check free message quota (x402 paywall after limit)
-    if (walletAddress) {
-      const free = await checkFreeMessages(walletAddress);
-      if (!free.allowed) {
-        return Response.json(
-          {
-            error: "free_tier_exceeded",
-            used: free.used,
-            limit: free.limit,
-            paidEndpoint: "/api/chat/paid",
-            message: `You've used ${free.limit} free messages. Continue coaching with x402 micro-payments ($0.01/message in USDC on Base).`,
-          },
-          { status: 402 },
-        );
-      }
-    }
-
     const body: unknown = await req.json();
 
     if (!isValidBody(body)) {
@@ -70,6 +54,41 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     const { messages, agentName, coachingStyle, agentDbId } = body;
+
+    // Check free message quota (x402 paywall after limit)
+    // Skip during onboarding — new users shouldn't hit paywall before setup completes
+    if (walletAddress) {
+      let isOnboarding = false;
+
+      if (agentDbId) {
+        const db = createServerClient();
+        const { data: agent } = await db
+          .from("agents")
+          .select("onboarding_complete")
+          .eq("id", agentDbId)
+          .single();
+
+        if (agent && !agent.onboarding_complete) {
+          isOnboarding = true;
+        }
+      }
+
+      if (!isOnboarding) {
+        const free = await checkFreeMessages(walletAddress);
+        if (!free.allowed) {
+          return Response.json(
+            {
+              error: "free_tier_exceeded",
+              used: free.used,
+              limit: free.limit,
+              paidEndpoint: "/api/chat/paid",
+              message: `You've used ${free.limit} free messages. Continue coaching with x402 micro-payments ($0.01/message in USDC on Base).`,
+            },
+            { status: 402 },
+          );
+        }
+      }
+    }
 
     const systemPrompt = await resolveSystemPrompt(agentName, coachingStyle, agentDbId);
 

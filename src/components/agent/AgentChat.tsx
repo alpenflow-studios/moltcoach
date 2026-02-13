@@ -60,6 +60,9 @@ export function AgentChat({
   // Track onboarding state locally (defaults to false — show onboarding until sync confirms otherwise)
   const [isOnboarded, setIsOnboarded] = useState(onboardingComplete ?? false);
 
+  // Accumulate ALL messages across the session so extraction sees full conversation
+  const allMessagesRef = useRef<ChatMessageType[]>([]);
+
   // Sync when prop changes (e.g., after agent sync response arrives)
   useEffect(() => {
     if (onboardingComplete !== undefined) {
@@ -67,9 +70,19 @@ export function AgentChat({
     }
   }, [onboardingComplete]);
 
+  // Seed the ref from Supabase history when it loads (e.g., on return visit)
+  useEffect(() => {
+    if (chatHistory && chatHistory.length > 0 && allMessagesRef.current.length === 0) {
+      allMessagesRef.current = [...chatHistory];
+    }
+  }, [chatHistory]);
+
   // Handle completed message pairs — save to Supabase + mirror to XMTP + extract
   const handleMessageComplete = useCallback(
     (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => {
+      // Accumulate messages in ref for extraction
+      allMessagesRef.current = [...allMessagesRef.current, userMsg, assistantMsg];
+
       // Persist to Supabase
       onSaveMessages?.(userMsg, assistantMsg);
       // Mirror to XMTP
@@ -84,7 +97,7 @@ export function AgentChat({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             agentDbId,
-            messages: [...(chatHistory ?? []), userMsg, assistantMsg],
+            messages: allMessagesRef.current,
             latestUser: userMsg.content,
             latestAssistant: assistantMsg.content,
           }),
@@ -99,14 +112,17 @@ export function AgentChat({
           .catch(() => {});
       }
     },
-    [onSaveMessages, onXmtpSendMessage, agentDbId, chatHistory, isOnboarded],
+    [onSaveMessages, onXmtpSendMessage, agentDbId, isOnboarded],
   );
 
-  // Supabase history takes priority, XMTP history as fallback.
-  // Skip ALL history when not onboarded — fresh onboarding interview needs a clean slate.
-  const initialMessages = isOnboarded
-    ? (chatHistory && chatHistory.length > 0 ? chatHistory : xmtpHistory)
-    : undefined;
+  // Supabase history always loads (includes mid-onboarding conversation).
+  // XMTP fallback only when onboarded — prevents stale pre-onboarding XMTP messages.
+  const initialMessages =
+    chatHistory && chatHistory.length > 0
+      ? chatHistory
+      : isOnboarded
+        ? xmtpHistory
+        : undefined;
 
   const { messages, isStreaming, error, paywall, sendMessage, dismissPaywall } = useChat({
     agentName,

@@ -7,126 +7,78 @@
 ## Last Session
 
 - **Date**: 2026-02-12
-- **Duration**: Session 31
+- **Duration**: Session 32
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
+- **Commits**: `71cf0e2`, `1da143c`
 
 ---
 
 ## What Was Done
 
+### Session 32
+
+1. **Fixed Agent Page Address Error (P0) — COMPLETE**
+   - Root cause: `NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS` on Vercel had trailing whitespace (same pattern as S29 Privy, S31 Redis)
+   - Fix: Added `.trim()` to ALL contract address env var reads in `src/config/contracts.ts` — permanent fix, no more `vercel env rm` needed for contract addresses
+   - Also confirmed: address checksum valid, contract reads work on default RPC, 0 agents on new contracts
+   - **Committed**: `1da143c`
+
+2. **Chain Guard UX — COMPLETE**
+   - Added `useChainId` + `useSwitchChain` to `AgentPageContent`
+   - Wrong chain → "Wrong Network" screen with "Switch to Base Sepolia" button
+   - Read errors now surfaced with user-friendly messages + retry button
+   - New `src/lib/contractErrors.ts` — parses viem errors into plain English (chain mismatch, no gas, user rejected, RPC failures, reverts)
+   - **Committed**: `71cf0e2`
+
+3. **Telegram Wallet Linking (P2) — COMPLETE (code)**
+   - `POST /api/telegram/link` — generates 6-char code (Redis, 10-min TTL)
+   - `/connect <CODE>` bot command — verifies code, deletes it (one-time use), upserts `telegram_links` in Supabase
+   - `LinkTelegram` UI card on agent page — generate code, copy command, open bot link
+   - `telegram_links` table types added to `database.ts`
+   - SQL migration at `docs/sql/telegram_links.sql`
+   - **BLOCKER**: Michael needs to run `docs/sql/telegram_links.sql` in Supabase SQL Editor before `/connect` works
+   - **Committed**: `1da143c`
+
+4. **Chat History — Expected Fresh Start**
+   - Old chat messages in Supabase are tied to old agent IDs (pre-Phase 7 rebrand contracts)
+   - 0 agents on new contracts → no agent to load history for
+   - After registering a new agent, chat history starts fresh (old data still in Supabase, just orphaned)
+   - NOT a bug — expected after contract redeployment
+
 ### Session 31
 
 1. **Fixed Telegram Redis on Vercel (P1) — COMPLETE**
-   - Root cause confirmed: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` had trailing whitespace (same pattern as Privy app ID S29)
-   - Fix: `vercel env rm` + `vercel env add` with `printf` for both vars
-   - Redeployed to Vercel (build succeeded, 21s)
-   - Verified: 2 test messages sent via webhook, Redis key created with 4 messages, bot recalled prior message content
-   - Michael confirmed working on Telegram
-   - **Committed**: `3fbd80d` (issue tracking update)
-
 2. **Landing Page Updates — COMPLETE**
-   - Restored missing "Your AI Coach. On-chain." h1 headline (dropped during S30 edits)
-   - Updated Base pill to brand spec per base.org/brand/core-identifiers:
-     - Logo: circle "B" mark → rounded square (5% radius per spec)
-     - Color: `#0052FF` → `#0000FF` (Base Blue exact)
-     - Style: filled `#0000FF` background with white text (readable on dark zinc)
-   - **Committed**: `3fbd80d`, `d3f03cb`, `a74c0a9`, `c11e30e`
-
 3. **Privy Dashboard Config (Michael — manual)**
-   - Farcaster login: enabled, auto-link wallets turned on
-   - Google OAuth: in progress (redirect URI: `https://auth.privy.io/api/v1/oauth/callback`)
-   - Apple: deferred (developer account takes ~2 weeks)
-   - X/GitHub: deferred to post-launch
-
-4. **Tester Bug Report — Agent Page Error (IN PROGRESS)**
-   - Tester getting `Address "0xB95....1116c"` error at agent profile box
-   - Investigated: likely wrong chain (Ethereum Sepolia vs Base Sepolia) or viem contract read error
-   - Shared Base Sepolia network details with Michael to relay
-   - Need to confirm which chain tester is on; if Base Sepolia, dig into viem error further
+4. **Tester Bug Report — Agent Page Error (resolved in S32)**
 
 ### Session 30
 
 1. **Privy Flow Testing (TASK-017 partial)**
-   - Desktop wallet connect: **confirmed working**
-   - Disconnect: **confirmed working**
-   - Email login: Modal opens correctly, needs burner email to complete test
-   - Farcaster login: Blocked by Privy dashboard setting — needs enabling
-   - Google OAuth: Needs enabling in Privy dashboard
-   - Mobile wallet: Untested this session
-
 2. **Mobile Loading Skeleton (P1) — COMPLETE**
-   - Replaced `return null` mount guard in `WalletProvider` with loading skeleton
-   - Skeleton shows: navbar skeleton (pulsing placeholders), centered spinner with "Loading 🦞 ClawCoach..." text, footer skeleton
-   - Matches real layout structure (`max-w-6xl`, `h-16` navbar, `overflow-x-clip`)
-   - **Committed**: `255898d`
-
 3. **Landing Page Updates — COMPLETE**
-   - Updated hero copy: nutrition goals, partner perks
-   - Added 🦞 emoji to all ClawCoach branding (footer, CTA section, loading screen)
-   - Replaced green Zap pill with Base blue (#0052FF) pill: Base logo SVG + "Built on Base with · ERC-8004 · ERC-8021 · ERC-8128"
-   - Stacked Farcaster + Base pills vertically above h1
-   - Reordered hero CTAs: I AM HUMAN/I AM NOT → Purchase $CLAWC → Connect/Start Staking
-   - **Committed**: `c67febc`, `65b97c2`, `d7cbe7b`
-
-4. **Telegram Bot Debugging (IN PROGRESS)**
-   - Bot responds to messages (webhook works, Claude API works)
-   - **Conversation history NOT persisting on Vercel** — `saveHistory` silently fails
-   - Works perfectly locally (Redis keys created, multi-turn memory works)
-   - Vercel webhook returns 200 but no `telegram:history:*` keys created in Redis
-   - **Root cause investigation**: Likely `UPSTASH_REDIS_REST_URL` or `UPSTASH_REDIS_REST_TOKEN` env vars on Vercel have whitespace/newline issues (same pattern as Privy app ID in S29)
-   - **Next step**: Run `vercel env pull` to inspect env var values, or `vercel env rm` + `vercel env add` with `printf` for both Upstash vars
-   - Rate limit keys (`ratelimit:chat:daily:*`) exist in Redis but may have been created locally, not on Vercel
+4. **Telegram Bot Debugging (resolved in S31)**
 
 ### Session 29
 
 1. **Fixed production crash — all browsers + mobile (P0)**
-   - **Root cause 1**: `NEXT_PUBLIC_PRIVY_APP_ID` on Vercel had trailing `\n` — Privy rejected it as invalid app ID
-   - **Fix**: Removed and re-added env var cleanly via `vercel env rm` + `vercel env add` with `printf` (no newline)
-   - **Root cause 2**: `@metamask/sdk` imports `@react-native-async-storage/async-storage` which doesn't exist in browser builds
-   - **Fix**: Added `turbopack.resolveAlias` (production) and `webpack.resolve.alias` (dev) in `next.config.ts` to stub the module
-   - **Added**: `src/app/global-error.tsx` for better error visibility on layout-level crashes
-   - **Committed**: `84754d6` — pushed, Vercel deploy succeeded
-   - **Verified**: Site loads in incognito (desktop) and on mobile (iOS Safari)
-
 2. **Wallet extension conflict diagnosed**
-   - MetaMask + Coinbase Wallet extensions fight over `window.ethereum` via `Object.defineProperty`
-   - Not our code — user should disable one extension. Privy handles multi-wallet via EIP-6963.
-
-### Session 28 (continued)
-
-1. **Privy Integration (TASK-017) — COMPLETE**
-   - Replaced wagmi-only auth with Privy for email + Farcaster + multi-wallet login
-   - **Installed**: `@privy-io/react-auth@3.13.1`, `@privy-io/wagmi@4.0.1`
-   - All 10 hook/component files that import from wagmi are UNCHANGED
-
-### Session 27
-
-1. **Multi-Token Pricing Page (TASK-012) — COMPLETE**
-2. **Telegram Conversation History — deployed but history doesn't persist on Vercel (see S30)**
-3. **Hero Orb Fix — COMPLETE**
-
-### Session 26
-
-1. **Fixed Mobile Wallet Connect (P0) — PARTIAL (reverted in S27)**
-2. **E2E Tested x402 Flow (P1) — COMPLETE**
-3. **Telegram Integration (P2) — COMPLETE (TASK-014)**
 
 ---
 
 ## What's In Progress
 
-1. **Tester agent page error** — `Address "0xB95....1116c"` error at agent profile. Need to confirm tester is on Base Sepolia (84532), not Ethereum Sepolia (11155111). If they are on Base Sepolia, investigate viem contract read error further.
-2. **Privy flow testing (TASK-017)** — Farcaster enabled in dashboard. Google OAuth in progress (needs Google Cloud Console setup). Email + mobile still untested.
+1. **Privy flow testing (TASK-017)** — Farcaster enabled in dashboard (untested). Google OAuth needs Google Cloud Console setup. Email + mobile still untested.
 
 ---
 
 ## What's Next (Priority Order)
 
-1. **Resolve tester agent page error** — Confirm chain, fix if needed
-2. **Complete Privy flow testing (P1)** — Test: Farcaster login (now enabled), Google OAuth (once configured), email login with burner, mobile wallet
-3. **Telegram wallet linking (P2)** — `/connect` command, one-time link code, Supabase `telegram_links` table
-4. **PartnerRewardPool contract (P2)** — Stage 2, partner token promos alongside $CLAWC
+1. **Run telegram_links SQL** — Michael: paste `docs/sql/telegram_links.sql` into Supabase SQL Editor to create the table
+2. **Register new agent** — Michael: register a new agent on the new contracts (agent page should work now with `.trim()` fix)
+3. **Complete Privy flow testing (P1)** — Test: Farcaster login, Google OAuth (once configured), email login with burner, mobile wallet
+4. **PartnerRewardPool contract (P2)** — Solidity + Foundry tests, Stage 2
 5. **Wearable integrations (P3)** — Strava, Apple Health, Garmin
 
 ---
@@ -169,7 +121,8 @@
 
 **NOT on Vercel**: PRIVATE_KEY, BASESCAN_KEY (deploy-only, never on hosted infra)
 
-**✅ FIXED S31**: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` cleaned and re-added via `printf`. Telegram history now works on production.
+**✅ FIXED S32**: Contract address env vars now `.trim()`'d in code — no more whitespace issues.
+**✅ FIXED S31**: Upstash env vars cleaned via `printf`.
 
 ---
 
@@ -192,6 +145,12 @@ User sends message
   → onMessageComplete fires:
     ├─ POST /api/messages → saves user + assistant messages to Supabase
     └─ XMTP mirror (if connected) → writes to XMTP DM
+
+Telegram wallet linking (NEW S32)
+  → User clicks "Generate Link Code" on agent page
+  → POST /api/telegram/link → generates 6-char code in Redis (10-min TTL)
+  → User sends /connect <CODE> to @ClawCoachBot
+  → Bot verifies code → upserts telegram_links in Supabase
 ```
 
 ### Supabase Project Details
@@ -201,13 +160,17 @@ User sends message
 | Reference ID | `agvdivapnrqpstvhkbmk` |
 | Region | East US (Ohio) |
 | URL | `https://agvdivapnrqpstvhkbmk.supabase.co` |
-| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions |
+| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions, **telegram_links (PENDING — run SQL)** |
 | RLS | Enabled on all tables, SELECT-only for anon key |
 
 ---
 
 ## Decisions Made
 
+- **Env var `.trim()` pattern**: All contract address env vars trimmed in `contracts.ts`. Permanent fix for recurring Vercel whitespace issue. (Session 32)
+- **Chain guard pattern**: `AgentPageContent` checks `useChainId()` against `baseSepolia.id`, shows "Switch to Base Sepolia" button via `useSwitchChain()`. (Session 32)
+- **Contract error parser**: `src/lib/contractErrors.ts` maps viem errors to user-friendly strings. Used in `useAgentReads` error display + `useRegisterAgent` error display. (Session 32)
+- **Telegram wallet linking**: One-time codes via Redis, `/connect` command in bot, `telegram_links` table in Supabase. Code format: 6 uppercase alphanumeric, 10-min TTL. (Session 32)
 - **Loading skeleton pattern**: WalletProvider mount guard shows navbar/content/footer skeleton instead of `null`. Uses shadcn `Skeleton` component. (Session 30)
 - **🦞 branding standard**: All visible ClawCoach references use `🦞 Claw<span class="text-primary">Coach</span>` — navbar (S28), footer (S30), landing CTA (S30), loading skeleton (S30). (Session 30)
 - **Base pill (brand-compliant)**: Filled `#0000FF` background, white text, rounded square logo (5% radius). Per base.org/brand/core-identifiers. (Session 31, replaces S30)
@@ -236,8 +199,8 @@ User sends message
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 30)
-- `pnpm build`: **PASSES** (19 routes, Session 30) — Vercel deploy succeeds
+- `pnpm typecheck`: **PASSES** (Session 32)
+- `pnpm build`: **PASSES** (20 routes, Session 32) — Vercel deploy succeeds
 
 ---
 
@@ -254,7 +217,7 @@ User sends message
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
 - **CLAWC supply**: 10,000 CLAWC
 - **Staked**: 9,500 CLAWC | **Wallet**: ~475 CLAWC | **FeeCollector**: ~25 CLAWC
-- **Agents**: 0 (no agent registered on new contracts yet)
+- **Agents**: 0 (no agent registered on new contracts yet — Michael needs to register)
 
 ---
 
@@ -269,8 +232,8 @@ User sends message
 - **NOT configured**: Coinbase Wallet project ID
 - **Deps**: `@privy-io/react-auth` ^3.13.1, `@privy-io/wagmi` ^4.0.1, `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0
 - **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
-- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history — **working on Vercel since S31**)
+- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history), `telegram:linkcode:<CODE>` (wallet link codes, 10-min TTL — **NEW S32**)
 
 ---
 
-*Last updated: Feb 12, 2026 — Session 31*
+*Last updated: Feb 12, 2026 — Session 32*

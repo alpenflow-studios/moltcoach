@@ -19,6 +19,25 @@ _(none)_
 
 ---
 
+#### TASK-018: Telegram Wallet Linking
+- **Priority**: P2
+- **Scope**: `src/app/api/telegram/link/route.ts`, `src/app/api/telegram/route.ts`, `src/components/agent/LinkTelegram.tsx`, `src/types/database.ts`
+- **Started**: Session 32 (Feb 12, 2026)
+- **Completed**: Session 32 (Feb 12, 2026) — code complete, table pending
+- **Notes**: One-time link codes via Redis. `/connect <CODE>` bot command. `LinkTelegram` UI card on agent page. SQL at `docs/sql/telegram_links.sql`.
+- **Acceptance Criteria**:
+  - [x] `POST /api/telegram/link` generates 6-char code (Redis, 10-min TTL)
+  - [x] `/connect <CODE>` bot command verifies code and upserts `telegram_links`
+  - [x] `LinkTelegram` UI card on agent page
+  - [x] `telegram_links` table types in `database.ts`
+  - [x] SQL migration written (`docs/sql/telegram_links.sql`)
+  - [ ] `telegram_links` table created in Supabase (Michael: run SQL in dashboard)
+  - [ ] End-to-end test: generate code → send `/connect` → verify link in Supabase
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm build` passes
+
+---
+
 #### TASK-015: Vercel Deployment + Password Protection
 - **Priority**: P0
 - **Scope**: Vercel project, env vars, domain, middleware

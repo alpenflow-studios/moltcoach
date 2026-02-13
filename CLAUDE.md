@@ -151,12 +151,14 @@ Implemented tables:
 - `coaching_sessions` — Structured coaching session records
 - `subscriptions` — User subscription records
 
+Implemented (pending SQL):
+- `telegram_links` — Telegram chat-to-wallet mappings (code complete S32, run `docs/sql/telegram_links.sql`)
+
 Planned tables:
 - `agent_personas` — Personality, heartbeat, persona config per agent
 - `wearable_connections` — Strava, Apple Health, Garmin links
 - `clawc_rewards` — $CLAWC earning history
 - `clawc_stakes` — $CLAWC staking positions
-- `telegram_links` — Telegram chat-to-wallet mappings
 
 ---
 

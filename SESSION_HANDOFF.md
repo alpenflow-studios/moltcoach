@@ -7,21 +7,29 @@
 ## Last Session
 
 - **Date**: 2026-02-13
-- **Duration**: Session 34
+- **Duration**: Session 35
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
-- **Commits**: NOT YET COMMITTED (all changes staged, awaiting Michael's approval)
+- **Commits**: `86b337b` — fix(onboarding): default isOnboarded to false so onboarding greeting shows immediately
 
 ---
 
 ## What Was Done
 
-### Session 34
+### Session 35
+
+1. **Session start housekeeping** — Updated all handoff files for S35 start
+2. **Michael ran SQL scripts** — All 3 TASK-019 scripts executed in Supabase SQL Editor
+3. **Michael verified XMTP** — Production XMTP connection confirmed working
+4. **Supabase data reset** — Cleared 8 old messages via REST API for fresh onboarding test
+5. **Bug fix: onboarding greeting default** — `isOnboarded` defaulted to `true` before sync response, showing motivator greeting instead of onboarding interview. Fixed default to `false` (`86b337b`)
+6. **Confirmed production API correctness** — Curled `/api/agents/sync` and `/api/messages` on production, both return correct data (`onboarding_complete: false`, `[]` messages)
+
+### Session 34 (recap)
 
 1. **TASK-019: Conversational Onboarding + Agent Memory — CODE COMPLETE**
    - Built the full onboarding + memory system (Big Four #1 + #2)
-   - 6 new files, 7 modified files, all typecheck + build passing
-   - **Awaiting**: Michael to run 3 SQL scripts in Supabase + commit + deploy
+   - 6 new files, 7 modified files, committed as `f3d640b`
 
    **New files created:**
    - `docs/sql/agent_onboarding.sql` — ALTER agents ADD onboarding_complete
@@ -70,11 +78,10 @@
 
 ## What's In Progress
 
-1. **TASK-019 SQL scripts** — Michael needs to run 3 scripts in Supabase SQL Editor (order: agent_onboarding → agent_personas → agent_memory_notes)
-2. **TASK-019 commit + deploy** — Code complete, needs commit + push + Vercel deploy
-3. **XMTP production verification** — Carried from S33, Michael needs to verify
-4. **Agent registration** — 0 agents on new contracts, Michael needs to register one
-5. **Privy flow testing (TASK-017)** — Farcaster, email, mobile, Google OAuth untested
+1. ~~TASK-019 SQL scripts~~ — **DONE** (S35)
+2. ~~XMTP production verification~~ — **DONE** (S35)
+3. **TASK-019 e2e test** — Onboarding default fix deployed (`86b337b`). Supabase data reset. Michael: reload `/agent`, confirm onboarding greeting shows, test full flow
+4. **Privy flow testing (TASK-017)** — Farcaster, email, mobile, Google OAuth untested
 
 ---
 
@@ -182,15 +189,15 @@ Telegram wallet linking (verified S33)
 | Reference ID | `agvdivapnrqpstvhkbmk` |
 | Region | East US (Ohio) |
 | URL | `https://agvdivapnrqpstvhkbmk.supabase.co` |
-| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions, telegram_links |
-| Pending (S34) | agent_personas, agent_memory_notes (Michael: run SQL scripts) |
-| New column (S34) | agents.onboarding_complete (Michael: run SQL script) |
+| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions, telegram_links, agent_personas, agent_memory_notes |
+| New column (S35) | agents.onboarding_complete (added) |
 | RLS | Enabled on all tables, SELECT-only for anon key |
 
 ---
 
 ## Decisions Made
 
+- **Onboarding default false**: `isOnboarded` in AgentChat defaults to `false` (not `true`). Show onboarding greeting until sync confirms user IS onboarded. (Session 35)
 - **Zod for extraction validation**: Installed `zod` for persona + memory extraction schemas. First Zod usage in project (global CLAUDE.md mandates it). (Session 34)
 - **resolveSystemPrompt is async + shared**: Single async function in `systemPrompt.ts` handles all prompt resolution for both chat routes. Does Supabase queries to check onboarding status, fetch persona, fetch memory. (Session 34)
 - **agentDbId threading**: Supabase UUID flows AgentPageContent → AgentChat → useChat → /api/chat → resolveSystemPrompt. Optional everywhere for backward compat (Telegram still uses generic prompt). (Session 34)
@@ -214,8 +221,8 @@ Telegram wallet linking (verified S33)
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 34)
-- `pnpm build`: **PASSES** (21 routes, `--webpack`, Session 34) — includes new `/api/chat/extract`
+- `pnpm typecheck`: **PASSES** (Session 35)
+- `pnpm build`: **PASSES** (21 routes, `--webpack`, Session 35)
 
 ---
 
@@ -232,7 +239,7 @@ Telegram wallet linking (verified S33)
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
 - **CLAWC supply**: 10,000 CLAWC
 - **Staked**: 9,500 CLAWC | **Wallet**: ~475 CLAWC | **FeeCollector**: ~25 CLAWC
-- **Agents**: 0 (no agent registered on new contracts yet — Michael needs to register)
+- **Agents**: 1 (deployer wallet has agent "daddy" on-chain, Supabase synced, onboarding reset to fresh state)
 
 ---
 
@@ -265,4 +272,4 @@ Telegram wallet linking (verified S33)
 
 ---
 
-*Last updated: Feb 13, 2026 — Session 34*
+*Last updated: Feb 13, 2026 — Session 35 end*

@@ -79,12 +79,12 @@ _No tasks in this state._
 - **Scope**: `src/lib/systemPrompt.ts`, `src/app/api/chat/route.ts`, `src/app/api/chat/extract/route.ts`, `src/lib/personaExtractor.ts`, `src/lib/memoryExtractor.ts`, `src/types/database.ts`, `src/components/agent/AgentChat.tsx`, `src/components/agent/AgentPageContent.tsx`
 - **Designed**: Session 33 (Feb 12, 2026)
 - **Code Complete**: Session 34 (Feb 13, 2026) — 6 new files, 7 modified, typecheck + build pass
-- **Awaiting**: Michael to run SQL scripts + commit + deploy
+- **Bug fix**: S35 — `isOnboarded` default `true→false` (`86b337b`). Supabase data reset for fresh test.
 - **Notes**: The "Big Four" feature #1+#2. Onboarding interview builds persona via Haiku extraction (~$0.001/call). Memory notes persist across conversations (max 50, oldest pruned). `zod` added for extraction validation.
 - **Acceptance Criteria**:
-  - [ ] SQL: `agent_personas` table created in Supabase (Michael: run `docs/sql/agent_personas.sql`)
-  - [ ] SQL: `agent_memory_notes` table created in Supabase (Michael: run `docs/sql/agent_memory_notes.sql`)
-  - [ ] SQL: `onboarding_complete` column added to `agents` table (Michael: run `docs/sql/agent_onboarding.sql`)
+  - [x] SQL: `agent_personas` table created in Supabase
+  - [x] SQL: `agent_memory_notes` table created in Supabase
+  - [x] SQL: `onboarding_complete` column added to `agents` table
   - [x] Types: `agent_personas` + `agent_memory_notes` in `database.ts`
   - [x] Onboarding system prompt guides agent to interview user (~5-8 questions)
   - [x] Persona-aware system prompt includes user profile + memory notes
@@ -96,9 +96,9 @@ _No tasks in this state._
   - [x] Memory notes accumulate over conversations (max 50, oldest pruned)
   - [x] `pnpm typecheck` passes
   - [x] `pnpm build` passes
-  - [ ] Changes committed + pushed
-  - [ ] Deployed to Vercel
-  - [ ] End-to-end tested with registered agent
+  - [x] Changes committed + pushed (`f3d640b`, `86b337b`)
+  - [x] Deployed to Vercel (auto-deploy on push)
+  - [ ] End-to-end tested with registered agent (S35: SQL done, agent exists, default fix deployed — Michael to test)
 
 ---
 

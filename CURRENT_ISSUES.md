@@ -10,7 +10,7 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| — | — | — | — | — |
+| 1 | TASK-019 SQL scripts not yet run | Supabase SQL Editor | S34 | Michael: run `agent_onboarding.sql` → `agent_personas.sql` → `agent_memory_notes.sql` in order. Code is complete but won't work until tables exist. |
 
 ---
 
@@ -18,8 +18,9 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| 1 | XMTP production fix awaiting verification | clawcoach.ai | S33 | Build switched to `--webpack` (`02c9c5d`). Michael: verify XMTP connects on production after Vercel deploys. |
-| 2 | New Supabase tables needed for onboarding | Supabase SQL Editor | S33 | `agent_personas`, `agent_memory_notes`, + `onboarding_complete` column on `agents`. SQL files to be written in S34. |
+| 1 | XMTP production fix awaiting verification | clawcoach.ai | S33 | Build switched to `--webpack` (`02c9c5d`). Michael: verify XMTP connects on production. |
+| 2 | 0 agents on new contracts | Base Sepolia | S33 | Michael needs to register an agent via the /agent page. Required for testing onboarding. |
+| 3 | TASK-019 not yet committed/deployed | git / Vercel | S34 | Code complete, typecheck + build pass. Needs commit + push + Vercel deploy. |
 
 ---
 
@@ -28,7 +29,8 @@
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
 | 1 | x402 paid route is non-streaming | `src/app/api/chat/paid/route.ts` | S24 | `withX402` expects `NextResponse<T>`, so paid route uses `messages.create` not `messages.stream`. Consider streaming upgrade later. |
-| 2 | Orphaned chat messages from pre-Phase 7 agents | Supabase `messages` table | S32 | Old messages tied to old agent UUIDs. Not actively breaking anything. Could clean up or migrate later. Not a launch blocker. |
+| 2 | Orphaned chat messages from pre-Phase 7 agents | Supabase `messages` table | S32 | Old messages tied to old agent UUIDs. Not actively breaking anything. |
+| 3 | Telegram bot not persona-aware | `src/app/api/telegram/route.ts` | S34 | Telegram still uses generic `buildSystemPrompt()`. Should use `resolveSystemPrompt()` with linked wallet's agent. Follow-up task. |
 
 ---
 
@@ -46,11 +48,11 @@
 
 | # | Issue | Resolution | Date |
 |---|-------|------------|------|
-| 1 | XMTP infinite spinner on production | Root cause: `next build` used Turbopack (Next.js 16 default), XMTP WASM config only in webpack block. Fix: `--webpack` flag on build + 30s timeout + `.trim()` on XMTP address. | S33 |
-| 2 | `telegram_links` table not created | Michael ran SQL in Supabase dashboard. Telegram bot verified working end-to-end. | S33 |
-| 3 | Agent page `Address "0xB95..."` error | `.trim()` on all contract address env vars in `contracts.ts`. Chain guard UX + error parser added. | S32 |
-| 4 | Telegram history not persisting on Vercel | Upstash env vars had whitespace. Cleaned via `printf`. | S31 |
-| 5 | Production crash — all browsers | Privy App ID trailing `\n` + MetaMask SDK React Native import. | S29 |
+| 1 | Supabase tables needed for onboarding | SQL files written in S34 (`docs/sql/agent_onboarding.sql`, `agent_personas.sql`, `agent_memory_notes.sql`). Michael to run. | S34 |
+| 2 | XMTP infinite spinner on production | Root cause: `next build` used Turbopack. Fix: `--webpack` flag + 30s timeout + `.trim()`. | S33 |
+| 3 | `telegram_links` table not created | Michael ran SQL in Supabase dashboard. Telegram bot verified working. | S33 |
+| 4 | Agent page `Address "0xB95..."` error | `.trim()` on all contract address env vars in `contracts.ts`. | S32 |
+| 5 | Telegram history not persisting on Vercel | Upstash env vars had whitespace. Cleaned via `printf`. | S31 |
 
 ---
 

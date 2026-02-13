@@ -6,101 +6,82 @@
 
 ## Last Session
 
-- **Date**: 2026-02-12
-- **Duration**: Session 33
+- **Date**: 2026-02-13
+- **Duration**: Session 34
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
-- **Commits**: `02c9c5d`, `1d59d74`, `16c3b8f`
+- **Commits**: NOT YET COMMITTED (all changes staged, awaiting Michael's approval)
 
 ---
 
 ## What Was Done
 
-### Session 33
+### Session 34
 
-1. **Fixed XMTP Production Spinner (P0) — COMPLETE**
-   - Root cause: `next build` used Turbopack (Next.js 16 default), but all XMTP WASM config was in the `webpack` block — completely ignored on production
-   - Fix: Changed `"build": "next build"` → `"build": "next build --webpack"` in `package.json`
-   - Also added `.trim()` to XMTP address env var in `src/config/xmtp.ts` (Vercel whitespace prevention)
-   - Also added 30s timeout to `Client.create()` in `src/hooks/useXmtpClient.ts` — fails with error message instead of spinning forever
-   - **Committed**: `02c9c5d` (pushed, Vercel deploying)
-   - **Status**: Michael needs to verify XMTP connects on production after deploy
+1. **TASK-019: Conversational Onboarding + Agent Memory — CODE COMPLETE**
+   - Built the full onboarding + memory system (Big Four #1 + #2)
+   - 6 new files, 7 modified files, all typecheck + build passing
+   - **Awaiting**: Michael to run 3 SQL scripts in Supabase + commit + deploy
 
-2. **Brand Guide — COMPLETE**
-   - Created `docs/BRAND.md` with full brand package
-   - Primary green: `#7CCF00` (oklch 0.768 0.233 130.85)
-   - Background: `#09090B` (zinc-950), Card: `#18181B` (zinc-900)
-   - Fonts: Geist (body) + Geist Mono (code) via Google Fonts
-   - Design system: shadcn/ui New York, zinc base, lucide-react icons
-   - Asset checklist: logo.svg, favicon, og-image (Michael providing agent bot head as logo)
-   - **Committed**: `1d59d74`
+   **New files created:**
+   - `docs/sql/agent_onboarding.sql` — ALTER agents ADD onboarding_complete
+   - `docs/sql/agent_personas.sql` — persona table (8 fields, UNIQUE FK to agents)
+   - `docs/sql/agent_memory_notes.sql` — memory notes table (content + category, max 50)
+   - `src/lib/personaExtractor.ts` — Haiku extracts persona from onboarding conversation
+   - `src/lib/memoryExtractor.ts` — Haiku extracts 0-3 memory notes per exchange
+   - `src/app/api/chat/extract/route.ts` — extraction endpoint (persona upsert + memory insert with 50-note cap)
 
-3. **Agent Runtime Architecture Spec — COMPLETE**
-   - Created `docs/AGENT_RUNTIME.md` — full spec for autonomous agent runtime
-   - Claude Agent SDK (`@anthropic-ai/claude-agent-sdk` ^0.2.41) = brain (reasoning, tool use, session persistence)
-   - Coinbase AgentKit (`@coinbase/agentkit` ^0.10.4) = wallet + on-chain actions (50+ actions, Privy wallet support, Base first-class)
-   - Connected via MCP (Model Context Protocol) — AgentKit exposes tools as MCP server, Claude Agent SDK consumes them
-   - 4 implementation phases: Runtime MVP → Agent Wallet → Agent Hub → Autonomous Actions
-   - Covers: agent wallets, custom MCP tools, human-in-the-loop guardrails, agent-to-agent communication, web browsing (Playwright)
-   - **Committed**: `16c3b8f`
+   **Modified files:**
+   - `src/types/database.ts` — `onboarding_complete` on agents + 2 new table types
+   - `src/lib/systemPrompt.ts` — `buildOnboardingPrompt()`, `buildPersonaAwarePrompt()`, `resolveSystemPrompt()` (async, shared by both chat routes)
+   - `src/app/api/chat/route.ts` — accepts `agentDbId`, uses `resolveSystemPrompt`
+   - `src/app/api/chat/paid/route.ts` — same changes
+   - `src/hooks/useChat.ts` — passes `agentDbId` to API
+   - `src/components/agent/AgentPageContent.tsx` — captures `agentDbId` + `onboardingComplete` from agent sync response
+   - `src/components/agent/AgentChat.tsx` — onboarding greeting, extraction trigger in `handleMessageComplete`, toast on completion
 
-4. **Telegram Wallet Linking — VERIFIED WORKING**
-   - Michael confirmed Telegram bot is working end-to-end
-   - `telegram_links` table was created in Supabase (no longer a blocker)
+   **Dependencies added:**
+   - `zod` (runtime validation for extraction schemas)
 
-5. **Onboarding + Agent Memory — DESIGNED (not yet implemented)**
-   - Full plan designed for conversational onboarding + persona storage + memory notes
-   - See "Next Task" section below for complete implementation plan
+   **Architecture:**
+   ```
+   User sends message
+     → POST /api/chat (with agentDbId)
+     → resolveSystemPrompt() checks onboarding_complete in Supabase
+       ├─ NOT onboarded → buildOnboardingPrompt (interview mode)
+       └─ Onboarded → buildPersonaAwarePrompt (persona + memory notes injected)
+     → Claude streams response
+     → onMessageComplete fires:
+       ├─ POST /api/messages (save to Supabase)
+       ├─ XMTP mirror (if connected)
+       └─ POST /api/chat/extract (async, Haiku)
+           ├─ Onboarding mode → extract persona, upsert agent_personas, flip onboarding_complete
+           └─ Memory mode → extract 0-3 notes, prune if >50, insert agent_memory_notes
+   ```
 
-### Session 32
+### Session 33 (recap)
 
-1. **Fixed Agent Page Address Error (P0) — COMPLETE**
-2. **Chain Guard UX — COMPLETE**
-3. **Telegram Wallet Linking (code) — COMPLETE**
-4. **Chat History — Expected Fresh Start**
-
-### Session 31
-
-1. **Fixed Telegram Redis on Vercel (P1) — COMPLETE**
-2. **Landing Page Updates — COMPLETE**
+1. Fixed XMTP Production Spinner — `02c9c5d`
+2. Brand Guide — `1d59d74`
+3. Agent Runtime Architecture Spec — `16c3b8f`
+4. Handoff docs — `b6924b3`
 
 ---
 
 ## What's In Progress
 
-1. **XMTP production fix** — Code pushed (`02c9c5d`), awaiting Vercel deploy verification
-2. **Privy flow testing (TASK-017)** — Farcaster enabled (untested). Google OAuth needs Google Cloud Console. Email + mobile untested.
+1. **TASK-019 SQL scripts** — Michael needs to run 3 scripts in Supabase SQL Editor (order: agent_onboarding → agent_personas → agent_memory_notes)
+2. **TASK-019 commit + deploy** — Code complete, needs commit + push + Vercel deploy
+3. **XMTP production verification** — Carried from S33, Michael needs to verify
+4. **Agent registration** — 0 agents on new contracts, Michael needs to register one
+5. **Privy flow testing (TASK-017)** — Farcaster, email, mobile, Google OAuth untested
 
 ---
 
 ## What's Next (Priority Order) — THE BIG FOUR
 
-Michael approved building these in order. This is the core product experience:
-
-### 1. Conversational Onboarding ("the birth of your agent")
-When a user registers an agent, instead of a blank chat, the agent interviews them:
-- "What's your fitness level?" / "What motivates you?" / "How often should I check in?"
-- Answers become the agent's persona (stored in Supabase `agent_personas`)
-- Every future conversation is shaped by this — agent isn't generic anymore
-
-**Implementation plan (ready to build):**
-- New `agent_personas` table (SQL migration at `docs/sql/agent_personas.sql`)
-- New `agent_memory_notes` table (SQL migration at `docs/sql/agent_memory_notes.sql`)
-- Add `onboarding_complete` boolean to `agents` table
-- New `buildOnboardingPrompt()` in `src/lib/systemPrompt.ts`
-- `/api/chat` checks onboarding status → uses onboarding or persona-aware prompt
-- New `/api/chat/extract` endpoint — Haiku extracts persona from conversation (async, after each message)
-- When Haiku says `onboarding_complete: true` → save persona, switch to normal mode
-- Frontend: AgentChat triggers extraction in `handleMessageComplete`, passes agentDbId + onboardingComplete
-- Cost: ~$0.001 per extraction call (Haiku), negligible
-
-### 2. Agent Memory (Session Persistence)
-Replace stateless chat with persistent context:
-- Agent remembers fitness goals, workout history, personal details
-- Memory notes extracted after each conversation (Haiku, async)
-- Stored in `agent_memory_notes` table, injected into system prompt
-- Cap: 50 notes per agent, oldest pruned
-- "How was that 5K you mentioned Tuesday?" — this is what makes it a coach, not a chatbot
+### 1. Conversational Onboarding — CODE COMPLETE (S34)
+### 2. Agent Memory — CODE COMPLETE (S34, same implementation)
 
 ### 3. Proactive Telegram Nudges
 Agent reaches out to YOU instead of waiting:
@@ -112,34 +93,11 @@ Agent reaches out to YOU instead of waiting:
 ### 4. Agent Hub as Social Feed
 `/hub` becomes a live feed of agent activity:
 - "Coach Alpha earned 50 CLAWC (coached @michael through leg day)"
-- "Coach Bravo registered on ClawCoach (specializes in marathon training)"
 - Agents have profiles, stats, reputation
 - Agent-to-agent XMTP messaging + $CLAWC payments
 
-**All four serve one idea: the agent is a character, not a feature.**
-
----
-
-## Key Files for Next Session (Onboarding Implementation)
-
-| File | Action | Purpose |
-|------|--------|---------|
-| `docs/sql/agent_personas.sql` | CREATE | New table: persona data per agent |
-| `docs/sql/agent_memory_notes.sql` | CREATE | New table: memory notes per agent |
-| `docs/sql/agent_onboarding.sql` | CREATE | ALTER agents ADD onboarding_complete |
-| `src/types/database.ts` | MODIFY | Add agent_personas + agent_memory_notes types |
-| `src/lib/systemPrompt.ts` | MODIFY | Add onboarding prompt + persona-aware prompt |
-| `src/lib/personaExtractor.ts` | CREATE | Haiku extraction function + Zod validation |
-| `src/lib/memoryExtractor.ts` | CREATE | Memory note extraction function |
-| `src/app/api/chat/route.ts` | MODIFY | Accept agentId, fetch persona, build enriched prompt |
-| `src/app/api/chat/extract/route.ts` | CREATE | Extraction endpoint (onboarding + memory) |
-| `src/app/api/chat/paid/route.ts` | MODIFY | Same changes as free route |
-| `src/hooks/useChat.ts` | MODIFY | Add agentId to options + API call |
-| `src/components/agent/AgentChat.tsx` | MODIFY | New props, extraction trigger |
-| `src/components/agent/AgentPageContent.tsx` | MODIFY | Capture agentDbId + onboardingComplete |
-| `src/app/api/agents/sync/route.ts` | MODIFY | Return onboarding_complete in response |
-
-**Extraction approach**: After each assistant response, client fires `POST /api/chat/extract` (fire-and-forget). Haiku extracts persona fields (onboarding) or memory notes (normal chat). When onboarding_complete → switch to persona-aware coaching mode.
+**Also planned:**
+- Make Telegram bot persona-aware (currently uses generic `buildSystemPrompt`)
 
 ---
 
@@ -181,11 +139,6 @@ Agent reaches out to YOU instead of waiting:
 
 **NOT on Vercel**: PRIVATE_KEY, BASESCAN_KEY (deploy-only, never on hosted infra)
 
-**FIXED S33**: Build now uses `--webpack` (was Turbopack, broke XMTP WASM on production).
-**FIXED S33**: XMTP address env var now `.trim()`'d.
-**FIXED S32**: Contract address env vars `.trim()`'d.
-**FIXED S31**: Upstash env vars cleaned via `printf`.
-
 ---
 
 ## Supabase Architecture (Implemented)
@@ -197,16 +150,23 @@ User connects wallet
 
 User visits /agent with existing agent
   → AgentPageContent effect → POST /api/agents/sync → upserts agent in Supabase
+  → Response includes agentDbId + onboarding_complete (captured in state)
   → useChatHistory → GET /api/messages → loads prior chat history
   → useChat seeds with Supabase history (priority) or XMTP history (fallback)
 
 User sends message
-  → POST /api/chat → Claude streams response (free tier)
+  → POST /api/chat (with agentDbId) → resolveSystemPrompt checks onboarding status
+    ├─ NOT onboarded → buildOnboardingPrompt (interview mode, ~5-8 questions)
+    └─ Onboarded → buildPersonaAwarePrompt (persona + memory injected)
+  → Claude streams response (free tier)
   → If free tier exceeded → 402 with paidEndpoint info
   → POST /api/chat/paid → x402 payment + Claude response (paid tier)
   → onMessageComplete fires:
     ├─ POST /api/messages → saves user + assistant messages to Supabase
-    └─ XMTP mirror (if connected) → writes to XMTP DM
+    ├─ XMTP mirror (if connected) → writes to XMTP DM
+    └─ POST /api/chat/extract → Haiku extracts persona (onboarding) or memory notes (normal)
+        ├─ Onboarding: upsert agent_personas, flip onboarding_complete when ready
+        └─ Memory: insert notes (max 50, oldest pruned)
 
 Telegram wallet linking (verified S33)
   → User clicks "Generate Link Code" on agent page
@@ -223,33 +183,27 @@ Telegram wallet linking (verified S33)
 | Region | East US (Ohio) |
 | URL | `https://agvdivapnrqpstvhkbmk.supabase.co` |
 | Tables | users, agents, messages, workouts, coaching_sessions, subscriptions, telegram_links |
-| Pending | agent_personas, agent_memory_notes (create in S34) |
+| Pending (S34) | agent_personas, agent_memory_notes (Michael: run SQL scripts) |
+| New column (S34) | agents.onboarding_complete (Michael: run SQL script) |
 | RLS | Enabled on all tables, SELECT-only for anon key |
 
 ---
 
 ## Decisions Made
 
-- **Production build uses webpack**: `next build --webpack` — Turbopack can't handle XMTP WASM. Dev already used `--webpack`. (Session 33)
-- **XMTP connection timeout**: 30s timeout via `Promise.race()` on `Client.create()`. Fails with error message instead of infinite spinner. (Session 33)
-- **XMTP address `.trim()`**: Added to `src/config/xmtp.ts` for Vercel whitespace safety. (Session 33)
+- **Zod for extraction validation**: Installed `zod` for persona + memory extraction schemas. First Zod usage in project (global CLAUDE.md mandates it). (Session 34)
+- **resolveSystemPrompt is async + shared**: Single async function in `systemPrompt.ts` handles all prompt resolution for both chat routes. Does Supabase queries to check onboarding status, fetch persona, fetch memory. (Session 34)
+- **agentDbId threading**: Supabase UUID flows AgentPageContent → AgentChat → useChat → /api/chat → resolveSystemPrompt. Optional everywhere for backward compat (Telegram still uses generic prompt). (Session 34)
+- **Onboarding completion threshold**: Haiku sets `onboarding_complete: true` when at least fitness_level + goals + schedule are filled. (Session 34)
+- **Memory note categories**: general, preference, achievement, health, schedule. Enforced in Zod schema, stored as TEXT in DB. (Session 34)
+- **Extraction model**: `claude-haiku-4-5-20251001` for both persona and memory extraction. ~$0.001/call. (Session 34)
+- **Production build uses webpack**: `next build --webpack` — Turbopack can't handle XMTP WASM. (Session 33)
 - **Brand colors**: Primary `#7CCF00`, Background `#09090B`, Card `#18181B`. Full guide at `docs/BRAND.md`. (Session 33)
 - **Agent runtime architecture**: Claude Agent SDK + Coinbase AgentKit via MCP. Spec at `docs/AGENT_RUNTIME.md`. (Session 33)
-- **Onboarding extraction via Haiku**: Async extraction call after each message (not markers in response, not message counting). Cheap (~$0.001/call), reliable, decoupled from streaming. (Session 33, designed)
-- **Agent memory as notes table**: Flat `agent_memory_notes` rows, not JSONB. Max 50 per agent. Oldest pruned. (Session 33, designed)
-- **Env var `.trim()` pattern**: All contract address env vars trimmed in `contracts.ts`. Permanent fix for recurring Vercel whitespace issue. (Session 32)
-- **Chain guard pattern**: `AgentPageContent` checks `useChainId()` against `baseSepolia.id`, shows "Switch to Base Sepolia" button via `useSwitchChain()`. (Session 32)
-- **Contract error parser**: `src/lib/contractErrors.ts` maps viem errors to user-friendly strings. (Session 32)
+- **Env var `.trim()` pattern**: All contract address env vars trimmed in `contracts.ts`. (Session 32)
+- **Chain guard pattern**: `AgentPageContent` checks `useChainId()` against `baseSepolia.id`. (Session 32)
 - **Telegram wallet linking**: One-time codes via Redis, `/connect` command in bot, `telegram_links` table. (Session 32)
-- **Loading skeleton pattern**: WalletProvider mount guard shows navbar/content/footer skeleton. (Session 30)
-- **🦞 branding standard**: All visible ClawCoach references use `🦞 Claw<span class="text-primary">Coach</span>`. (Session 30)
-- **Base pill (brand-compliant)**: Filled `#0000FF` background, white text, 5% radius. (Session 31)
-- **MetaMask SDK stub pattern**: `@react-native-async-storage/async-storage` aliased to empty. (Session 29)
-- **Vercel env var hygiene**: Always use `printf` (not `echo`). (Session 29)
 - **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. (Session 28)
-- **Privy App ID**: `cmlj0izut00hg0cjrd7rrm80b` (Session 28)
-- **Pricing simplified to 3 tiers**: Free/Pro/Elite. (Session 27)
-- **Telegram history in Redis**: 20 msg cap, 7-day TTL. (Session 27)
 - **Dev bundler**: webpack (not Turbopack) for XMTP WASM compat. (Session 16)
 - **Theme**: Dark mode, lime primary on zinc
 - **Brand**: ClawCoach (clawcoach.ai)
@@ -260,8 +214,8 @@ Telegram wallet linking (verified S33)
 
 - `forge build`: **PASSES** (exit 0, lint notes only)
 - `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 33)
-- `pnpm build`: **PASSES** (20 routes, `--webpack`, Session 33) — Vercel deploy succeeds
+- `pnpm typecheck`: **PASSES** (Session 34)
+- `pnpm build`: **PASSES** (21 routes, `--webpack`, Session 34) — includes new `/api/chat/extract`
 
 ---
 
@@ -289,22 +243,26 @@ Telegram wallet linking (verified S33)
 - **Vercel CLI**: v50.13.2
 - **Project**: `~/Projects/moltcoach`
 - **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
-- **Production build**: `pnpm build` now uses `--webpack` (S33 fix)
+- **Production build**: `pnpm build` uses `--webpack` (S33 fix)
 - **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY, TELEGRAM_BOT_TOKEN
 - **NOT configured**: Coinbase Wallet project ID, CDP API keys (needed for AgentKit Phase 2)
-- **Deps**: `@privy-io/react-auth` ^3.13.1, `@privy-io/wagmi` ^4.0.1, `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0
+- **Deps**: `@privy-io/react-auth` ^3.13.1, `@privy-io/wagmi` ^4.0.1, `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0, `zod` (new S34)
 - **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
 - **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history), `telegram:linkcode:<CODE>` (wallet link codes, 10-min TTL)
 
 ---
 
-## New Documents Created This Session
+## Key Files for Next Session
 
-| Document | Path | Purpose |
-|----------|------|---------|
-| Brand Guide | `docs/BRAND.md` | Colors (`#7CCF00`), fonts (Geist), design system, asset checklist |
-| Agent Runtime Spec | `docs/AGENT_RUNTIME.md` | Claude Agent SDK + Coinbase AgentKit architecture, 4 implementation phases |
+| File | Purpose |
+|------|---------|
+| `src/lib/systemPrompt.ts` | All prompt logic: generic, onboarding, persona-aware, resolveSystemPrompt |
+| `src/lib/personaExtractor.ts` | Haiku persona extraction with Zod validation |
+| `src/lib/memoryExtractor.ts` | Haiku memory note extraction with Zod validation |
+| `src/app/api/chat/extract/route.ts` | Extraction endpoint: orchestrates persona upsert + memory insert |
+| `src/components/agent/AgentChat.tsx` | Frontend: extraction trigger, onboarding state, greeting logic |
+| `src/components/agent/AgentPageContent.tsx` | Captures agentDbId + onboardingComplete from sync response |
 
 ---
 
-*Last updated: Feb 12, 2026 — Session 33*
+*Last updated: Feb 13, 2026 — Session 34*

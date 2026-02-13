@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { buildSystemPrompt } from "@/lib/systemPrompt";
+import { resolveSystemPrompt } from "@/lib/systemPrompt";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { checkFreeMessages } from "@/lib/freeMessages";
 import type { ChatMessage } from "@/types/chat";
@@ -10,6 +10,7 @@ type ChatRequestBody = {
   messages: ChatMessage[];
   agentName: string;
   coachingStyle: string;
+  agentDbId?: string;
 };
 
 function isValidBody(body: unknown): body is ChatRequestBody {
@@ -19,7 +20,8 @@ function isValidBody(body: unknown): body is ChatRequestBody {
     Array.isArray(b.messages) &&
     typeof b.agentName === "string" &&
     typeof b.coachingStyle === "string" &&
-    b.messages.length > 0
+    b.messages.length > 0 &&
+    (b.agentDbId === undefined || typeof b.agentDbId === "string")
   );
 }
 
@@ -67,9 +69,9 @@ export async function POST(req: Request): Promise<Response> {
       return Response.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { messages, agentName, coachingStyle } = body;
+    const { messages, agentName, coachingStyle, agentDbId } = body;
 
-    const systemPrompt = buildSystemPrompt(agentName, coachingStyle);
+    const systemPrompt = await resolveSystemPrompt(agentName, coachingStyle, agentDbId);
 
     const stream = anthropic.messages.stream({
       model: "claude-sonnet-4-5-20250929",

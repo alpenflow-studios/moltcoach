@@ -29,6 +29,7 @@ export type Database = {
           name: string;
           coaching_style: string;
           agent_uri: string;
+          onboarding_complete: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -39,6 +40,7 @@ export type Database = {
           name: string;
           coaching_style: string;
           agent_uri: string;
+          onboarding_complete?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -46,6 +48,7 @@ export type Database = {
           name?: string;
           coaching_style?: string;
           agent_uri?: string;
+          onboarding_complete?: boolean;
           updated_at?: string;
         };
         Relationships: [
@@ -248,6 +251,85 @@ export type Database = {
           telegram_username?: string | null;
         };
         Relationships: [];
+      };
+      agent_personas: {
+        Row: {
+          id: string;
+          agent_id: string;
+          fitness_level: string | null;
+          goals: string | null;
+          motivation: string | null;
+          schedule: string | null;
+          injuries: string | null;
+          preferred_workout_types: string | null;
+          communication_preferences: string | null;
+          additional_context: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_id: string;
+          fitness_level?: string | null;
+          goals?: string | null;
+          motivation?: string | null;
+          schedule?: string | null;
+          injuries?: string | null;
+          preferred_workout_types?: string | null;
+          communication_preferences?: string | null;
+          additional_context?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          fitness_level?: string | null;
+          goals?: string | null;
+          motivation?: string | null;
+          schedule?: string | null;
+          injuries?: string | null;
+          preferred_workout_types?: string | null;
+          communication_preferences?: string | null;
+          additional_context?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agent_personas_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: true;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      agent_memory_notes: {
+        Row: {
+          id: string;
+          agent_id: string;
+          content: string;
+          category: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_id: string;
+          content: string;
+          category?: string;
+          created_at?: string;
+        };
+        Update: {
+          content?: string;
+          category?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agent_memory_notes_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: Record<string, never>;

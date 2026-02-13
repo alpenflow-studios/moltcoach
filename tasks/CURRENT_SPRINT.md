@@ -15,26 +15,7 @@
 
 ### Not Started
 
-#### TASK-019: Conversational Onboarding + Agent Memory
-- **Priority**: P0
-- **Scope**: `src/lib/systemPrompt.ts`, `src/app/api/chat/route.ts`, `src/app/api/chat/extract/route.ts`, `src/lib/personaExtractor.ts`, `src/lib/memoryExtractor.ts`, `src/types/database.ts`, `src/components/agent/AgentChat.tsx`, `src/components/agent/AgentPageContent.tsx`
-- **Designed**: Session 33 (Feb 12, 2026) — full plan in SESSION_HANDOFF.md
-- **Notes**: The "Big Four" feature #1+#2. Makes the agent feel alive. Onboarding interview builds persona, memory persists across conversations. Extraction via Haiku (async, ~$0.001/call). See `docs/AGENT_RUNTIME.md` for broader context.
-- **Acceptance Criteria**:
-  - [ ] SQL: `agent_personas` table created in Supabase
-  - [ ] SQL: `agent_memory_notes` table created in Supabase
-  - [ ] SQL: `onboarding_complete` column added to `agents` table
-  - [ ] Types: `agent_personas` + `agent_memory_notes` in `database.ts`
-  - [ ] Onboarding system prompt guides agent to interview user (~5-8 questions)
-  - [ ] Persona-aware system prompt includes user profile + memory notes
-  - [ ] `/api/chat` checks `onboarding_complete`, uses correct prompt mode
-  - [ ] `/api/chat/extract` endpoint extracts persona (onboarding) or memory notes (normal)
-  - [ ] Frontend: `AgentChat` triggers extraction after each message
-  - [ ] Frontend: `AgentPageContent` passes agentDbId + onboardingComplete
-  - [ ] Onboarding → coaching mode transition is seamless
-  - [ ] Memory notes accumulate over conversations (max 50, oldest pruned)
-  - [ ] `pnpm typecheck` passes
-  - [ ] `pnpm build` passes
+_No tasks in this state._
 
 ---
 
@@ -92,6 +73,34 @@
 ---
 
 ### In Progress
+
+#### TASK-019: Conversational Onboarding + Agent Memory
+- **Priority**: P0
+- **Scope**: `src/lib/systemPrompt.ts`, `src/app/api/chat/route.ts`, `src/app/api/chat/extract/route.ts`, `src/lib/personaExtractor.ts`, `src/lib/memoryExtractor.ts`, `src/types/database.ts`, `src/components/agent/AgentChat.tsx`, `src/components/agent/AgentPageContent.tsx`
+- **Designed**: Session 33 (Feb 12, 2026)
+- **Code Complete**: Session 34 (Feb 13, 2026) — 6 new files, 7 modified, typecheck + build pass
+- **Awaiting**: Michael to run SQL scripts + commit + deploy
+- **Notes**: The "Big Four" feature #1+#2. Onboarding interview builds persona via Haiku extraction (~$0.001/call). Memory notes persist across conversations (max 50, oldest pruned). `zod` added for extraction validation.
+- **Acceptance Criteria**:
+  - [ ] SQL: `agent_personas` table created in Supabase (Michael: run `docs/sql/agent_personas.sql`)
+  - [ ] SQL: `agent_memory_notes` table created in Supabase (Michael: run `docs/sql/agent_memory_notes.sql`)
+  - [ ] SQL: `onboarding_complete` column added to `agents` table (Michael: run `docs/sql/agent_onboarding.sql`)
+  - [x] Types: `agent_personas` + `agent_memory_notes` in `database.ts`
+  - [x] Onboarding system prompt guides agent to interview user (~5-8 questions)
+  - [x] Persona-aware system prompt includes user profile + memory notes
+  - [x] `/api/chat` checks `onboarding_complete`, uses correct prompt mode
+  - [x] `/api/chat/extract` endpoint extracts persona (onboarding) or memory notes (normal)
+  - [x] Frontend: `AgentChat` triggers extraction after each message
+  - [x] Frontend: `AgentPageContent` passes agentDbId + onboardingComplete
+  - [x] Onboarding → coaching mode transition is seamless
+  - [x] Memory notes accumulate over conversations (max 50, oldest pruned)
+  - [x] `pnpm typecheck` passes
+  - [x] `pnpm build` passes
+  - [ ] Changes committed + pushed
+  - [ ] Deployed to Vercel
+  - [ ] End-to-end tested with registered agent
+
+---
 
 #### TASK-017: Privy Integration (Email + Farcaster + Multi-Wallet Auth)
 - **Priority**: P0

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withX402 } from "@x402/next";
 import Anthropic from "@anthropic-ai/sdk";
-import { buildSystemPrompt } from "@/lib/systemPrompt";
+import { resolveSystemPrompt } from "@/lib/systemPrompt";
 import { x402Server, chatPaymentConfig } from "@/lib/x402";
 import type { ChatMessage } from "@/types/chat";
 
@@ -11,6 +11,7 @@ type ChatRequestBody = {
   messages: ChatMessage[];
   agentName: string;
   coachingStyle: string;
+  agentDbId?: string;
 };
 
 function isValidBody(body: unknown): body is ChatRequestBody {
@@ -20,7 +21,8 @@ function isValidBody(body: unknown): body is ChatRequestBody {
     Array.isArray(b.messages) &&
     typeof b.agentName === "string" &&
     typeof b.coachingStyle === "string" &&
-    b.messages.length > 0
+    b.messages.length > 0 &&
+    (b.agentDbId === undefined || typeof b.agentDbId === "string")
   );
 }
 
@@ -46,8 +48,8 @@ const handler = async (req: NextRequest): Promise<NextResponse<PaidChatResponse>
       );
     }
 
-    const { messages, agentName, coachingStyle } = body;
-    const systemPrompt = buildSystemPrompt(agentName, coachingStyle);
+    const { messages, agentName, coachingStyle, agentDbId } = body;
+    const systemPrompt = await resolveSystemPrompt(agentName, coachingStyle, agentDbId);
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5-20250929",

@@ -14,6 +14,8 @@ type UseChatOptions = {
   agentName: string;
   coachingStyle: string;
   walletAddress?: string;
+  /** Supabase agent UUID — enables persona-aware prompts on the server */
+  agentDbId?: string;
   /** Seed messages from XMTP history (loaded after mount) */
   initialMessages?: ChatMessage[];
   /** Called when a message pair (user + assistant) completes successfully */
@@ -24,6 +26,7 @@ export function useChat({
   agentName,
   coachingStyle,
   walletAddress,
+  agentDbId,
   initialMessages,
   onMessageComplete,
 }: UseChatOptions) {
@@ -64,6 +67,7 @@ export function useChat({
             messages: updatedMessages,
             agentName,
             coachingStyle,
+            ...(agentDbId ? { agentDbId } : {}),
           }),
           signal: abortRef.current.signal,
         });
@@ -145,7 +149,7 @@ export function useChat({
         abortRef.current = null;
       }
     },
-    [messages, isStreaming, agentName, coachingStyle, walletAddress, onMessageComplete],
+    [messages, isStreaming, agentName, coachingStyle, walletAddress, agentDbId, onMessageComplete],
   );
 
   const dismissPaywall = useCallback(() => {

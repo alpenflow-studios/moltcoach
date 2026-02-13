@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,6 +16,9 @@ type AgentChatProps = {
   agentName: string;
   coachingStyle: string;
   walletAddress?: string;
+  // Onboarding + persona (from agent sync response)
+  agentDbId?: string;
+  onboardingComplete?: boolean;
   // Supabase chat persistence
   chatHistory?: ChatMessageType[];
   onSaveMessages?: (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => void;
@@ -43,6 +46,8 @@ export function AgentChat({
   agentName,
   coachingStyle,
   walletAddress,
+  agentDbId,
+  onboardingComplete,
   chatHistory,
   onSaveMessages,
   xmtpStatus,
@@ -52,7 +57,17 @@ export function AgentChat({
   onXmtpDisconnect,
   onXmtpSendMessage,
 }: AgentChatProps) {
-  // Handle completed message pairs — save to Supabase + mirror to XMTP
+  // Track onboarding state locally (defaults to true for backward compat)
+  const [isOnboarded, setIsOnboarded] = useState(onboardingComplete ?? true);
+
+  // Sync when prop changes (e.g., after agent sync response arrives)
+  useEffect(() => {
+    if (onboardingComplete !== undefined) {
+      setIsOnboarded(onboardingComplete);
+    }
+  }, [onboardingComplete]);
+
+  // Handle completed message pairs — save to Supabase + mirror to XMTP + extract
   const handleMessageComplete = useCallback(
     (userMsg: ChatMessageType, assistantMsg: ChatMessageType) => {
       // Persist to Supabase
@@ -62,8 +77,29 @@ export function AgentChat({
         void onXmtpSendMessage(userMsg.content, "user");
         void onXmtpSendMessage(assistantMsg.content, "assistant");
       }
+      // Trigger async persona/memory extraction
+      if (agentDbId) {
+        void fetch("/api/chat/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agentDbId,
+            messages: [...(chatHistory ?? []), userMsg, assistantMsg],
+            latestUser: userMsg.content,
+            latestAssistant: assistantMsg.content,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data: { onboardingComplete?: boolean }) => {
+            if (data.onboardingComplete && !isOnboarded) {
+              setIsOnboarded(true);
+              toast.success("Onboarding complete! Your coach now knows you.");
+            }
+          })
+          .catch(() => {});
+      }
     },
-    [onSaveMessages, onXmtpSendMessage],
+    [onSaveMessages, onXmtpSendMessage, agentDbId, chatHistory, isOnboarded],
   );
 
   // Supabase history takes priority, XMTP history as fallback
@@ -73,6 +109,7 @@ export function AgentChat({
     agentName,
     coachingStyle,
     walletAddress,
+    agentDbId,
     initialMessages,
     onMessageComplete: handleMessageComplete,
   });
@@ -90,8 +127,9 @@ export function AgentChat({
     }
   }, [error]);
 
-  const greeting =
-    STYLE_GREETINGS[coachingStyle] ?? STYLE_GREETINGS["motivator"]!;
+  const greeting = !isOnboarded
+    ? `Hey! I'm ${agentName}, your new ClawCoach. Before we start training, I'd love to learn about you. What's your current fitness level — beginner, intermediate, or advanced?`
+    : (STYLE_GREETINGS[coachingStyle] ?? STYLE_GREETINGS["motivator"]!);
   const hasMessages = messages.length > 0;
   const showXmtp = xmtpStatus !== undefined;
 

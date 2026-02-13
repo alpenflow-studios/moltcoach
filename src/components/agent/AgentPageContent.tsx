@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { useSearchParams } from "next/navigation";
@@ -48,6 +48,10 @@ export function AgentPageContent() {
   } = useXmtpClient();
   const xmtpConvo = useXmtpConversation(xmtpClient);
 
+  // Agent identity from Supabase (captured from sync response)
+  const [agentDbId, setAgentDbId] = useState<string | undefined>();
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | undefined>();
+
   // Sync agent to Supabase when loaded (idempotent — runs once per agent)
   const agentSyncedRef = useRef<string | null>(null);
   useEffect(() => {
@@ -67,7 +71,15 @@ export function AgentPageContent() {
         coachingStyle: parsed?.style ?? "motivator",
         agentUri: data.agentURI,
       }),
-    });
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((agent: { id: string; onboarding_complete: boolean } | null) => {
+        if (agent) {
+          setAgentDbId(agent.id);
+          setOnboardingComplete(agent.onboarding_complete);
+        }
+      })
+      .catch(() => {});
   }, [data.hasAgent, data.agentId, data.agentURI, address]);
 
   // Auto-connect XMTP when arriving from landing page (?xmtp=1)
@@ -163,6 +175,8 @@ export function AgentPageContent() {
                 agentName={name}
                 coachingStyle={style}
                 walletAddress={address}
+                agentDbId={agentDbId}
+                onboardingComplete={onboardingComplete}
                 chatHistory={chatHistory.history}
                 onSaveMessages={chatHistory.saveMessages}
                 xmtpStatus={xmtpStatus}

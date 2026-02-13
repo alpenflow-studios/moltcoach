@@ -7,137 +7,131 @@
 ## Last Session
 
 - **Date**: 2026-02-13
-- **Duration**: Session 36
+- **Duration**: Session 37
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
-- **Commits**: `0f35f72` — fix(onboarding): skip XMTP history fallback during onboarding
+- **Commits**: `8f54b03` — fix(onboarding): accumulate messages for extraction + skip free tier during onboarding, `340427e` — chore(docs): S36 handoff
 
 ---
 
 ## What Was Done
 
-### Session 36
+### Session 37
 
-1. **Fixed XMTP history fallback** — Old XMTP messages showed as chat history when Supabase was empty. Fixed by skipping XMTP fallback when `isOnboarded` is false (`0f35f72`, pushed + deployed)
-2. **Updated CLAUDE.md** — Database tables section: moved telegram_links, agent_personas, agent_memory_notes from pending/planned to implemented
-3. **Verified production state** — Confirmed via API: `onboarding_complete: false`, messages: `[]`, deploy live on Vercel
-4. **Michael tested full onboarding flow** — 6 exchanges (12 messages) on production. Agent "daddy" ran through the full onboarding interview. Messages saved to Supabase correctly.
-5. **Discovered 3 bugs during e2e test** (see below)
-6. **Partial fix for Bug B** — Changed history loading so Supabase always loads, only XMTP fallback gated. **UNCOMMITTED** in `AgentChat.tsx`.
-
----
-
-## 3 Bugs Found in S36 E2E Test
-
-### Bug A: Extraction only sees latest 2 messages (CRITICAL — blocks onboarding completion)
-- **File**: `src/components/agent/AgentChat.tsx` line 87
-- **Root cause**: `chatHistory` prop loaded once on mount (empty on first visit). Each extraction sends `[...(chatHistory ?? []), userMsg, assistantMsg]` = only latest 2 messages. Haiku never sees fitness_level + goals + schedule together.
-- **Fix**: Add a ref to accumulate all session messages. Pass full conversation to `/api/chat/extract`.
-- **Status**: Root cause identified, fix NOT written yet
-
-### Bug B: Chat disappears when navigating away and back
-- **File**: `src/components/agent/AgentChat.tsx` lines 105-112
-- **Root cause**: Original S36 fix skipped ALL history when not onboarded, including Supabase messages from the current onboarding session
-- **Fix**: Supabase history always loads; only XMTP fallback gated by onboarding status
-- **Status**: Fix written, **UNCOMMITTED** — needs typecheck + commit
-
-### Bug C: Free tier (10 messages) hit during onboarding
-- **File**: `src/lib/freeMessages.ts`
-- **Root cause**: x402 free tier is flat 10 messages/30 days regardless of staking tier. Michael is Pro tier (9,500 CLAWC staked) but hit the cap during onboarding.
-- **Fix options**: Exempt onboarding from counter, raise limit for stakers, or reset counter
-- **Status**: Not investigated yet
+1. **Fixed Bug A (CRITICAL)** — Extraction only saw latest 2 messages. Added `allMessagesRef` (useRef) to accumulate all messages across the session. Extraction now receives full conversation so Haiku can see fitness_level + goals + schedule together and flip `onboarding_complete`. (`8f54b03`)
+2. **Fixed Bug B** — Chat disappeared on navigation. Committed the S36 uncommitted fix: Supabase history always loads, only XMTP fallback gated by onboarding status. (`8f54b03`)
+3. **Fixed Bug C** — Free tier counter incremented during onboarding. Restructured `/api/chat/route.ts`: parses body first, checks `onboarding_complete` in Supabase, skips free message counter during onboarding. Added `createServerClient` import. (`8f54b03`)
+4. **Reset Supabase data** — Cleared messages, agent_personas, agent_memory_notes via REST API. Confirmed `onboarding_complete: false`.
+5. **Reset Redis counter** — Deleted `x402:free:0xad4e...` key. Verified null.
+6. **Pushed + deployed** — Both commits pushed to main, Vercel auto-deploy triggered.
+7. **Researched Multi-Token Reward Distribution** — Explored contracts architecture for partner token rewards (see Research section below).
 
 ---
 
 ## Immediate Priority for Next Session
 
-1. **Fix Bug A** (extraction accumulation) — add ref in AgentChat to pass full conversation
-2. **Commit Bug B fix** (already written, just needs typecheck + commit)
-3. **Fix Bug C** (free tier) — at minimum, reset Michael's counter so he can re-test
-4. **Reset Supabase state** — flip `onboarding_complete` back to false, clear messages for clean re-test (OR keep existing 12 messages and test extraction with fixed Bug A)
-5. **Re-test full onboarding e2e** — verify extraction flips `onboarding_complete`, persona is saved, toast fires
-6. Close TASK-019
+1. **Michael: re-test on clawcoach.ai/agent** — Full onboarding flow with clean data
+2. **Verify in Supabase**: `onboarding_complete` flipped to `true`, `agent_personas` populated, `agent_memory_notes` created
+3. **Close TASK-019** — Check off final acceptance criteria
+4. **Build MultiTokenRewardDistributor** — Full stack (contract + tests + frontend + deploy)
 
 ---
 
-## What's Next (Priority Order) — THE BIG FOUR
+## Multi-Token Reward Distribution — Research (S37)
 
-### 1. Conversational Onboarding — CODE COMPLETE, 3 bugs from e2e (S36)
-### 2. Agent Memory — CODE COMPLETE (same impl, blocked on onboarding completion)
+### What Michael Wants
+Partner companies (e.g., FitCaster at fitcaster.xyz) distribute THEIR tokens alongside $CLAWC through ClawCoach. Users earn both $CLAWC + partner tokens per workout. Scales to any number of partnerships.
 
-### 3. Proactive Telegram Nudges
-Agent reaches out to YOU instead of waiting:
-- Trigger.dev cron job checks each agent's last activity
-- No workout in 3 days → send nudge via Telegram
-- Hit a milestone → send congratulations
-- Usual workout time → send reminder
+### Michael's Design Decisions (S37)
+- **Partner rewards**: Flat per workout (NOT scaled by tier/streak multipliers)
+- **Pool funding**: Anyone can fund (partners call `fundPool()` themselves)
+- **Scope**: Full stack — contract + tests + frontend + deploy to Base Sepolia
 
-### 4. Agent Hub as Social Feed
-`/hub` becomes a live feed of agent activity:
-- "Coach Alpha earned 50 CLAWC (coached @michael through leg day)"
-- Agents have profiles, stats, reputation
-- Agent-to-agent XMTP messaging + $CLAWC payments
+### Existing Infrastructure
+- **RewardDistributor does NOT exist yet** — needs to be built from scratch
+- **ClawcToken** has owner-only `mint()` with daily cap (100K/day) + max supply (1B)
+- **ProtocolFeeCollector** already handles dual-token (CLAWC + USDC) fee collection + 4-way treasury distribution
+- **ClawcStaking** has 4-tier system (Free/Basic/Pro/Elite)
+
+### Proposed Architecture: `MultiTokenRewardDistributor.sol`
+
+```
+contract MultiTokenRewardDistributor {
+    // Primary: Mint $CLAWC with tier/streak multipliers
+    // Partners: Flat per-workout from funded pool
+
+    struct PartnerReward {
+        IERC20 token;
+        uint256 rewardPerWorkout;
+        uint256 poolBalance;
+        bool active;
+        string name;
+    }
+
+    // Owner registers partners, anyone funds pools
+    // distributeReward() mints CLAWC + transfers partner tokens
+    // Streak tracking per user (7/30/90 day bonuses)
+    // Tier multipliers (1.0x/0.85x/0.7x/0.5x)
+}
+```
+
+### Key Files for Implementation
+| File | Purpose |
+|------|---------|
+| `contracts/src/ClawcToken.sol` | Mint function (owner-only, daily cap) |
+| `contracts/src/ClawcStaking.sol` | Tier system reference |
+| `contracts/src/fees/ProtocolFeeCollector.sol` | Dual-token pattern reference |
+| `contracts/script/Deploy.s.sol` | Deployment script to extend |
+| `src/config/contracts.ts` | Frontend contract config + ABIs |
+| `src/hooks/useStakingReads.ts` | Pattern for on-chain reads |
+| `src/components/staking/` | UI pattern reference |
+| `docs/TOKENOMICS.md` | Reward formula: baseReward x tierMultiplier x streakBonus |
+
+### Contract Dependencies
+```
+ClawcToken (existing) ← MultiTokenRewardDistributor needs mint permission
+ClawcStaking (existing) ← Read tier for multipliers
+ProtocolFeeCollector (existing) ← Optional fee routing
+Partner ERC-20s (external) ← transferFrom for partner rewards
+```
+
+---
+
+## Supabase Data State (after S37 reset)
+
+- **agents**: "daddy", `onboarding_complete: false` (reset for clean re-test)
+- **messages**: empty (cleared)
+- **agent_personas**: empty (cleared)
+- **agent_memory_notes**: empty (cleared)
+- **Redis free tier**: 0/10 (counter deleted)
+
+---
+
+## What's Next (Priority Order)
+
+### 1. Conversational Onboarding — All 3 bugs FIXED, deployed, awaiting re-test (S37)
+### 2. Agent Memory — Same impl, will work once onboarding completes
+### 3. Multi-Token Reward Distribution — Researched S37, ready to build
+### 4. Proactive Telegram Nudges — Trigger.dev cron
+### 5. Agent Hub as Social Feed — /hub live feed
 
 **Also planned:**
 - Make Telegram bot persona-aware (currently uses generic `buildSystemPrompt`)
 
 ---
 
-## Supabase Data State (after S36 e2e test)
-
-- **agents**: "daddy", `onboarding_complete: false` (extraction never flipped — Bug A)
-- **messages**: 12 messages (6 exchanges from onboarding test)
-- **agent_personas**: empty (extraction never had full conversation)
-- **agent_memory_notes**: empty (never reached memory mode)
-- **Redis free tier**: 10/10 used for deployer wallet
-
----
-
-## Vercel Deployment Details
-
-| Field | Value |
-|-------|-------|
-| Team | `classcoin` |
-| Project | `moltcoach` |
-| Production URL | `https://clawcoach.ai` |
-| Vercel URL | `https://moltcoach.vercel.app` |
-| Password | Basic Auth via proxy (`beta` / `democlawcoachbeta`) |
-| Builder | **webpack** (Turbopack broke XMTP WASM) |
-
-### Env Vars on Vercel (17 total)
-
-| Variable | Env | Sensitive |
-|----------|-----|-----------|
-| NEXT_PUBLIC_PRIVY_APP_ID | production | no |
-| NEXT_PUBLIC_CHAIN_ID | production | no |
-| NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS | production | no |
-| NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS | production | no |
-| NEXT_PUBLIC_CLAWC_STAKING_ADDRESS | production | no |
-| NEXT_PUBLIC_FEE_COLLECTOR_ADDRESS | production | no |
-| NEXT_PUBLIC_SUPABASE_URL | production | no |
-| NEXT_PUBLIC_SUPABASE_ANON_KEY | production | no |
-| NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID | production | no |
-| NEXT_PUBLIC_CLAWCOACH_AGENT_XMTP_ADDRESS | production | no |
-| SUPABASE_SERVICE_ROLE_KEY | production | yes |
-| ANTHROPIC_API_KEY | production | yes |
-| UPSTASH_REDIS_REST_URL | production | no |
-| UPSTASH_REDIS_REST_TOKEN | production | yes |
-| STAGING_USERNAME | production | yes |
-| STAGING_PASSWORD | production | yes |
-| TELEGRAM_BOT_TOKEN | production | yes |
-
----
-
 ## Decisions Made
 
-- **Supabase history always loads during onboarding**: Only XMTP fallback gated by onboarding status. (Session 36 — uncommitted)
+- **Onboarding messages exempt from free tier**: Chat route checks `onboarding_complete` in Supabase before incrementing Redis counter. (Session 37)
+- **Message accumulation via ref**: `allMessagesRef` in AgentChat accumulates messages across session for extraction. Seeded from Supabase history on return visits. (Session 37)
+- **Partner rewards flat per workout**: Not scaled by tier/streak multipliers. Simpler for partners to budget. (Session 37)
+- **Anyone can fund partner pools**: Partners call `fundPool()` directly. More decentralized. (Session 37)
+- **Supabase history always loads during onboarding**: Only XMTP fallback gated by onboarding status. (Session 36)
 - **Onboarding default false**: `isOnboarded` defaults to `false`. (Session 35)
 - **resolveSystemPrompt is async + shared**: Single function for both chat routes. (Session 34)
 - **Onboarding completion threshold**: fitness_level + goals + schedule must all be filled. (Session 34)
-- **Memory note categories**: general, preference, achievement, health, schedule. (Session 34)
 - **Extraction model**: `claude-haiku-4-5-20251001` ~$0.001/call. (Session 34)
 - **Production build uses webpack**: Turbopack can't handle XMTP WASM. (Session 33)
-- **Brand colors**: Primary `#7CCF00`, Background `#09090B`, Card `#18181B`. (Session 33)
 - **Env var `.trim()` pattern**: All contract address env vars trimmed. (Session 32)
 - **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1`. (Session 28)
 
@@ -147,7 +141,7 @@ Agent reaches out to YOU instead of waiting:
 
 - `forge build`: **PASSES**
 - `forge test`: **PASSES** (216 tests)
-- `pnpm typecheck`: **PASSES** (Session 36)
+- `pnpm typecheck`: **PASSES** (Session 37)
 - `pnpm build`: **PASSES** (Session 35)
 
 ---
@@ -164,7 +158,20 @@ Agent reaches out to YOU instead of waiting:
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
 - **Staked**: 9,500 CLAWC | **Wallet**: ~475 CLAWC | **FeeCollector**: ~25 CLAWC
-- **Agents**: 1 ("daddy", onboarding NOT complete)
+- **Agents**: 1 ("daddy", onboarding NOT complete — reset for re-test)
+
+---
+
+## Vercel Deployment Details
+
+| Field | Value |
+|-------|-------|
+| Team | `classcoin` |
+| Project | `moltcoach` |
+| Production URL | `https://clawcoach.ai` |
+| Vercel URL | `https://moltcoach.vercel.app` |
+| Password | Basic Auth via proxy (`beta` / `democlawcoachbeta`) |
+| Builder | **webpack** (Turbopack broke XMTP WASM) |
 
 ---
 
@@ -172,12 +179,12 @@ Agent reaches out to YOU instead of waiting:
 
 | File | Why |
 |------|-----|
-| `src/components/agent/AgentChat.tsx` | **UNCOMMITTED fix** (Bug B) + needs Bug A fix (extraction accumulation) |
-| `src/lib/freeMessages.ts` | Bug C — free tier doesn't respect staking |
-| `src/lib/personaExtractor.ts` | Working correctly, just receiving insufficient data |
-| `src/app/api/chat/extract/route.ts` | Extraction endpoint — working, receives data from frontend |
-| `src/lib/systemPrompt.ts` | All prompt logic — working correctly |
+| `src/components/agent/AgentChat.tsx` | Bug A+B fixes — verify extraction works e2e |
+| `src/app/api/chat/route.ts` | Bug C fix — onboarding exemption from free tier |
+| `contracts/src/ClawcToken.sol` | Mint permission for RewardDistributor |
+| `contracts/src/fees/ProtocolFeeCollector.sol` | Dual-token pattern reference |
+| `docs/TOKENOMICS.md` | Reward formula spec |
 
 ---
 
-*Last updated: Feb 13, 2026 — Session 36 end*
+*Last updated: Feb 13, 2026 — Session 37 end*

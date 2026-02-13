@@ -15,7 +15,25 @@
 
 ### Not Started
 
-_No tasks in this state._
+#### TASK-020: Multi-Token Reward Distribution
+- **Priority**: P1
+- **Scope**: `contracts/src/rewards/MultiTokenRewardDistributor.sol`, `contracts/test/`, `contracts/script/`, `src/config/contracts.ts`, `src/hooks/`, `src/components/`
+- **Designed**: Session 37 (Feb 13, 2026)
+- **Notes**: Partners (e.g., FitCaster) distribute their tokens alongside $CLAWC per workout. Contract mints CLAWC (tier/streak multipliers) + transfers flat partner rewards from funded pools. RewardDistributor does NOT exist yet — building from scratch. Full stack: contract + tests + frontend + deploy.
+- **Acceptance Criteria**:
+  - [ ] `MultiTokenRewardDistributor.sol` contract with CLAWC minting + partner token distribution
+  - [ ] Partner registration (owner-only) with token address, reward amount, name
+  - [ ] Pool funding (anyone can call `fundPool()` with partner tokens)
+  - [ ] CLAWC rewards with tier multipliers (1.0x/0.85x/0.7x/0.5x) + streak bonuses (1.5x/2.0x/2.5x)
+  - [ ] Partner rewards flat per workout (not scaled)
+  - [ ] Streak tracking per user (reset on missed day)
+  - [ ] `forge build` passes with zero warnings
+  - [ ] `forge test` passes with comprehensive test coverage
+  - [ ] Frontend: rewards display component
+  - [ ] Frontend: partner rewards visible on dashboard/agent page
+  - [ ] Deploy to Base Sepolia
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm build` passes
 
 ---
 
@@ -81,6 +99,7 @@ _No tasks in this state._
 - **Code Complete**: Session 34 (Feb 13, 2026) — 6 new files, 7 modified, typecheck + build pass
 - **Bug fix**: S35 — `isOnboarded` default `true→false` (`86b337b`). Supabase data reset for fresh test.
 - **E2E test (S36)**: Michael ran full onboarding on production. 3 bugs found (see CURRENT_ISSUES.md). Bugs A+B+C block completion.
+- **Bug fixes (S37)**: All 3 bugs fixed (`8f54b03`). Bug A: allMessagesRef accumulates full conversation. Bug B: Supabase history always loads. Bug C: onboarding exempt from free tier. Data reset for clean re-test.
 - **Notes**: The "Big Four" feature #1+#2. Onboarding interview builds persona via Haiku extraction (~$0.001/call). Memory notes persist across conversations (max 50, oldest pruned). `zod` added for extraction validation.
 - **Acceptance Criteria**:
   - [x] SQL: `agent_personas` table created in Supabase
@@ -93,13 +112,13 @@ _No tasks in this state._
   - [x] `/api/chat/extract` endpoint extracts persona (onboarding) or memory notes (normal)
   - [x] Frontend: `AgentChat` triggers extraction after each message
   - [x] Frontend: `AgentPageContent` passes agentDbId + onboardingComplete
-  - [ ] Onboarding → coaching mode transition is seamless (Bug A: extraction only sees 2 messages, never flips onboarding_complete)
+  - [x] Onboarding → coaching mode transition (S37: Bug A fixed — allMessagesRef accumulates full conversation for extraction)
   - [ ] Memory notes accumulate over conversations (untested — never reached memory mode)
   - [x] `pnpm typecheck` passes
   - [x] `pnpm build` passes
-  - [x] Changes committed + pushed (`f3d640b`, `86b337b`, `0f35f72`)
+  - [x] Changes committed + pushed (`f3d640b`, `86b337b`, `0f35f72`, `8f54b03`)
   - [x] Deployed to Vercel (auto-deploy on push)
-  - [ ] End-to-end tested with registered agent (S36: 3 bugs found — Bug A critical, Bug B uncommitted fix, Bug C free tier)
+  - [ ] End-to-end tested with registered agent (S37: all 3 bugs fixed, data reset, awaiting Michael re-test)
 
 ---
 

@@ -228,6 +228,27 @@ export type Database = {
           },
         ];
       };
+      telegram_links: {
+        Row: {
+          id: string;
+          telegram_chat_id: string;
+          wallet_address: string;
+          telegram_username: string | null;
+          linked_at: string;
+        };
+        Insert: {
+          id?: string;
+          telegram_chat_id: string;
+          wallet_address: string;
+          telegram_username?: string | null;
+          linked_at?: string;
+        };
+        Update: {
+          wallet_address?: string;
+          telegram_username?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

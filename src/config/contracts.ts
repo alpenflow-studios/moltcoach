@@ -1,7 +1,8 @@
 // Contract addresses from environment variables (Base Sepolia)
-export const CLAWC_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS ?? "") as `0x${string}`;
-export const CLAWC_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_STAKING_ADDRESS ?? "") as `0x${string}`;
-export const CLAWCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS ?? "") as `0x${string}`;
+// .trim() prevents trailing whitespace from Vercel env vars (same issue as S29 Privy, S31 Redis)
+export const CLAWC_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_TOKEN_ADDRESS?.trim() ?? "") as `0x${string}`;
+export const CLAWC_STAKING_ADDRESS = (process.env.NEXT_PUBLIC_CLAWC_STAKING_ADDRESS?.trim() ?? "") as `0x${string}`;
+export const CLAWCOACH_IDENTITY_ADDRESS = (process.env.NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS?.trim() ?? "") as `0x${string}`;
 
 // Tier metadata
 export const TIER_NAMES = ["Free", "Basic", "Pro", "Elite"] as const;

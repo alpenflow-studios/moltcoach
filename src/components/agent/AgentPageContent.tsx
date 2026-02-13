@@ -22,6 +22,7 @@ import { parseContractError } from "@/lib/contractErrors";
 import { RegisterAgentForm } from "./RegisterAgentForm";
 import { AgentProfileCard } from "./AgentProfileCard";
 import { AgentChat } from "./AgentChat";
+import { LinkTelegram } from "./LinkTelegram";
 
 export function AgentPageContent() {
   const { address, isConnected } = useAccount();
@@ -173,6 +174,7 @@ export function AgentPageContent() {
               />
             );
           })()}
+          <LinkTelegram walletAddress={address!} />
         </>
       ) : (
         <RegisterAgentForm onSuccess={data.refetchAll} />

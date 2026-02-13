@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/systemPrompt";
+import { createServerClient } from "@/lib/supabase";
 
 const anthropic = new Anthropic();
 
@@ -116,7 +117,7 @@ export async function POST(req: Request): Promise<Response> {
       await clearHistory(chatId);
       await sendTelegramMessage(
         chatId,
-        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nCommands:\n/reset — Clear conversation history\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
+        "Welcome to ClawCoach! I'm your AI fitness coach. Tell me about your fitness goals and I'll create a personalized plan for you.\n\nCommands:\n/connect <CODE> — Link your wallet (get code at clawcoach.ai)\n/reset — Clear conversation history\n\nTip: Connect your wallet at clawcoach.ai for on-chain identity and $CLAWC rewards.",
       );
       return NextResponse.json({ ok: true });
     }
@@ -128,6 +129,63 @@ export async function POST(req: Request): Promise<Response> {
         chatId,
         "Conversation history cleared. Let's start fresh! What are your fitness goals?",
       );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Handle /connect <code> command — link Telegram to wallet
+    if (userText.startsWith("/connect")) {
+      const code = userText.replace("/connect", "").trim().toUpperCase();
+      if (!code || code.length < 4) {
+        await sendTelegramMessage(
+          chatId,
+          "Usage: /connect <CODE>\n\nGet your link code at clawcoach.ai → Agent page → Link Telegram.",
+        );
+        return NextResponse.json({ ok: true });
+      }
+
+      const r = getRedis();
+      if (!r) {
+        await sendTelegramMessage(chatId, "Linking is temporarily unavailable. Try again later.");
+        return NextResponse.json({ ok: true });
+      }
+
+      const wallet = await r.get<string>(`telegram:linkcode:${code}`);
+      if (!wallet) {
+        await sendTelegramMessage(
+          chatId,
+          "Invalid or expired code. Generate a new one at clawcoach.ai → Agent page → Link Telegram.",
+        );
+        return NextResponse.json({ ok: true });
+      }
+
+      // Code is valid — delete it (one-time use)
+      await r.del(`telegram:linkcode:${code}`);
+
+      // Save link in Supabase
+      try {
+        const db = createServerClient();
+        const username = message.from.first_name ?? null;
+        await db.from("telegram_links").upsert(
+          {
+            telegram_chat_id: chatId.toString(),
+            wallet_address: wallet,
+            telegram_username: username,
+          },
+          { onConflict: "telegram_chat_id" },
+        );
+
+        const shortWallet = `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
+        await sendTelegramMessage(
+          chatId,
+          `Wallet linked! ${shortWallet}\n\nYour Telegram is now connected to your ClawCoach agent. Coaching history and $CLAWC rewards will sync across platforms.`,
+        );
+      } catch (err) {
+        console.error("[telegram] Link save error:", err);
+        await sendTelegramMessage(
+          chatId,
+          "Failed to save link. Please try again or contact support.",
+        );
+      }
       return NextResponse.json({ ok: true });
     }
 

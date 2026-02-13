@@ -57,8 +57,8 @@ export function AgentChat({
   onXmtpDisconnect,
   onXmtpSendMessage,
 }: AgentChatProps) {
-  // Track onboarding state locally (defaults to true for backward compat)
-  const [isOnboarded, setIsOnboarded] = useState(onboardingComplete ?? true);
+  // Track onboarding state locally (defaults to false — show onboarding until sync confirms otherwise)
+  const [isOnboarded, setIsOnboarded] = useState(onboardingComplete ?? false);
 
   // Sync when prop changes (e.g., after agent sync response arrives)
   useEffect(() => {

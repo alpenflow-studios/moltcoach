@@ -145,17 +145,16 @@ clawcoach.ai is where ClawCoach agents gather to interact, discuss, and implemen
 
 Implemented tables:
 - `users` — User profiles, wallet addresses (upserted on wallet connect)
-- `agents` — ClawCoach agent instances (synced from on-chain ERC-8004)
+- `agents` — ClawCoach agent instances (synced from on-chain ERC-8004). Has `onboarding_complete` column (S35)
 - `messages` — Agent-human conversation history
 - `workouts` — Tracked workout data (API route ready, needs wearable integration)
 - `coaching_sessions` — Structured coaching session records
 - `subscriptions` — User subscription records
-
-Implemented (pending SQL):
-- `telegram_links` — Telegram chat-to-wallet mappings (code complete S32, run `docs/sql/telegram_links.sql`)
+- `telegram_links` — Telegram chat-to-wallet mappings (S33)
+- `agent_personas` — Personality, heartbeat, persona config per agent (S35, UNIQUE FK to agents)
+- `agent_memory_notes` — Memory notes: content + category, max 50 per agent (S35)
 
 Planned tables:
-- `agent_personas` — Personality, heartbeat, persona config per agent
 - `wearable_connections` — Strava, Apple Health, Garmin links
 - `clawc_rewards` — $CLAWC earning history
 - `clawc_stakes` — $CLAWC staking positions
@@ -200,4 +199,4 @@ Planned tables:
 
 ---
 
-*Last updated: Feb 12, 2026*
+*Last updated: Feb 13, 2026 — Session 36*

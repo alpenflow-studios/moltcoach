@@ -102,8 +102,11 @@ export function AgentChat({
     [onSaveMessages, onXmtpSendMessage, agentDbId, chatHistory, isOnboarded],
   );
 
-  // Supabase history takes priority, XMTP history as fallback
-  const initialMessages = chatHistory && chatHistory.length > 0 ? chatHistory : xmtpHistory;
+  // Supabase history takes priority, XMTP history as fallback.
+  // Skip ALL history when not onboarded — fresh onboarding interview needs a clean slate.
+  const initialMessages = isOnboarded
+    ? (chatHistory && chatHistory.length > 0 ? chatHistory : xmtpHistory)
+    : undefined;
 
   const { messages, isStreaming, error, paywall, sendMessage, dismissPaywall } = useChat({
     agentName,

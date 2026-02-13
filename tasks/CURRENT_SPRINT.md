@@ -80,6 +80,7 @@ _No tasks in this state._
 - **Designed**: Session 33 (Feb 12, 2026)
 - **Code Complete**: Session 34 (Feb 13, 2026) — 6 new files, 7 modified, typecheck + build pass
 - **Bug fix**: S35 — `isOnboarded` default `true→false` (`86b337b`). Supabase data reset for fresh test.
+- **E2E test (S36)**: Michael ran full onboarding on production. 3 bugs found (see CURRENT_ISSUES.md). Bugs A+B+C block completion.
 - **Notes**: The "Big Four" feature #1+#2. Onboarding interview builds persona via Haiku extraction (~$0.001/call). Memory notes persist across conversations (max 50, oldest pruned). `zod` added for extraction validation.
 - **Acceptance Criteria**:
   - [x] SQL: `agent_personas` table created in Supabase
@@ -92,13 +93,13 @@ _No tasks in this state._
   - [x] `/api/chat/extract` endpoint extracts persona (onboarding) or memory notes (normal)
   - [x] Frontend: `AgentChat` triggers extraction after each message
   - [x] Frontend: `AgentPageContent` passes agentDbId + onboardingComplete
-  - [x] Onboarding → coaching mode transition is seamless
-  - [x] Memory notes accumulate over conversations (max 50, oldest pruned)
+  - [ ] Onboarding → coaching mode transition is seamless (Bug A: extraction only sees 2 messages, never flips onboarding_complete)
+  - [ ] Memory notes accumulate over conversations (untested — never reached memory mode)
   - [x] `pnpm typecheck` passes
   - [x] `pnpm build` passes
-  - [x] Changes committed + pushed (`f3d640b`, `86b337b`)
+  - [x] Changes committed + pushed (`f3d640b`, `86b337b`, `0f35f72`)
   - [x] Deployed to Vercel (auto-deploy on push)
-  - [ ] End-to-end tested with registered agent (S35: SQL done, agent exists, default fix deployed — Michael to test)
+  - [ ] End-to-end tested with registered agent (S36: 3 bugs found — Bug A critical, Bug B uncommitted fix, Bug C free tier)
 
 ---
 

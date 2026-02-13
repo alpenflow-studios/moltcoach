@@ -10,7 +10,7 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| — | — | — | — | — |
+| 1 | Extraction only sees latest 2 messages — onboarding never completes | `AgentChat.tsx:87` | S36 | `chatHistory` prop is stale (loaded once on mount, empty on first visit). Each extraction sends only latest message pair. Haiku never sees fitness_level + goals + schedule together. Fix: add ref to accumulate all session messages. |
 
 ---
 
@@ -18,7 +18,8 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| 1 | TASK-019 e2e test pending | clawcoach.ai/agent | S35 | Fix deployed (`86b337b`), Supabase reset. Michael: reload `/agent` after Vercel deploys, confirm onboarding greeting, run full flow. |
+| 1 | Chat disappears on navigation during onboarding | `AgentChat.tsx:105-112` | S36 | Original fix skipped ALL history when not onboarded. Partial fix written (Supabase always loads, XMTP gated). **UNCOMMITTED** — needs typecheck + commit. |
+| 2 | Free tier (10 msg) hit during onboarding — staking tier ignored | `freeMessages.ts` | S36 | x402 free tier is flat 10/30 days. Michael is Pro (9,500 CLAWC) but got capped. Options: exempt onboarding, raise limit for stakers, or reset counter. |
 
 ---
 
@@ -27,8 +28,7 @@
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
 | 1 | x402 paid route is non-streaming | `src/app/api/chat/paid/route.ts` | S24 | `withX402` expects `NextResponse<T>`, so paid route uses `messages.create` not `messages.stream`. Consider streaming upgrade later. |
-| 2 | Orphaned chat messages from pre-Phase 7 agents | Supabase `messages` table | S32 | Cleared in S35 reset. Table now empty. No longer an issue unless old agents re-sync. |
-| 3 | Telegram bot not persona-aware | `src/app/api/telegram/route.ts` | S34 | Telegram still uses generic `buildSystemPrompt()`. Should use `resolveSystemPrompt()` with linked wallet's agent. Follow-up task. |
+| 2 | Telegram bot not persona-aware | `src/app/api/telegram/route.ts` | S34 | Telegram still uses generic `buildSystemPrompt()`. Should use `resolveSystemPrompt()` with linked wallet's agent. Follow-up task. |
 
 ---
 
@@ -46,23 +46,28 @@
 
 | # | Issue | Resolution | Date |
 |---|-------|------------|------|
-| 1 | Onboarding greeting showing motivator instead of interview | `isOnboarded` defaulted to `true`. Fixed to `false` in `86b337b`. | S35 |
-| 2 | TASK-019 SQL scripts not run | Michael ran all 3 scripts in Supabase SQL Editor. | S35 |
-| 3 | XMTP production fix awaiting verification | Michael verified — `--webpack` fix working. | S35 |
-| 4 | 0 agents on new contracts | Deployer wallet has agent "daddy" on-chain + Supabase synced. | S35 |
-| 5 | TASK-019 code not committed/deployed | `f3d640b` + `86b337b` pushed, Vercel auto-deploy. | S34→S35 |
+| 1 | XMTP history showing during onboarding | Skip XMTP fallback when `isOnboarded` is false (`0f35f72`) | S36 |
+| 2 | Onboarding greeting showing motivator instead of interview | `isOnboarded` defaulted to `true`. Fixed to `false` in `86b337b`. | S35 |
+| 3 | TASK-019 SQL scripts not run | Michael ran all 3 scripts in Supabase SQL Editor. | S35 |
+| 4 | XMTP production fix awaiting verification | Michael verified — `--webpack` fix working. | S35 |
+| 5 | 0 agents on new contracts | Deployer wallet has agent "daddy" on-chain + Supabase synced. | S35 |
 
 ---
 
 ## Investigation Notes
 
+### S36 Onboarding E2E Test Results
+
+Michael ran full onboarding flow on production:
+- 6 exchanges (12 messages) saved to Supabase correctly
+- Agent asked good questions (fitness level, goals, schedule, injuries, preferences, coaching style)
+- `onboarding_complete` never flipped to `true` (Bug A — extraction sees only 2 messages per call)
+- Free tier capped at 10 messages (Bug C — staking tier not checked)
+- Chat disappeared when navigating to /staking and back (Bug B — history skip too aggressive)
+- `agent_personas` table: empty. `agent_memory_notes` table: empty.
+
 ### Recurring Pattern: Vercel Env Var Whitespace (S29, S31, S32)
 
-Three separate incidents caused by trailing `\n` in Vercel env vars:
-- **S29**: `NEXT_PUBLIC_PRIVY_APP_ID` — fixed via `vercel env rm` + `printf`
-- **S31**: `UPSTASH_REDIS_REST_*` — fixed via `vercel env rm` + `printf`
-- **S32**: `NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS` — fixed permanently via `.trim()` in code
-
-**Prevention**: S32 added `.trim()` to all contract address reads in `contracts.ts`. For future env vars, either `.trim()` in code or use `printf` when adding to Vercel.
+Three separate incidents caused by trailing `\n` in Vercel env vars. Prevention: `.trim()` in code or `printf` when adding to Vercel.
 
 ---

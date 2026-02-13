@@ -7,88 +7,63 @@
 ## Last Session
 
 - **Date**: 2026-02-13
-- **Duration**: Session 35
+- **Duration**: Session 36
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
-- **Commits**: `86b337b` — fix(onboarding): default isOnboarded to false so onboarding greeting shows immediately
+- **Commits**: `0f35f72` — fix(onboarding): skip XMTP history fallback during onboarding
 
 ---
 
 ## What Was Done
 
-### Session 35
+### Session 36
 
-1. **Session start housekeeping** — Updated all handoff files for S35 start
-2. **Michael ran SQL scripts** — All 3 TASK-019 scripts executed in Supabase SQL Editor
-3. **Michael verified XMTP** — Production XMTP connection confirmed working
-4. **Supabase data reset** — Cleared 8 old messages via REST API for fresh onboarding test
-5. **Bug fix: onboarding greeting default** — `isOnboarded` defaulted to `true` before sync response, showing motivator greeting instead of onboarding interview. Fixed default to `false` (`86b337b`)
-6. **Confirmed production API correctness** — Curled `/api/agents/sync` and `/api/messages` on production, both return correct data (`onboarding_complete: false`, `[]` messages)
-
-### Session 34 (recap)
-
-1. **TASK-019: Conversational Onboarding + Agent Memory — CODE COMPLETE**
-   - Built the full onboarding + memory system (Big Four #1 + #2)
-   - 6 new files, 7 modified files, committed as `f3d640b`
-
-   **New files created:**
-   - `docs/sql/agent_onboarding.sql` — ALTER agents ADD onboarding_complete
-   - `docs/sql/agent_personas.sql` — persona table (8 fields, UNIQUE FK to agents)
-   - `docs/sql/agent_memory_notes.sql` — memory notes table (content + category, max 50)
-   - `src/lib/personaExtractor.ts` — Haiku extracts persona from onboarding conversation
-   - `src/lib/memoryExtractor.ts` — Haiku extracts 0-3 memory notes per exchange
-   - `src/app/api/chat/extract/route.ts` — extraction endpoint (persona upsert + memory insert with 50-note cap)
-
-   **Modified files:**
-   - `src/types/database.ts` — `onboarding_complete` on agents + 2 new table types
-   - `src/lib/systemPrompt.ts` — `buildOnboardingPrompt()`, `buildPersonaAwarePrompt()`, `resolveSystemPrompt()` (async, shared by both chat routes)
-   - `src/app/api/chat/route.ts` — accepts `agentDbId`, uses `resolveSystemPrompt`
-   - `src/app/api/chat/paid/route.ts` — same changes
-   - `src/hooks/useChat.ts` — passes `agentDbId` to API
-   - `src/components/agent/AgentPageContent.tsx` — captures `agentDbId` + `onboardingComplete` from agent sync response
-   - `src/components/agent/AgentChat.tsx` — onboarding greeting, extraction trigger in `handleMessageComplete`, toast on completion
-
-   **Dependencies added:**
-   - `zod` (runtime validation for extraction schemas)
-
-   **Architecture:**
-   ```
-   User sends message
-     → POST /api/chat (with agentDbId)
-     → resolveSystemPrompt() checks onboarding_complete in Supabase
-       ├─ NOT onboarded → buildOnboardingPrompt (interview mode)
-       └─ Onboarded → buildPersonaAwarePrompt (persona + memory notes injected)
-     → Claude streams response
-     → onMessageComplete fires:
-       ├─ POST /api/messages (save to Supabase)
-       ├─ XMTP mirror (if connected)
-       └─ POST /api/chat/extract (async, Haiku)
-           ├─ Onboarding mode → extract persona, upsert agent_personas, flip onboarding_complete
-           └─ Memory mode → extract 0-3 notes, prune if >50, insert agent_memory_notes
-   ```
-
-### Session 33 (recap)
-
-1. Fixed XMTP Production Spinner — `02c9c5d`
-2. Brand Guide — `1d59d74`
-3. Agent Runtime Architecture Spec — `16c3b8f`
-4. Handoff docs — `b6924b3`
+1. **Fixed XMTP history fallback** — Old XMTP messages showed as chat history when Supabase was empty. Fixed by skipping XMTP fallback when `isOnboarded` is false (`0f35f72`, pushed + deployed)
+2. **Updated CLAUDE.md** — Database tables section: moved telegram_links, agent_personas, agent_memory_notes from pending/planned to implemented
+3. **Verified production state** — Confirmed via API: `onboarding_complete: false`, messages: `[]`, deploy live on Vercel
+4. **Michael tested full onboarding flow** — 6 exchanges (12 messages) on production. Agent "daddy" ran through the full onboarding interview. Messages saved to Supabase correctly.
+5. **Discovered 3 bugs during e2e test** (see below)
+6. **Partial fix for Bug B** — Changed history loading so Supabase always loads, only XMTP fallback gated. **UNCOMMITTED** in `AgentChat.tsx`.
 
 ---
 
-## What's In Progress
+## 3 Bugs Found in S36 E2E Test
 
-1. ~~TASK-019 SQL scripts~~ — **DONE** (S35)
-2. ~~XMTP production verification~~ — **DONE** (S35)
-3. **TASK-019 e2e test** — Onboarding default fix deployed (`86b337b`). Supabase data reset. Michael: reload `/agent`, confirm onboarding greeting shows, test full flow
-4. **Privy flow testing (TASK-017)** — Farcaster, email, mobile, Google OAuth untested
+### Bug A: Extraction only sees latest 2 messages (CRITICAL — blocks onboarding completion)
+- **File**: `src/components/agent/AgentChat.tsx` line 87
+- **Root cause**: `chatHistory` prop loaded once on mount (empty on first visit). Each extraction sends `[...(chatHistory ?? []), userMsg, assistantMsg]` = only latest 2 messages. Haiku never sees fitness_level + goals + schedule together.
+- **Fix**: Add a ref to accumulate all session messages. Pass full conversation to `/api/chat/extract`.
+- **Status**: Root cause identified, fix NOT written yet
+
+### Bug B: Chat disappears when navigating away and back
+- **File**: `src/components/agent/AgentChat.tsx` lines 105-112
+- **Root cause**: Original S36 fix skipped ALL history when not onboarded, including Supabase messages from the current onboarding session
+- **Fix**: Supabase history always loads; only XMTP fallback gated by onboarding status
+- **Status**: Fix written, **UNCOMMITTED** — needs typecheck + commit
+
+### Bug C: Free tier (10 messages) hit during onboarding
+- **File**: `src/lib/freeMessages.ts`
+- **Root cause**: x402 free tier is flat 10 messages/30 days regardless of staking tier. Michael is Pro tier (9,500 CLAWC staked) but hit the cap during onboarding.
+- **Fix options**: Exempt onboarding from counter, raise limit for stakers, or reset counter
+- **Status**: Not investigated yet
+
+---
+
+## Immediate Priority for Next Session
+
+1. **Fix Bug A** (extraction accumulation) — add ref in AgentChat to pass full conversation
+2. **Commit Bug B fix** (already written, just needs typecheck + commit)
+3. **Fix Bug C** (free tier) — at minimum, reset Michael's counter so he can re-test
+4. **Reset Supabase state** — flip `onboarding_complete` back to false, clear messages for clean re-test (OR keep existing 12 messages and test extraction with fixed Bug A)
+5. **Re-test full onboarding e2e** — verify extraction flips `onboarding_complete`, persona is saved, toast fires
+6. Close TASK-019
 
 ---
 
 ## What's Next (Priority Order) — THE BIG FOUR
 
-### 1. Conversational Onboarding — CODE COMPLETE (S34)
-### 2. Agent Memory — CODE COMPLETE (S34, same implementation)
+### 1. Conversational Onboarding — CODE COMPLETE, 3 bugs from e2e (S36)
+### 2. Agent Memory — CODE COMPLETE (same impl, blocked on onboarding completion)
 
 ### 3. Proactive Telegram Nudges
 Agent reaches out to YOU instead of waiting:
@@ -108,19 +83,26 @@ Agent reaches out to YOU instead of waiting:
 
 ---
 
+## Supabase Data State (after S36 e2e test)
+
+- **agents**: "daddy", `onboarding_complete: false` (extraction never flipped — Bug A)
+- **messages**: 12 messages (6 exchanges from onboarding test)
+- **agent_personas**: empty (extraction never had full conversation)
+- **agent_memory_notes**: empty (never reached memory mode)
+- **Redis free tier**: 10/10 used for deployer wallet
+
+---
+
 ## Vercel Deployment Details
 
 | Field | Value |
 |-------|-------|
 | Team | `classcoin` |
 | Project | `moltcoach` |
-| Framework | Next.js (auto-detected) |
 | Production URL | `https://clawcoach.ai` |
 | Vercel URL | `https://moltcoach.vercel.app` |
-| GitHub | Connected to `alpenflow-studios/moltcoach` |
 | Password | Basic Auth via proxy (`beta` / `democlawcoachbeta`) |
-| Node | 24.x (Vercel default) |
-| Builder | **webpack** (S33 fix — was Turbopack, broke XMTP WASM) |
+| Builder | **webpack** (Turbopack broke XMTP WASM) |
 
 ### Env Vars on Vercel (17 total)
 
@@ -144,89 +126,33 @@ Agent reaches out to YOU instead of waiting:
 | STAGING_PASSWORD | production | yes |
 | TELEGRAM_BOT_TOKEN | production | yes |
 
-**NOT on Vercel**: PRIVATE_KEY, BASESCAN_KEY (deploy-only, never on hosted infra)
-
----
-
-## Supabase Architecture (Implemented)
-
-### How It Works
-```
-User connects wallet
-  → useUserSync fires → POST /api/users → upserts user in Supabase
-
-User visits /agent with existing agent
-  → AgentPageContent effect → POST /api/agents/sync → upserts agent in Supabase
-  → Response includes agentDbId + onboarding_complete (captured in state)
-  → useChatHistory → GET /api/messages → loads prior chat history
-  → useChat seeds with Supabase history (priority) or XMTP history (fallback)
-
-User sends message
-  → POST /api/chat (with agentDbId) → resolveSystemPrompt checks onboarding status
-    ├─ NOT onboarded → buildOnboardingPrompt (interview mode, ~5-8 questions)
-    └─ Onboarded → buildPersonaAwarePrompt (persona + memory injected)
-  → Claude streams response (free tier)
-  → If free tier exceeded → 402 with paidEndpoint info
-  → POST /api/chat/paid → x402 payment + Claude response (paid tier)
-  → onMessageComplete fires:
-    ├─ POST /api/messages → saves user + assistant messages to Supabase
-    ├─ XMTP mirror (if connected) → writes to XMTP DM
-    └─ POST /api/chat/extract → Haiku extracts persona (onboarding) or memory notes (normal)
-        ├─ Onboarding: upsert agent_personas, flip onboarding_complete when ready
-        └─ Memory: insert notes (max 50, oldest pruned)
-
-Telegram wallet linking (verified S33)
-  → User clicks "Generate Link Code" on agent page
-  → POST /api/telegram/link → generates 6-char code in Redis (10-min TTL)
-  → User sends /connect <CODE> to @ClawCoachBot
-  → Bot verifies code → upserts telegram_links in Supabase
-```
-
-### Supabase Project Details
-| Field | Value |
-|-------|-------|
-| Project name | `clawcoach` |
-| Reference ID | `agvdivapnrqpstvhkbmk` |
-| Region | East US (Ohio) |
-| URL | `https://agvdivapnrqpstvhkbmk.supabase.co` |
-| Tables | users, agents, messages, workouts, coaching_sessions, subscriptions, telegram_links, agent_personas, agent_memory_notes |
-| New column (S35) | agents.onboarding_complete (added) |
-| RLS | Enabled on all tables, SELECT-only for anon key |
-
 ---
 
 ## Decisions Made
 
-- **Onboarding default false**: `isOnboarded` in AgentChat defaults to `false` (not `true`). Show onboarding greeting until sync confirms user IS onboarded. (Session 35)
-- **Zod for extraction validation**: Installed `zod` for persona + memory extraction schemas. First Zod usage in project (global CLAUDE.md mandates it). (Session 34)
-- **resolveSystemPrompt is async + shared**: Single async function in `systemPrompt.ts` handles all prompt resolution for both chat routes. Does Supabase queries to check onboarding status, fetch persona, fetch memory. (Session 34)
-- **agentDbId threading**: Supabase UUID flows AgentPageContent → AgentChat → useChat → /api/chat → resolveSystemPrompt. Optional everywhere for backward compat (Telegram still uses generic prompt). (Session 34)
-- **Onboarding completion threshold**: Haiku sets `onboarding_complete: true` when at least fitness_level + goals + schedule are filled. (Session 34)
-- **Memory note categories**: general, preference, achievement, health, schedule. Enforced in Zod schema, stored as TEXT in DB. (Session 34)
-- **Extraction model**: `claude-haiku-4-5-20251001` for both persona and memory extraction. ~$0.001/call. (Session 34)
-- **Production build uses webpack**: `next build --webpack` — Turbopack can't handle XMTP WASM. (Session 33)
-- **Brand colors**: Primary `#7CCF00`, Background `#09090B`, Card `#18181B`. Full guide at `docs/BRAND.md`. (Session 33)
-- **Agent runtime architecture**: Claude Agent SDK + Coinbase AgentKit via MCP. Spec at `docs/AGENT_RUNTIME.md`. (Session 33)
-- **Env var `.trim()` pattern**: All contract address env vars trimmed in `contracts.ts`. (Session 32)
-- **Chain guard pattern**: `AgentPageContent` checks `useChainId()` against `baseSepolia.id`. (Session 32)
-- **Telegram wallet linking**: One-time codes via Redis, `/connect` command in bot, `telegram_links` table. (Session 32)
-- **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1` + `@privy-io/wagmi@4.0.1`. (Session 28)
-- **Dev bundler**: webpack (not Turbopack) for XMTP WASM compat. (Session 16)
-- **Theme**: Dark mode, lime primary on zinc
-- **Brand**: ClawCoach (clawcoach.ai)
+- **Supabase history always loads during onboarding**: Only XMTP fallback gated by onboarding status. (Session 36 — uncommitted)
+- **Onboarding default false**: `isOnboarded` defaults to `false`. (Session 35)
+- **resolveSystemPrompt is async + shared**: Single function for both chat routes. (Session 34)
+- **Onboarding completion threshold**: fitness_level + goals + schedule must all be filled. (Session 34)
+- **Memory note categories**: general, preference, achievement, health, schedule. (Session 34)
+- **Extraction model**: `claude-haiku-4-5-20251001` ~$0.001/call. (Session 34)
+- **Production build uses webpack**: Turbopack can't handle XMTP WASM. (Session 33)
+- **Brand colors**: Primary `#7CCF00`, Background `#09090B`, Card `#18181B`. (Session 33)
+- **Env var `.trim()` pattern**: All contract address env vars trimmed. (Session 32)
+- **Privy replaces wagmi-only auth**: `@privy-io/react-auth@3.13.1`. (Session 28)
 
 ---
 
 ## State of Tests
 
-- `forge build`: **PASSES** (exit 0, lint notes only)
-- `forge test`: **PASSES** (216 tests, 0 failures)
-- `pnpm typecheck`: **PASSES** (Session 35)
-- `pnpm build`: **PASSES** (21 routes, `--webpack`, Session 35)
+- `forge build`: **PASSES**
+- `forge test`: **PASSES** (216 tests)
+- `pnpm typecheck`: **PASSES** (Session 36)
+- `pnpm build`: **PASSES** (Session 35)
 
 ---
 
-## On-Chain State (Base Sepolia) — $CLAWC Contracts (Phase 7 deploy)
+## On-Chain State (Base Sepolia)
 
 | Contract | Address |
 |----------|---------|
@@ -237,39 +163,21 @@ Telegram wallet linking (verified S33)
 | USDC (testnet) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
 
 - **Deployer**: `0xAd4E23f274cdF74754dAA1Fb03BF375Db2eBf5C2`
-- **CLAWC supply**: 10,000 CLAWC
 - **Staked**: 9,500 CLAWC | **Wallet**: ~475 CLAWC | **FeeCollector**: ~25 CLAWC
-- **Agents**: 1 (deployer wallet has agent "daddy" on-chain, Supabase synced, onboarding reset to fresh state)
-
----
-
-## Environment Notes
-
-- **Foundry**: v1.5.1 at `~/.foundry/bin/`
-- **pnpm**: v10.29.1 | **Next.js**: 16.1.6 | **Node**: v25.6.0
-- **Vercel CLI**: v50.13.2
-- **Project**: `~/Projects/moltcoach`
-- **Dev server**: `pnpm dev` uses `--webpack` (not Turbopack) for XMTP WASM compatibility
-- **Production build**: `pnpm build` uses `--webpack` (S33 fix)
-- **Configured**: ANTHROPIC_API_KEY, Upstash Redis, XMTP agent (V3), Supabase (`clawcoach` project), PRIVATE_KEY, BASESCAN_KEY, TELEGRAM_BOT_TOKEN
-- **NOT configured**: Coinbase Wallet project ID, CDP API keys (needed for AgentKit Phase 2)
-- **Deps**: `@privy-io/react-auth` ^3.13.1, `@privy-io/wagmi` ^4.0.1, `@x402/next` ^2.3.0, `@x402/core` ^2.3.1, `@x402/evm` ^2.3.1, `grammy` ^1.40.0, `zod` (new S34)
-- **Telegram bot**: `@ClawCoachBot`, webhook at `clawcoach.ai/api/telegram`, proxy bypass in `src/proxy.ts`
-- **Redis keys**: `x402:free:<addr>` (free tier counter), `telegram:history:<chatId>` (conversation history), `telegram:linkcode:<CODE>` (wallet link codes, 10-min TTL)
+- **Agents**: 1 ("daddy", onboarding NOT complete)
 
 ---
 
 ## Key Files for Next Session
 
-| File | Purpose |
-|------|---------|
-| `src/lib/systemPrompt.ts` | All prompt logic: generic, onboarding, persona-aware, resolveSystemPrompt |
-| `src/lib/personaExtractor.ts` | Haiku persona extraction with Zod validation |
-| `src/lib/memoryExtractor.ts` | Haiku memory note extraction with Zod validation |
-| `src/app/api/chat/extract/route.ts` | Extraction endpoint: orchestrates persona upsert + memory insert |
-| `src/components/agent/AgentChat.tsx` | Frontend: extraction trigger, onboarding state, greeting logic |
-| `src/components/agent/AgentPageContent.tsx` | Captures agentDbId + onboardingComplete from sync response |
+| File | Why |
+|------|-----|
+| `src/components/agent/AgentChat.tsx` | **UNCOMMITTED fix** (Bug B) + needs Bug A fix (extraction accumulation) |
+| `src/lib/freeMessages.ts` | Bug C — free tier doesn't respect staking |
+| `src/lib/personaExtractor.ts` | Working correctly, just receiving insufficient data |
+| `src/app/api/chat/extract/route.ts` | Extraction endpoint — working, receives data from frontend |
+| `src/lib/systemPrompt.ts` | All prompt logic — working correctly |
 
 ---
 
-*Last updated: Feb 13, 2026 — Session 35 end*
+*Last updated: Feb 13, 2026 — Session 36 end*

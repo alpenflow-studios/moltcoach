@@ -15,7 +15,26 @@
 
 ### Not Started
 
-_(none)_
+#### TASK-019: Conversational Onboarding + Agent Memory
+- **Priority**: P0
+- **Scope**: `src/lib/systemPrompt.ts`, `src/app/api/chat/route.ts`, `src/app/api/chat/extract/route.ts`, `src/lib/personaExtractor.ts`, `src/lib/memoryExtractor.ts`, `src/types/database.ts`, `src/components/agent/AgentChat.tsx`, `src/components/agent/AgentPageContent.tsx`
+- **Designed**: Session 33 (Feb 12, 2026) — full plan in SESSION_HANDOFF.md
+- **Notes**: The "Big Four" feature #1+#2. Makes the agent feel alive. Onboarding interview builds persona, memory persists across conversations. Extraction via Haiku (async, ~$0.001/call). See `docs/AGENT_RUNTIME.md` for broader context.
+- **Acceptance Criteria**:
+  - [ ] SQL: `agent_personas` table created in Supabase
+  - [ ] SQL: `agent_memory_notes` table created in Supabase
+  - [ ] SQL: `onboarding_complete` column added to `agents` table
+  - [ ] Types: `agent_personas` + `agent_memory_notes` in `database.ts`
+  - [ ] Onboarding system prompt guides agent to interview user (~5-8 questions)
+  - [ ] Persona-aware system prompt includes user profile + memory notes
+  - [ ] `/api/chat` checks `onboarding_complete`, uses correct prompt mode
+  - [ ] `/api/chat/extract` endpoint extracts persona (onboarding) or memory notes (normal)
+  - [ ] Frontend: `AgentChat` triggers extraction after each message
+  - [ ] Frontend: `AgentPageContent` passes agentDbId + onboardingComplete
+  - [ ] Onboarding → coaching mode transition is seamless
+  - [ ] Memory notes accumulate over conversations (max 50, oldest pruned)
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm build` passes
 
 ---
 
@@ -23,16 +42,16 @@ _(none)_
 - **Priority**: P2
 - **Scope**: `src/app/api/telegram/link/route.ts`, `src/app/api/telegram/route.ts`, `src/components/agent/LinkTelegram.tsx`, `src/types/database.ts`
 - **Started**: Session 32 (Feb 12, 2026)
-- **Completed**: Session 32 (Feb 12, 2026) — code complete, table pending
-- **Notes**: One-time link codes via Redis. `/connect <CODE>` bot command. `LinkTelegram` UI card on agent page. SQL at `docs/sql/telegram_links.sql`.
+- **Completed**: Session 33 (Feb 12, 2026) — verified working end-to-end
+- **Notes**: One-time link codes via Redis. `/connect <CODE>` bot command. `LinkTelegram` UI card on agent page.
 - **Acceptance Criteria**:
   - [x] `POST /api/telegram/link` generates 6-char code (Redis, 10-min TTL)
   - [x] `/connect <CODE>` bot command verifies code and upserts `telegram_links`
   - [x] `LinkTelegram` UI card on agent page
   - [x] `telegram_links` table types in `database.ts`
   - [x] SQL migration written (`docs/sql/telegram_links.sql`)
-  - [ ] `telegram_links` table created in Supabase (Michael: run SQL in dashboard)
-  - [ ] End-to-end test: generate code → send `/connect` → verify link in Supabase
+  - [x] `telegram_links` table created in Supabase
+  - [x] End-to-end verified (Michael confirmed S33)
   - [x] `pnpm typecheck` passes
   - [x] `pnpm build` passes
 

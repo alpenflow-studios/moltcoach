@@ -18,7 +18,8 @@
 
 | # | Issue | File/Area | Found | Notes |
 |---|-------|-----------|-------|-------|
-| 1 | `telegram_links` table not yet created in Supabase | Supabase SQL Editor | S32 | Run `docs/sql/telegram_links.sql` in dashboard. `/connect` bot command will fail until table exists. |
+| 1 | XMTP production fix awaiting verification | clawcoach.ai | S33 | Build switched to `--webpack` (`02c9c5d`). Michael: verify XMTP connects on production after Vercel deploys. |
+| 2 | New Supabase tables needed for onboarding | Supabase SQL Editor | S33 | `agent_personas`, `agent_memory_notes`, + `onboarding_complete` column on `agents`. SQL files to be written in S34. |
 
 ---
 
@@ -45,11 +46,11 @@
 
 | # | Issue | Resolution | Date |
 |---|-------|------------|------|
-| 1 | Agent page `Address "0xB95..."` error | Root cause: `NEXT_PUBLIC_CLAWCOACH_IDENTITY_ADDRESS` on Vercel had trailing whitespace. Fix: `.trim()` on all contract address env vars in `contracts.ts`. Also added chain guard UX + error parser. | S32 |
-| 2 | Telegram history not persisting on Vercel | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` had trailing whitespace. Cleaned via `vercel env rm` + `vercel env add` with `printf`. Redeployed. Multi-turn verified. | S31 |
-| 3 | Mobile load time ~10s (blank page) | Replaced `return null` mount guard with loading skeleton (navbar/spinner/footer) in WalletProvider | S30 |
-| 4 | Production crash — all browsers, incognito, mobile | Two root causes: (1) `NEXT_PUBLIC_PRIVY_APP_ID` had trailing `\n` on Vercel. (2) `@metamask/sdk` React Native import stubbed. | S29 |
-| 5 | Hero orb clipped on left side of mobile | Removed `overflow-hidden`, added `overflow-x-clip`, fixed double-translate in orb keyframes | S27 |
+| 1 | XMTP infinite spinner on production | Root cause: `next build` used Turbopack (Next.js 16 default), XMTP WASM config only in webpack block. Fix: `--webpack` flag on build + 30s timeout + `.trim()` on XMTP address. | S33 |
+| 2 | `telegram_links` table not created | Michael ran SQL in Supabase dashboard. Telegram bot verified working end-to-end. | S33 |
+| 3 | Agent page `Address "0xB95..."` error | `.trim()` on all contract address env vars in `contracts.ts`. Chain guard UX + error parser added. | S32 |
+| 4 | Telegram history not persisting on Vercel | Upstash env vars had whitespace. Cleaned via `printf`. | S31 |
+| 5 | Production crash — all browsers | Privy App ID trailing `\n` + MetaMask SDK React Native import. | S29 |
 
 ---
 

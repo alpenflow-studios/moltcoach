@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { config } from "@/config/wagmi";
 import { useUserSync } from "@/hooks/useUserSync";
@@ -11,11 +12,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const queryClient = new QueryClient();
 
-const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
+const PRIVY_APP_ID = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "").trim();
+
+/** Clear React Query cache when wallet disconnects — prevents stale data leaking between sessions */
+function useAuthCleanup() {
+  const { isConnected } = useAccount();
+  const qc = useQueryClient();
+  const wasConnected = useRef(false);
+
+  useEffect(() => {
+    if (isConnected) {
+      wasConnected.current = true;
+    } else if (wasConnected.current) {
+      // Wallet just disconnected — clear all cached queries
+      wasConnected.current = false;
+      qc.clear();
+    }
+  }, [isConnected, qc]);
+}
 
 /** Runs hooks that need wagmi context */
 function WalletSyncProvider({ children }: { children: ReactNode }) {
   useUserSync();
+  useAuthCleanup();
   return <>{children}</>;
 }
 

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,15 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { isConnected } = useAccount();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu when wallet connects (so user sees the page, not the menu)
+  useEffect(() => {
+    if (isConnected && mobileOpen) {
+      setMobileOpen(false);
+    }
+  }, [isConnected, mobileOpen]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">

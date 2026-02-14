@@ -51,9 +51,18 @@ export function AgentPageContent() {
   // Agent identity from Supabase (captured from sync response)
   const [agentDbId, setAgentDbId] = useState<string | undefined>();
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | undefined>();
+  const agentSyncedRef = useRef<string | null>(null);
+
+  // Clear local state on disconnect — prevents stale agent data leaking
+  useEffect(() => {
+    if (!isConnected) {
+      setAgentDbId(undefined);
+      setOnboardingComplete(undefined);
+      agentSyncedRef.current = null;
+    }
+  }, [isConnected]);
 
   // Sync agent to Supabase when loaded (idempotent — runs once per agent)
-  const agentSyncedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!data.hasAgent || !address || !data.agentURI) return;
     const key = `${address}-${data.agentId}`;

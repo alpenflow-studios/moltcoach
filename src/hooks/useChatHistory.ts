@@ -16,6 +16,14 @@ export function useChatHistory({ walletAddress, agentIdOnchain }: UseChatHistory
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const loadedRef = useRef<string | null>(null);
 
+  // Clear history when wallet disconnects
+  useEffect(() => {
+    if (!walletAddress) {
+      setHistory([]);
+      loadedRef.current = null;
+    }
+  }, [walletAddress]);
+
   // Load history on mount (once per wallet+agent combo)
   useEffect(() => {
     if (!walletAddress || agentIdOnchain == null) return;

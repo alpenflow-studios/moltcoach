@@ -7,33 +7,86 @@
 ## Last Session
 
 - **Date**: 2026-02-13
-- **Duration**: Session 37
+- **Duration**: Session 38
 - **Branch**: `main`
 - **Model**: Claude Opus 4.6
-- **Commits**: `8f54b03` — fix(onboarding): accumulate messages for extraction + skip free tier during onboarding, `340427e` — chore(docs): S36 handoff
+- **Commits**:
+  - `341d920` — fix(auth): clear cached data on logout + add mobile viewport
+  - `cdab137` — fix(auth): force wagmi disconnect on Privy logout
+  - `8706186` — fix(auth): disconnect wagmi on page load when Privy session is gone
+  - `8babcbd` — fix(auth): don't disconnect wagmi during active login flow
 
 ---
 
 ## What Was Done
 
-### Session 37
+### Session 38
 
-1. **Fixed Bug A (CRITICAL)** — Extraction only saw latest 2 messages. Added `allMessagesRef` (useRef) to accumulate all messages across the session. Extraction now receives full conversation so Haiku can see fitness_level + goals + schedule together and flip `onboarding_complete`. (`8f54b03`)
-2. **Fixed Bug B** — Chat disappeared on navigation. Committed the S36 uncommitted fix: Supabase history always loads, only XMTP fallback gated by onboarding status. (`8f54b03`)
-3. **Fixed Bug C** — Free tier counter incremented during onboarding. Restructured `/api/chat/route.ts`: parses body first, checks `onboarding_complete` in Supabase, skips free message counter during onboarding. Added `createServerClient` import. (`8f54b03`)
-4. **Reset Supabase data** — Cleared messages, agent_personas, agent_memory_notes via REST API. Confirmed `onboarding_complete: false`.
-5. **Reset Redis counter** — Deleted `x402:free:0xad4e...` key. Verified null.
-6. **Pushed + deployed** — Both commits pushed to main, Vercel auto-deploy triggered.
-7. **Researched Multi-Token Reward Distribution** — Explored contracts architecture for partner token rewards (see Research section below).
+1. **Security fix: React Query cache cleanup on logout** — Added `useAuthCleanup` hook in WalletProvider that clears React Query cache when wallet disconnects. Also added cleanup in `useChatHistory` (reset history state) and `AgentPageContent` (reset agentDbId, onboardingComplete, agentSyncedRef). (`341d920`)
+
+2. **Mobile: viewport meta tag** — Added `export const viewport: Viewport` to `layout.tsx` with `width: device-width`, `initialScale: 1`, `viewportFit: cover`. Without this, mobile browsers render at desktop width and responsive breakpoints don't apply. (`341d920`)
+
+3. **Mobile: auto-close menu on connect** — Navbar now watches `isConnected` and closes mobile menu when wallet connects. (`341d920`)
+
+4. **Privy APP_ID trim** — Added `.trim()` to PRIVY_APP_ID env var (4th whitespace prevention). (`341d920`)
+
+5. **Auth cleanup iterations** — Went through 3 iterations trying to fix the stale session problem:
+   - v1 (`cdab137`): Watch `authenticated` from Privy instead of `isConnected` from wagmi, force wagmi disconnect
+   - v2 (`8706186`): Simplified — whenever Privy ready + not authenticated + wagmi connected, disconnect. **BROKE LOGIN** — disconnected wagmi during active MetaMask login flow
+   - v3 (`8babcbd`): Separated into 3 cases (stale page load / logout / active login). **STILL BROKE LOGIN** — `disconnectWagmi()` appears to corrupt wagmi internal state, preventing subsequent connections
+
+---
+
+## BLOCKER: Auth Cleanup Breaking Wallet Login
+
+### The Problem
+After calling `disconnectWagmi()` (from wagmi's `useDisconnect()`), subsequent wallet connections via Privy fail. MetaMask login does not complete. The `disconnectWagmi()` call appears to interfere with `@privy-io/wagmi`'s connector management.
+
+### Root Cause Analysis
+- **Privy** is the auth source of truth (`authenticated` from `usePrivy()`)
+- **wagmi** has its own localStorage persistence and auto-reconnects independently
+- After Privy `logout()`, wagmi reconnects from stored session → stale data appears
+- Calling wagmi's `disconnect()` clears the session but seems to corrupt the connector state managed by `@privy-io/wagmi`
+
+### What Was Tried (all in `WalletProvider.tsx` `useAuthCleanup`)
+1. Watch `isConnected` transition → wagmi bounces back after Privy logout
+2. Watch `authenticated` + force `disconnectWagmi()` → catches stale sessions but kills login
+3. Separate initial check vs transition → still kills login because `disconnectWagmi()` is the problem
+
+### Recommended Approach for Next Session
+**Don't call wagmi's `disconnect()` at all.** Instead:
+- **Option A**: Change page guards (`StakingPageContent`, `DashboardContent`, `AgentPageContent`) to check `usePrivy().authenticated` instead of `useAccount().isConnected`. This way Privy is the gate, not wagmi. wagmi can do whatever it wants — the UI won't show data unless Privy says authenticated.
+- **Option B**: Use Privy's `useLogout()` hook with `onSuccess` callback to clear React Query cache without touching wagmi's connector state.
+- **Option C**: Disable wagmi's localStorage persistence in the config (`createConfig` with `storage: null` or similar).
+
+### Current State of `useAuthCleanup` (commit `8babcbd`)
+```tsx
+function useAuthCleanup() {
+  // 3 cases: stale page load / logout transition / active login (skip)
+  // Uses wasAuthenticated + initialCheckDone refs
+  // Calls disconnectWagmi() which BREAKS subsequent logins
+}
+```
+
+### Files Changed in S38
+| File | Changes |
+|------|---------|
+| `src/components/providers/WalletProvider.tsx` | `useAuthCleanup` hook (3 iterations), `.trim()` on PRIVY_APP_ID |
+| `src/components/ConnectWallet.tsx` | Added `useDisconnect`, calls `disconnectWagmi()` on logout click |
+| `src/components/Navbar.tsx` | Auto-close mobile menu on wallet connect |
+| `src/app/layout.tsx` | Added viewport metadata |
+| `src/components/agent/AgentPageContent.tsx` | Reset local state on disconnect |
+| `src/hooks/useChatHistory.ts` | Reset history on wallet disconnect |
 
 ---
 
 ## Immediate Priority for Next Session
 
-1. **Michael: re-test on clawcoach.ai/agent** — Full onboarding flow with clean data
-2. **Verify in Supabase**: `onboarding_complete` flipped to `true`, `agent_personas` populated, `agent_memory_notes` created
-3. **Close TASK-019** — Check off final acceptance criteria
-4. **Build MultiTokenRewardDistributor** — Full stack (contract + tests + frontend + deploy)
+1. **FIX AUTH CLEANUP** — Use Option A (page guards check `authenticated` from Privy, not `isConnected` from wagmi) or Option C (disable wagmi persistence). Do NOT call `disconnectWagmi()`.
+2. **Test login flow** — MetaMask + Coinbase Wallet on desktop and mobile
+3. **Test logout flow** — Verify staking/agent/dashboard data clears
+4. **Then**: Re-test onboarding on clawcoach.ai/agent
+5. **Then**: Build TASK-020 (MultiTokenRewardDistributor)
 
 ---
 
@@ -75,18 +128,6 @@ contract MultiTokenRewardDistributor {
 }
 ```
 
-### Key Files for Implementation
-| File | Purpose |
-|------|---------|
-| `contracts/src/ClawcToken.sol` | Mint function (owner-only, daily cap) |
-| `contracts/src/ClawcStaking.sol` | Tier system reference |
-| `contracts/src/fees/ProtocolFeeCollector.sol` | Dual-token pattern reference |
-| `contracts/script/Deploy.s.sol` | Deployment script to extend |
-| `src/config/contracts.ts` | Frontend contract config + ABIs |
-| `src/hooks/useStakingReads.ts` | Pattern for on-chain reads |
-| `src/components/staking/` | UI pattern reference |
-| `docs/TOKENOMICS.md` | Reward formula: baseReward x tierMultiplier x streakBonus |
-
 ### Contract Dependencies
 ```
 ClawcToken (existing) ← MultiTokenRewardDistributor needs mint permission
@@ -109,7 +150,8 @@ Partner ERC-20s (external) ← transferFrom for partner rewards
 
 ## What's Next (Priority Order)
 
-### 1. Conversational Onboarding — All 3 bugs FIXED, deployed, awaiting re-test (S37)
+### 0. Fix auth cleanup (BLOCKER) — S38 left wallet login broken
+### 1. Conversational Onboarding — All 3 bugs FIXED (S37), awaiting re-test
 ### 2. Agent Memory — Same impl, will work once onboarding completes
 ### 3. Multi-Token Reward Distribution — Researched S37, ready to build
 ### 4. Proactive Telegram Nudges — Trigger.dev cron
@@ -122,6 +164,9 @@ Partner ERC-20s (external) ← transferFrom for partner rewards
 
 ## Decisions Made
 
+- **Don't call wagmi disconnect()**: It corrupts `@privy-io/wagmi` connector state. Use Privy `authenticated` as page guard instead. (Session 38)
+- **Viewport meta tag required**: Without it, mobile CSS breakpoints don't apply. (Session 38)
+- **Privy APP_ID must be trimmed**: 4th env var whitespace incident. (Session 38)
 - **Onboarding messages exempt from free tier**: Chat route checks `onboarding_complete` in Supabase before incrementing Redis counter. (Session 37)
 - **Message accumulation via ref**: `allMessagesRef` in AgentChat accumulates messages across session for extraction. Seeded from Supabase history on return visits. (Session 37)
 - **Partner rewards flat per workout**: Not scaled by tier/streak multipliers. Simpler for partners to budget. (Session 37)
@@ -141,8 +186,8 @@ Partner ERC-20s (external) ← transferFrom for partner rewards
 
 - `forge build`: **PASSES**
 - `forge test`: **PASSES** (216 tests)
-- `pnpm typecheck`: **PASSES** (Session 37)
-- `pnpm build`: **PASSES** (Session 35)
+- `pnpm typecheck`: **PASSES** (Session 38)
+- `pnpm build`: **PASSES** (Session 38)
 
 ---
 
@@ -179,12 +224,12 @@ Partner ERC-20s (external) ← transferFrom for partner rewards
 
 | File | Why |
 |------|-----|
-| `src/components/agent/AgentChat.tsx` | Bug A+B fixes — verify extraction works e2e |
-| `src/app/api/chat/route.ts` | Bug C fix — onboarding exemption from free tier |
-| `contracts/src/ClawcToken.sol` | Mint permission for RewardDistributor |
-| `contracts/src/fees/ProtocolFeeCollector.sol` | Dual-token pattern reference |
-| `docs/TOKENOMICS.md` | Reward formula spec |
+| `src/components/providers/WalletProvider.tsx` | `useAuthCleanup` — needs rewrite (don't call `disconnectWagmi()`) |
+| `src/components/ConnectWallet.tsx` | Has `disconnectWagmi()` in onClick — may need to remove |
+| `src/components/staking/StakingPageContent.tsx` | Page guard: change `isConnected` → `authenticated` |
+| `src/components/dashboard/DashboardContent.tsx` | Page guard: change `isConnected` → `authenticated` |
+| `src/components/agent/AgentPageContent.tsx` | Page guard: change `isConnected` → `authenticated` |
 
 ---
 
-*Last updated: Feb 13, 2026 — Session 37 end*
+*Last updated: Feb 13, 2026 — Session 38 end*

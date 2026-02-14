@@ -15,6 +15,24 @@
 
 ### Not Started
 
+#### TASK-021: Fix Auth Cleanup (Login Broken + Stale Data on Logout)
+- **Priority**: P0 (BLOCKER)
+- **Scope**: `src/components/providers/WalletProvider.tsx`, `src/components/ConnectWallet.tsx`, `src/components/staking/StakingPageContent.tsx`, `src/components/dashboard/DashboardContent.tsx`, `src/components/agent/AgentPageContent.tsx`
+- **Found**: Session 38 (Feb 13, 2026)
+- **Notes**: S38 attempted to fix stale data after logout by calling wagmi's `useDisconnect().disconnect()` — this broke wallet login entirely. `disconnectWagmi()` corrupts `@privy-io/wagmi` connector state. Three iterations tried, all failed. **Do NOT call `disconnectWagmi()`.** Recommended fix: change page guards from `useAccount().isConnected` to `usePrivy().authenticated`, and clear React Query cache via Privy's `onLogout` callback (not wagmi disconnect). Also remove `disconnectWagmi()` from `ConnectWallet.tsx` onClick.
+- **Acceptance Criteria**:
+  - [ ] Remove all `disconnectWagmi()` calls from `WalletProvider.tsx` and `ConnectWallet.tsx`
+  - [ ] Page guards use `usePrivy().authenticated` instead of `useAccount().isConnected` (3 page components)
+  - [ ] `useAuthCleanup` clears React Query cache on Privy logout WITHOUT calling wagmi disconnect
+  - [ ] Wallet login works (MetaMask on desktop)
+  - [ ] Wallet login works (mobile)
+  - [ ] Staking/agent/dashboard data clears on logout and stays cleared
+  - [ ] No stale data on page load after previous logout
+  - [ ] `pnpm typecheck` passes
+  - [ ] `pnpm build` passes
+
+---
+
 #### TASK-020: Multi-Token Reward Distribution
 - **Priority**: P1
 - **Scope**: `contracts/src/rewards/MultiTokenRewardDistributor.sol`, `contracts/test/`, `contracts/script/`, `src/config/contracts.ts`, `src/hooks/`, `src/components/`

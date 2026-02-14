@@ -1,7 +1,7 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut, Loader2 } from "lucide-react";
 import type { ComponentProps } from "react";
@@ -15,6 +15,7 @@ function truncateAddress(address: string): string {
 export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
   const { ready, authenticated, login, logout } = usePrivy();
   const { address } = useAccount();
+  const { disconnect: disconnectWagmi } = useDisconnect();
 
   if (!ready) {
     return (
@@ -31,7 +32,14 @@ export function ConnectWallet({ size = "sm" }: { size?: ButtonSize }) {
         <span className="rounded-md border border-border/50 bg-muted px-3 py-1.5 font-mono text-sm">
           {truncateAddress(address)}
         </span>
-        <Button variant="ghost" size="icon-sm" onClick={() => void logout()}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => {
+            disconnectWagmi();
+            void logout();
+          }}
+        >
           <LogOut className="size-4" />
         </Button>
       </div>

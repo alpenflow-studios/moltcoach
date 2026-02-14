@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
-import { PrivyProvider } from "@privy-io/react-auth";
+import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { config } from "@/config/wagmi";
 import { useUserSync } from "@/hooks/useUserSync";
@@ -14,21 +14,30 @@ const queryClient = new QueryClient();
 
 const PRIVY_APP_ID = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "").trim();
 
-/** Clear React Query cache when wallet disconnects — prevents stale data leaking between sessions */
+/**
+ * Clear cached data when Privy logs out.
+ * Privy is the auth source of truth — wagmi may auto-reconnect after logout,
+ * so we watch `authenticated` (not `isConnected`) and force wagmi disconnect.
+ */
 function useAuthCleanup() {
+  const { authenticated } = usePrivy();
   const { isConnected } = useAccount();
+  const { disconnect: disconnectWagmi } = useDisconnect();
   const qc = useQueryClient();
-  const wasConnected = useRef(false);
+  const wasAuthenticated = useRef(false);
 
   useEffect(() => {
-    if (isConnected) {
-      wasConnected.current = true;
-    } else if (wasConnected.current) {
-      // Wallet just disconnected — clear all cached queries
-      wasConnected.current = false;
+    if (authenticated) {
+      wasAuthenticated.current = true;
+    } else if (wasAuthenticated.current) {
+      wasAuthenticated.current = false;
+      // Force wagmi disconnect so it can't auto-reconnect
+      if (isConnected) {
+        disconnectWagmi();
+      }
       qc.clear();
     }
-  }, [isConnected, qc]);
+  }, [authenticated, isConnected, disconnectWagmi, qc]);
 }
 
 /** Runs hooks that need wagmi context */

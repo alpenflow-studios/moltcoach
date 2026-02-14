@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
@@ -16,25 +16,52 @@ const PRIVY_APP_ID = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "").trim();
 
 /**
  * Enforce Privy as the single auth source of truth.
- * wagmi has its own localStorage persistence and may auto-reconnect even after
- * Privy logout. This hook waits for Privy to be ready, then if Privy says
- * "not authenticated" but wagmi is still connected, forces wagmi disconnect
- * and clears the React Query cache.
+ *
+ * Two scenarios need cleanup:
+ * 1. Stale session on page load — wagmi auto-reconnects from localStorage but
+ *    Privy has no valid session. Cleaned up once when Privy first becomes ready.
+ * 2. User logs out — authenticated transitions true→false. Cleaned up on transition.
+ *
+ * Must NOT interfere with active login (wagmi connects before Privy finishes auth).
  */
 function useAuthCleanup() {
   const { ready, authenticated } = usePrivy();
   const { isConnected } = useAccount();
   const { disconnect: disconnectWagmi } = useDisconnect();
   const qc = useQueryClient();
+  const wasAuthenticated = useRef(false);
+  const initialCheckDone = useRef(false);
 
   useEffect(() => {
-    if (!ready) return; // Privy still initializing — don't interfere
+    if (!ready) return;
 
-    if (!authenticated && isConnected) {
-      // Privy says not authenticated, but wagmi auto-reconnected — force disconnect
-      disconnectWagmi();
+    // User is authenticated — track it and do nothing
+    if (authenticated) {
+      wasAuthenticated.current = true;
+      initialCheckDone.current = true;
+      return;
+    }
+
+    // Case 1: First check after Privy ready — clean up stale wagmi session
+    if (!initialCheckDone.current) {
+      initialCheckDone.current = true;
+      if (isConnected) {
+        disconnectWagmi();
+        qc.clear();
+      }
+      return;
+    }
+
+    // Case 2: User was authenticated, now they're not — they logged out
+    if (wasAuthenticated.current) {
+      wasAuthenticated.current = false;
+      if (isConnected) {
+        disconnectWagmi();
+      }
       qc.clear();
     }
+
+    // If neither case matches (e.g., mid-login flow), do nothing
   }, [ready, authenticated, isConnected, disconnectWagmi, qc]);
 }
 

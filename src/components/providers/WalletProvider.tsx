@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
@@ -15,29 +15,27 @@ const queryClient = new QueryClient();
 const PRIVY_APP_ID = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "").trim();
 
 /**
- * Clear cached data when Privy logs out.
- * Privy is the auth source of truth — wagmi may auto-reconnect after logout,
- * so we watch `authenticated` (not `isConnected`) and force wagmi disconnect.
+ * Enforce Privy as the single auth source of truth.
+ * wagmi has its own localStorage persistence and may auto-reconnect even after
+ * Privy logout. This hook waits for Privy to be ready, then if Privy says
+ * "not authenticated" but wagmi is still connected, forces wagmi disconnect
+ * and clears the React Query cache.
  */
 function useAuthCleanup() {
-  const { authenticated } = usePrivy();
+  const { ready, authenticated } = usePrivy();
   const { isConnected } = useAccount();
   const { disconnect: disconnectWagmi } = useDisconnect();
   const qc = useQueryClient();
-  const wasAuthenticated = useRef(false);
 
   useEffect(() => {
-    if (authenticated) {
-      wasAuthenticated.current = true;
-    } else if (wasAuthenticated.current) {
-      wasAuthenticated.current = false;
-      // Force wagmi disconnect so it can't auto-reconnect
-      if (isConnected) {
-        disconnectWagmi();
-      }
+    if (!ready) return; // Privy still initializing — don't interfere
+
+    if (!authenticated && isConnected) {
+      // Privy says not authenticated, but wagmi auto-reconnected — force disconnect
+      disconnectWagmi();
       qc.clear();
     }
-  }, [authenticated, isConnected, disconnectWagmi, qc]);
+  }, [ready, authenticated, isConnected, disconnectWagmi, qc]);
 }
 
 /** Runs hooks that need wagmi context */
